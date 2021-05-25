@@ -89,6 +89,23 @@ include: "entity.sol"
 ;
 
 
+: put_num ( n x y -- )
+  val: buf  val: n  val: i  val: q  val: r  val: x  val: y
+  const: max  8  ( u32 = 4bytes = FF FF FF FF )
+  const: base 10
+  : init buf IF RET END max 1 + allot buf! ;
+  : check buf i > IF "too big hex" panic END ;
+  : >char ( n -- ) dup 10 < IF 48 ELSE 55 END + ;
+  : put ( n -- ) >char i b! i 1 - i! ;
+  : fin 0 buf i + b! ;
+  : read check
+    n base /mod r! q!
+    r put
+    q 0 = IF RET END q n! AGAIN ;
+  y! x! n!  init  buf max + i! read x y i 1 + put_text
+;
+
+
 : put_hex ( n x y -- )
   val: buf  val: n  val: i  val: q  val: r  val: x  val: y
   const: max  8  ( u32 = 4bytes = FF FF FF FF )

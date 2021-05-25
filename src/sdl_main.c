@@ -22,16 +22,17 @@ Cell req_poll       = 1;
 
 
 /* Hardware Timer Emulation 
-   Check timer per (virtual_cpu_hz/timer_rate_hz - timer_accuracy_diff) steps.
+   Check timer per (virtual_cpu_hz/timer_rate_hz/timer_accuracy_ratio) steps.
    If (elapsed counter > frame/rate) and timer_handler != 0 then
    run code from timer_handler until it returns ARK_HALT
 */
 Cell virtual_cpu_hz        = 4190000; /* 4.19MHz (Gameboy) */
 Cell timer_rate_hz         = 4096;    /* Hz */
-Cell timer_accuracy_diff   = 100;     /* steps */
+Cell timer_accuracy_ratio  = 4;       /* ratio */
 Cell timer_check_steps     = 0;       /* steps, should be inited */
 Cell timer_min_check_steps = 30;
 Cell timer_handler         = 0;       /* Handler address in ArkamVM */
+Cell frame_per_timer       = 0;       /* should be inited */
 
 
 
@@ -436,9 +437,12 @@ void setup_audio(VM* vm) {
 
 /* ===== EMU ===== */
 
-void calc_timer_check_steps() {
-  timer_check_steps = (virtual_cpu_hz / timer_rate_hz) - timer_accuracy_diff;
+void calc_timer() {
+  timer_check_steps = virtual_cpu_hz / (timer_rate_hz * timer_accuracy_ratio);
   if (timer_check_steps < timer_min_check_steps) timer_check_steps = timer_min_check_steps;
+
+  Uint64 freq = SDL_GetPerformanceFrequency();
+  frame_per_timer = freq / timer_rate_hz;
 }
 
 
@@ -489,6 +493,7 @@ Code handleEMU(VM* vm, Cell op) {
       Cell n = Pop();
       if (n < 0) die("Invalid timer rate: %d", n);
       timer_rate_hz = n;
+      calc_timer();
       return ARK_OK;
     }
   case 6: /* timer_handler ( addr -- ) */
@@ -536,9 +541,14 @@ Code run(VM* vm) {
   Code code = ARK_OK;
   assert(timer_check_steps > 0);
 
-  double previous = SDL_GetPerformanceCounter();
-  double current;
+  Uint64 previous = SDL_GetPerformanceCounter();
+  Uint64 current;
   int timer_counter = 0;
+
+  /* ---- debug timer performance -----
+  Cell dbgcount = 0;
+  Uint64 dbgprev = previous;
+  */
 
   while (1) {
     if (ppu->req_redraw) {
@@ -560,9 +570,20 @@ Code run(VM* vm) {
       timer_counter++;
       if (timer_counter > timer_check_steps) {
         timer_counter = 0;
-        current = SDL_GetPerformanceCounter();
-        if (current - previous > SDL_GetPerformanceFrequency() / timer_rate_hz) {
-          previous = current; 
+        current = SDL_GetPerformanceCounter();        
+        if (current - previous > frame_per_timer) {
+          /* ----- debug timer performance -----
+          dbgcount++;
+          if (dbgcount % timer_rate_hz == 0) {
+            dbgcount = 0;
+            Uint64 freq = SDL_GetPerformanceFrequency();
+            double elapsed = (current - dbgprev) / (double)freq;
+            printf("elapsed:%lf diff:%lld %lf\n", elapsed, current - previous, (current - previous) / (double)freq);
+            fflush(stdout);
+            dbgprev = current;
+          }
+          */
+          previous = current;          
           if (timer_handler != 0) {
             Cell ip = vm->ip;
             vm->ip = timer_handler;
@@ -635,7 +656,7 @@ int main(int argc, char* argv[]) {
   setup_emu(vm);
   setup_app(vm, app_argc, argv + app_argi);
 
-  calc_timer_check_steps();
+  calc_timer();
   Code code = ark_get(vm, ARK_ADDR_START);
   guard_err(vm, code);
   vm->ip = vm->result;

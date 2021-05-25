@@ -7,13 +7,21 @@ include: "fm.sol"
 
 
 : rbeat
+  val: bpm
+  const: bpm_min 30
+  const: bpm_max 250
+  val: fpb ( frame per 16beat, TimerRate * 60 / 4 / BPM )
+  val: frame_i
   const: max_ch   8
   const: beat_len 8
-  const: fpb      6 ( frame per beat )
   const: max_age  10  ( note len )
   ( ----- sequencer ----- )
   val: beat_i
   val: beat_life
+  : set_bpm ( n -- )
+    bpm_min max bpm_max min bpm!
+    emu:timer_rate_hz 60 * 4 bpm * / fpb!
+  ;
   ( ----- channel ----- )
   const: ch_not_playing -1
   val: channels
@@ -38,11 +46,14 @@ include: "fm.sol"
   : stop fm:voice! fm:stop ; # ch --
   : next_beat beat_i 1 + beat_len mod beat_i! ;
   : play_all
+    0 frame_i!
     0 beat_i!
     yes playing!
   ;
   : stop_all
     no playing!
+    0 frame_i!
+    0 beat_i!
     channels [ stop ] ecs:each
   ;
   ( ----- randomize ----- )
@@ -84,39 +95,38 @@ include: "fm.sol"
     3 ppu:sprite:i!
     beat_i 10 * 8 + 136 ppu:sprite:plot
   ;
+  const: bpm_x 200
+  const: bpm_y 8
+  : draw_bpm
+    bpm bpm_x 20 + bpm_y put_num
+  ;
   : draw_all
     channels [ draw_ch ] ecs:each
+    draw_bpm
     playing IF draw_pos END
   ;
   ( ----- update ----- )
-  : update_ch ( ch -- ) val: ch  val: l
-    ch! ch life l!
-    l ch_not_playing = IF RET END
-    l 0 > IF l 1 - ch life! RET END ( playing )
-    ch stop ch_not_playing ch life!
-  ;
   : trigger_ch ( ch -- ) val: ch
     ch!
-    beat_i ch beat dup IF ch life! ch play RET END
-    drop ch stop
+    beat_i ch beat IF ch play RET END
+    ch stop
   ;
   : shuffle ( frames -- frames )
     beat_i 2 mod IF RET END 2 + ;
   : update
-    draw_all
+    # called by timer interruption
     playing not IF RET END
-    beat_life 0 > IF
-      beat_life 1 - beat_life!
-      channels [ update_ch ] ecs:each
-    RET END
-    ( trigger beats )
-    channels [ dup trigger_ch update_ch ] ecs:each
-    fpb shuffle beat_life!
-    next_beat
+
+    frame_i 0 = IF ( trigger beats )
+      channels [ trigger_ch ] ecs:each
+    END
+
+    frame_i 1 + dup fpb >= IF drop next_beat 0 END frame_i!
   ;
   ( ----- init ----- )
   : new_components channels ecs:components ;
   : init
+    120 set_bpm
     max_ch ecs:entities channels!
     max_ch [ channels ecs:new! drop ] times
     new_components freqs!
@@ -128,20 +138,35 @@ include: "fm.sol"
     0 8   148 "play" [ play_all ] text_button:create
     0 58  148 "stop" [ stop_all ] text_button:create
     0 108 148 "random" [ drop rand_channels ] text_button:create
+     10 bpm_x      bpm_y 0x1E [ bpm + set_bpm ] sprite_button:create
+    -10 bpm_x 10 + bpm_y 0x1F [ bpm + set_bpm ] sprite_button:create
   ;
 ;
 
 
 
-: main_loop
-  ppu:0clear
-  mgui:update
-
-  rbeat:update
-
-  ppu:switch!
-  AGAIN
+: main_timer
+  const: fps 30
+  val: draw_frames
+  val: draw_i
+  : init emu:timer_rate_hz fps / draw_frames! ;
+  : draw_all
+    ppu:0clear
+    mgui:update
+    rbeat:draw_all
+    ppu:switch!
+  ;
+  : update
+    rbeat:update
+    draw_i 1 + dup draw_frames >= IF
+      drop draw_all 0
+    END draw_i!
+    HALT
+  ;
 ;
+
+
+: main_loop AGAIN ;
 
 
 : main
@@ -153,6 +178,9 @@ include: "fm.sol"
 
   rbeat:init
   rbeat:rand_channels
+
+  main_timer:init
+  &main_timer:update emu:timer_handler!
 
   main_loop
 ;
