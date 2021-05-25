@@ -247,7 +247,7 @@ include: "color8.sol"
   : draw
     genes [ draw_gene ] ecs:each
     display:draw
-    generation gen_x gen_y put_hex
+    generation gen_x gen_y put_num
   ;
   ( ----- initialize ----- )
   : new_components genes ecs:components ;

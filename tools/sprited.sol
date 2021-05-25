@@ -110,7 +110,7 @@ include: "mgui.sol"
       mp IF i si! yes pressed! END
     ;
     : draw
-      si left bottom 8 + put_hex
+      si left bottom 8 + put_num:hex
       ( ----- all sprites ----- )
       9 [ y!
         9 y * top + py!

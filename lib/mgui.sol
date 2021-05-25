@@ -89,38 +89,33 @@ include: "entity.sol"
 ;
 
 
+
 : put_num ( n x y -- )
-  val: buf  val: n  val: i  val: q  val: r  val: x  val: y
-  const: max  8  ( u32 = 4bytes = FF FF FF FF )
-  const: base 10
+  val: buf  val: base
+  val: n  val: i  val: q  val: r  val: x  val: y  val: posi
+  const: max 11 ( i32: max "-2147483648" )
   : init buf IF RET END max 1 + allot buf! ;
-  : check buf i > IF "too big hex" panic END ;
+  : check buf i > IF "too big num" panic END ;
   : >char ( n -- ) dup 10 < IF 48 ELSE 55 END + ;
-  : put ( n -- ) >char i b! i 1 - i! ;
-  : fin 0 buf i + b! ;
+  : put ( n -- ) i 1 - i! i b! ;
+  : put_sign posi IF RET END 45 put ;
   : read check
     n base /mod r! q!
-    r put
+    r >char put
     q 0 = IF RET END q n! AGAIN ;
-  y! x! n!  init  buf max + i! read x y i 1 + put_text
+  : check_sign n 0 < IF n neg n! no ELSE yes END posi! ;
+  : go y! x! n!
+    init
+    buf max + i!
+    check_sign
+    read
+    put_sign
+    x y i put_text ;
+  : dec 10 base! go ;
+  : hex 16 base! go ;
+  dec
 ;
 
-
-: put_hex ( n x y -- )
-  val: buf  val: n  val: i  val: q  val: r  val: x  val: y
-  const: max  8  ( u32 = 4bytes = FF FF FF FF )
-  const: base 16
-  : init buf IF RET END max 1 + allot buf! ;
-  : check buf i > IF "too big hex" panic END ;
-  : >char ( n -- ) dup 10 < IF 48 ELSE 55 END + ;
-  : put ( n -- ) >char i b! i 1 - i! ;
-  : fin 0 buf i + b! ;
-  : read check
-    n base /mod r! q!
-    r put
-    q 0 = IF RET END q n! AGAIN ;
-  y! x! n!  init  buf max + i! read x y i 1 + put_text
-;
 
 
 : put_ff ( n x y -- )
