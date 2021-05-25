@@ -292,6 +292,14 @@ Emulator Operation.
 
 3 poll ( -- )
   force polling
+
+4 timer_rate_hz ( -- n )
+
+5 timer_rate_hz! ( n -- )
+  n > 0
+
+6 timer_handler ( addr -- )
+  0: no handling
 ```
 
 
