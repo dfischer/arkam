@@ -110,7 +110,7 @@ include: "mgui.sol"
       mp IF i si! yes pressed! END
     ;
     : draw
-      si left bottom 8 + put_hex
+      si left bottom 8 + put_num:hex
       ( ----- all sprites ----- )
       9 [ y!
         9 y * top + py!
@@ -281,16 +281,8 @@ include: "mgui.sol"
 ;
 
 
-: main_loop
-  ppu:0clear
-  mgui:update
 
-  sprite_editor:draw
-
-  ppu:switch!
-  AGAIN
-;
-
+: wait_loop AGAIN ;
 
 : main
   const: fnamelen 512
@@ -312,5 +304,7 @@ include: "mgui.sol"
   basic_sprite:load
   sprite_editor:init
 
-  main_loop
+  30 [ mgui:update sprite_editor:draw ] draw_loop:register!
+
+  wait_loop
 ;
