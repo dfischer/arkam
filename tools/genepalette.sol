@@ -295,20 +295,13 @@ include: "color8.sol"
 ;
 
 
-: main_loop
-  ppu:0clear
-  mgui:update
-
-  genepalette:draw
-  ppu:switch!
-  AGAIN
-;
-
 
 : sprites
   datafile: spr "genepalette.spr"
   : load spr ppu:sprite:load_datafile ;
 ;
+
+: wait_loop AGAIN ;
 
 : main
   rand:init
@@ -325,5 +318,7 @@ include: "color8.sol"
 
   sprites:load
 
-  main_loop
+  30 [ mgui:update genepalette:draw ] draw_loop:register!
+
+  wait_loop
 ;

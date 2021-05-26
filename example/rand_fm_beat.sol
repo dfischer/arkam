@@ -145,28 +145,7 @@ include: "fm.sol"
 
 
 
-: main_timer
-  const: fps 30
-  val: draw_frames
-  val: draw_i
-  : init emu:timer_rate_hz fps / draw_frames! ;
-  : draw_all
-    ppu:0clear
-    mgui:update
-    rbeat:draw_all
-    ppu:switch!
-  ;
-  : update
-    rbeat:update
-    draw_i 1 + dup draw_frames >= IF
-      drop draw_all 0
-    END draw_i!
-    HALT
-  ;
-;
-
-
-: main_loop AGAIN ;
+: wait_loop AGAIN ;
 
 
 : main
@@ -179,8 +158,8 @@ include: "fm.sol"
   rbeat:init
   rbeat:rand_channels
 
-  main_timer:init
-  &main_timer:update emu:timer_handler!
+  30 [ mgui:update rbeat:draw_all ] draw_loop:init
+  [ rbeat:update draw_loop:update HALT ] emu:timer_handler!
 
-  main_loop
+  wait_loop
 ;

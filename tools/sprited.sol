@@ -281,16 +281,8 @@ include: "mgui.sol"
 ;
 
 
-: main_loop
-  ppu:0clear
-  mgui:update
 
-  sprite_editor:draw
-
-  ppu:switch!
-  AGAIN
-;
-
+: wait_loop AGAIN ;
 
 : main
   const: fnamelen 512
@@ -312,5 +304,7 @@ include: "mgui.sol"
   basic_sprite:load
   sprite_editor:init
 
-  main_loop
+  30 [ mgui:update sprite_editor:draw ] draw_loop:register!
+
+  wait_loop
 ;

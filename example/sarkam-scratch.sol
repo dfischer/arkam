@@ -5,13 +5,11 @@ include: "mgui.sol"
 
 
 : main_loop
-  ppu:0clear
   mgui:update
-
-  ppu:switch!
-  AGAIN
 ;
 
+
+: wait_loop AGAIN ;
 
 : main
   "scratch" emu:title!
@@ -20,5 +18,7 @@ include: "mgui.sol"
   mgui:init
   basic_sprite:load
 
-  main_loop
+  30 &main_loop draw_loop:register!
+
+  wait_loop
 ;

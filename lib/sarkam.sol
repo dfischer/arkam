@@ -119,3 +119,31 @@ include: "app.sol"
   w dx - 1 < IF no RET END
   dy h - 0 <
 ;
+
+
+
+: draw_loop
+  # ===== Usage =====
+  # draw_loop only:
+  #   30 [ foo:update foo:draw ] draw_loop:register!
+  # with other update routine:
+  #   30 [ foo:update foo:draw ] draw_loop:init
+  #   [ other_loop draw_loop:update HALT ] emu:timer_handler!
+  val: fps
+  val: frames
+  val: callback
+  val: i
+  : init ( fps callback -- )
+    callback! fps!
+    emu:timer_rate_hz fps / dup frames! i!
+  ;
+  : draw
+    ppu:0clear
+    callback call
+    ppu:switch!
+  ;
+  : update i 1 + dup frames >= IF drop draw 0 END i! ;
+  : update_halt update HALT ;
+  : register! ( fps callback -- )
+    init &update_halt emu:timer_handler! ;
+;
