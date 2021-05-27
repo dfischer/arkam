@@ -216,7 +216,10 @@ Registers
       1 saw
       2 square
       3 noise (reset each note-on)
-
+    7 amp freq mod
+    8 fm level
+    9 pan
+      0:left 127:center 255:right
 5 set_algo ( algo -- )
   algo: 0-7
   unstable

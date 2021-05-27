@@ -166,7 +166,10 @@ typedef struct FMOp {
 */
 
 typedef struct FMVoice {
-  double  vol;     // 0-1
+  double vol; // 0-1
+  double pan; // 0-1 0:left 1:right
+
+  double pan_l, pan_r; // computed
 
   FMOp ops[FM_OPERATORS];
   FMAlgo algo;
@@ -245,6 +248,22 @@ double xorshift_vol() {
   s = s ^ (s >> 17);
   s = s ^ (s << 5);
   return s / (double)ARK_MAX_UINT;
+}
+
+
+
+/* ===== Panning ===== */
+
+void set_pan(FMVoice* voc, double pan) {
+  // constant power panning
+  // ref: http://puredatajapan.info/?page_id=1219
+  const double pi05 = M_PI * 0.5;
+  const double pi15 = M_PI * 1.5;
+  voc->pan = pan;
+  
+  double rad = pan * pi05;
+  voc->pan_l = cos(rad);
+  voc->pan_r = cos(rad+pi15);
 }
 
 
@@ -600,40 +619,21 @@ static void audio_callback(void* u, Byte* stream, int bytes) {
   int16_t* samples = (int16_t *)stream;
   int len = bytes / 2; // 8bit len => 16bit len
 
-  FMVoice* v1 = &synth.voices[0];
-  FMVoice* v2 = &synth.voices[1];
-  FMVoice* v3 = &synth.voices[2];
-  FMVoice* v4 = &synth.voices[3];
-  FMVoice* v5 = &synth.voices[4];
-  FMVoice* v6 = &synth.voices[5];
-  FMVoice* v7 = &synth.voices[6];
-  FMVoice* v8 = &synth.voices[7];
-  FMAlgo a1 = v1->algo;
-  FMAlgo a2 = v2->algo;
-  FMAlgo a3 = v3->algo;
-  FMAlgo a4 = v4->algo;
-  FMAlgo a5 = v5->algo;
-  FMAlgo a6 = v6->algo;
-  FMAlgo a7 = v7->algo;
-  FMAlgo a8 = v8->algo;
-  
   for(int i = 0; i < len; i+=2) {
-    //TODO: panning
-    double sin1 = generate_sin(v1, a1);
-    double sin2 = generate_sin(v2, a2);
-    double sin3 = generate_sin(v3, a3);
-    double sin4 = generate_sin(v4, a4);
-    double sin5 = generate_sin(v5, a5);
-    double sin6 = generate_sin(v6, a6);
-    double sin7 = generate_sin(v7, a7);
-    double sin8 = generate_sin(v8, a8);
-    int16_t sample = (
-                      synth.vol
-                      * (sin1 + sin2 + sin3 + sin4 + sin5 + sin6 + sin7 + sin8)
-                      / 8.0 * 0x7FFF
-                      ); // half of 16bit
-    samples[i]   = sample;
-    samples[i+1] = sample;
+    double sin_l = 0.0;
+    double sin_r = 0.0;
+
+    for (int vi = 0; vi < FM_VOICES; vi++) {
+      FMVoice* voc = &synth.voices[vi];
+      double sin = generate_sin(voc, voc->algo);
+      sin_l += sin * voc->pan_l;
+      sin_r += sin * voc->pan_r;
+    }
+
+    int16_t sample_l = (synth.vol * sin_l / 8.0 * 0x7FFF); // half of 16bit
+    int16_t sample_r = (synth.vol * sin_r / 8.0 * 0x7FFF);
+    samples[i]   = sample_l;
+    samples[i+1] = sample_r;
   }
 }
 
@@ -700,6 +700,13 @@ static void io_set_param(FMVoice* voice, Cell op_i, Cell param, Cell v) {
       op->fm_level = byte_to_env_vol(v, synth.ms_env) * (double)MAX_FM_LEVEL;
       return;
     }
+  case 9: /* pan 0-255 */
+    {
+      if (v < 0 || v > 255) die("Invalid pan: %d", v);
+      double pan = v == 127 ? 0.5 : v / (double)255; // linear
+      set_pan(voice, pan);
+      return;
+    }
   default:
     die("Unknown param:%d v:%d", param, v);
   }
@@ -743,7 +750,6 @@ Code handleFMSYNTH(VM* vm, Cell op) {
       return ARK_OK;
     }
   case 4: /* set_param: v param -- */
-    // 0:atk 1:dcy 2:sus 3:rel 4:ratio 5:feedback_ratio 6:wave_table
     {
       if (!ark_has_ds_items(vm, 2)) Raise(DS_UNDERFLOW);
       Cell param = Pop();
@@ -859,6 +865,7 @@ static void init_voice(FMVoice* voice) {
   memset(voice, 0, sizeof(FMVoice));
   voice->algo = FMAlgo0;
   voice->vol = 1.0f;
+  set_pan(voice, 0.5);
 
   init_operator(&(voice->ops[0]));
   init_operator(&(voice->ops[1]));

@@ -60,6 +60,7 @@ include: "fm.sol"
   : rand_ch ( ch -- )
     val: ch
     dup ch! fm:voice!
+    ch 3 < IF 16 ELSE ch 6 < IF 240 ELSE 127 END END fm:pan!
     8 rand fm:algo!
     440 rand 20 + ch freq!
     ( beats )
