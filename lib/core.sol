@@ -248,7 +248,7 @@ const: stderr 2
 
 ( ===== Debug print ===== )
 
-: >ff ( n -- c ) dup 10 < IF 48 ELSE 55 END + ;
+: >hex ( n -- c ) dup 10 < IF 48 ELSE 55 END + ;
 
 
 : ? ( n -- n )
@@ -261,7 +261,7 @@ const: stderr 2
   : put_sign posi IF RET END 45 put ;
   : check_sign n 0 < IF n neg n! no ELSE yes END posi! ;
   : read n base /mod r! q!
-    r >ff put
+    r >hex put
     q 0 = IF RET END q n! AGAIN ;
   : check_min ( minimum number )
     n dup neg != IF RET END ( 0x80000000 * -1 = 0x80000000 )
@@ -279,7 +279,7 @@ const: stderr 2
 
 
 : ?ff ( n -- )
-  0xff bit-and 16 /mod swap >ff putc >ff putc
+  0xff bit-and 16 /mod swap >hex putc >hex putc
 ;
 
 

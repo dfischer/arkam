@@ -94,20 +94,24 @@ include: "entity.sol"
   val: buf  val: base
   val: n  val: i  val: q  val: r  val: x  val: y  val: posi
   const: max 11 ( i32: max "-2147483648" )
-  : init buf IF RET END max 1 + allot buf! ;
+  : init buf not IF max 1 + allot buf! END buf max + i! ;
   : check buf i > IF "too big num" panic END ;
-  : >char ( n -- ) dup 10 < IF 48 ELSE 55 END + ;
   : put ( n -- ) i 1 - i! i b! ;
   : put_sign posi IF RET END 45 put ;
   : read check
     n base /mod r! q!
-    r >char put
+    r >hex put
     q 0 = IF RET END q n! AGAIN ;
   : check_sign n 0 < IF n neg n! no ELSE yes END posi! ;
+  : check_min ( minimum number )
+    n dup neg != IF RET END ( 0x80000000 * -1 = 0x80000000 )
+    10 base = IF x y "-2147483648" put_text rdrop RET END
+    16 base = IF x y "-80000000"   put_text rdrop RET END
+    "?: invalid base" panic ;
   : go y! x! n!
-    init
-    buf max + i!
+    check_min
     check_sign
+    init
     read
     put_sign
     x y i put_text ;
@@ -122,11 +126,10 @@ include: "entity.sol"
   const: base 16
   val: buf  val: x  val: y
   : init buf IF RET END 3 allot buf! ;
-  : >char ( n -- ) dup 10 < IF 48 ELSE 55 END + ;
   init
   y! x! 0xff bit-and base /mod ( q r )
-  >char buf 1 + b!
-  >char buf     b!
+  >hex buf 1 + b!
+  >hex buf     b!
   x y buf put_text
 ;
 
