@@ -18,6 +18,7 @@
   : wave!      6 param! ; # v --
   : ampfreq!   7 param! ; # v --
   : fm_level!  8 param! ; # v --
+  : pan!       9 param! ; # v --
 
   const: C3  261
   const: D3  293
