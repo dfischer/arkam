@@ -204,40 +204,12 @@ const: stderr 2
 ;
 
 
-( ===== Debug print ===== )
-
-: >ff ( n -- c ) dup 10 < IF 48 ELSE 55 END + ;
-
-: ? ( n -- )
-  : pr ( n -- )
-    : p    0x30 + putc ;
-    : dash 0x2D putc ;
-    : sign dup 0 < IF dash neg END ;
-    : digits ( n -- )
-      10 /mod swap ( % / )
-      dup 0 = IF drop p RET END
-      RECUR p ;
-    sign digits ;
-  [ dup pr space ] >stderr
-;
-
-: ?ff ( n -- )
-  0xff bit-and 16 /mod swap >ff putc >ff putc
-;
-
-: ?stack ( -- )
-  : loop ( sp -- )
-    dup sys:info:rs >= IF drop RET END
-    dup @ ? cr drop
-    1 cells + AGAIN ;
-  [ cr sp 1 cells + loop ] >stderr
-;
-
 
 ( ===== Exception ===== )
 
 : die 1 sys:exit ;
 : panic ( s -- ) eprn die ;
+
 
 
 ( ===== Address validation ===== )
@@ -271,6 +243,54 @@ const: stderr 2
 
 : allot ( bytes -- addr )
   here >r  here + align here! r> ;
+
+
+
+( ===== Debug print ===== )
+
+: >ff ( n -- c ) dup 10 < IF 48 ELSE 55 END + ;
+
+
+: ? ( n -- n )
+  val: buf  val: n  val: posi  val: r  val: q  val: i
+  val: base
+  const: max 11 ( i32: max "-2147483648" )
+  : init buf not IF max 1 + allot buf! END buf max + i! ;
+  : check buf i > IF "too big num" panic END ;
+  : put i 1 - i! i b! ; # c --
+  : put_sign posi IF RET END 45 put ;
+  : check_sign n 0 < IF n neg n! no ELSE yes END posi! ;
+  : read n base /mod r! q!
+    r >ff put
+    q 0 = IF RET END q n! AGAIN ;
+  : check_min ( minimum number )
+    n dup neg != IF RET END ( 0x80000000 * -1 = 0x80000000 )
+    10 base = IF "-2147483648" pr space rdrop RET END
+    16 base = IF "-80000000"   pr space rdrop RET END
+    "?: invalid base" panic ;
+  : go ( n -- )
+    n! check_min check_sign init read put_sign i pr space ;
+  : dec dup 10 base! go ;
+  : hex dup 16 base! go ;
+  dec
+;
+
+: ?hex ?:hex ;
+
+
+: ?ff ( n -- )
+  0xff bit-and 16 /mod swap >ff putc >ff putc
+;
+
+
+: ?stack ( -- )
+  : loop ( sp -- )
+    dup sys:info:rs >= IF drop RET END
+    dup @ ? cr drop
+    1 cells + AGAIN ;
+  [ cr sp 1 cells + loop ] >stderr
+;
+
 
 
 ( ===== Stack 2 ===== )

@@ -1109,7 +1109,7 @@ Word* find_word(Context* ctx, char* name) {
 // =============================================================================
 
 int read_number(Context* ctx, Cell* result) {
-  int   acc  = 0;
+  Cell  acc  = 0;
   int   sign = 1;
   char* p    = ctx->token_buf;
   char  c    = *p;
