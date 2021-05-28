@@ -435,6 +435,21 @@ void setup_audio(VM* vm) {
 }
 
 
+
+/* ===== Keyboard ===== */
+
+Code handleKEY(VM* vm, Cell op) {
+  die("unimplemented yet");
+  return ARK_ERR;
+}
+
+void setup_keyboard(VM* vm) {
+  SDL_StartTextInput();
+  vm->io_handlers[ARK_DEVICE_KEY] = handleKEY;
+}
+
+
+
 /* ===== EMU ===== */
 
 void calc_timer() {
@@ -514,6 +529,7 @@ void setup_emu(VM* vm) {
 }
 
 
+
 /* ===== Main Loop & Entrypoint ===== */
 
 void poll_sdl_event(VM* vm, PPU* ppu) {
@@ -521,16 +537,30 @@ void poll_sdl_event(VM* vm, PPU* ppu) {
   
   while (SDL_PollEvent(&event) != 0) {
     switch(event.type) {
+      
     case SDL_QUIT:
       quit(0);
       break;
     case SDL_WINDOWEVENT:
       if (event.window.event == SDL_WINDOWEVENT_EXPOSED) render_ppu(ppu);
       break;
+     
     case SDL_MOUSEBUTTONUP:
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEMOTION:
+      /* ----- Mouse ----- */
       handle_mouse_event(vm, &event);
+      break;
+
+    case SDL_TEXTINPUT:
+      printf("textinput\n");
+      fflush(stdout);
+      break;
+    case SDL_KEYDOWN:
+    case SDL_KEYUP:
+      printf("key%s sym:%d ", event.type == SDL_KEYDOWN ? "down" : "up", event.key.keysym.sym);
+      printf("\n");
+      fflush(stdout);
       break;
     }
   }
@@ -653,6 +683,7 @@ int main(int argc, char* argv[]) {
   setup_ppu(vm, WIDTH, HEIGHT);
   setup_mouse(vm);
   setup_audio(vm);
+  setup_keyboard(vm);
   setup_emu(vm);
   setup_app(vm, app_argc, argv + app_argi);
 
