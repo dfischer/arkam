@@ -438,13 +438,25 @@ void setup_audio(VM* vm) {
 
 /* ===== Keyboard ===== */
 
+Cell key_handler_addr = 0;
+VM* key_handler_vm = NULL;
+
 Code handleKEY(VM* vm, Cell op) {
-  die("unimplemented yet");
-  return ARK_ERR;
+  switch (op) {
+  case 0: /* handler ( addr -- ) */
+    {
+      if (!ark_has_ds_items(vm, 1)) Raise(DS_UNDERFLOW);
+      Cell a; PopValid(&a);
+      key_handler_addr = a;
+      return ARK_OK;
+    }
+  default: Raise(IO_UNKNOWN_OP);
+  }
 }
 
 void setup_keyboard(VM* vm) {
   SDL_StartTextInput();
+  key_handler_vm = vm;
   vm->io_handlers[ARK_DEVICE_KEY] = handleKEY;
 }
 
@@ -531,6 +543,8 @@ void setup_emu(VM* vm) {
 
 
 /* ===== Main Loop & Entrypoint ===== */
+#define SDL_SCANCODE_MASK (1<<30);
+
 
 void poll_sdl_event(VM* vm, PPU* ppu) {
   SDL_Event event;
@@ -552,16 +566,22 @@ void poll_sdl_event(VM* vm, PPU* ppu) {
       handle_mouse_event(vm, &event);
       break;
 
-    case SDL_TEXTINPUT:
-      printf("textinput\n");
-      fflush(stdout);
-      break;
     case SDL_KEYDOWN:
     case SDL_KEYUP:
-      printf("key%s sym:%d ", event.type == SDL_KEYDOWN ? "down" : "up", event.key.keysym.sym);
-      printf("\n");
-      fflush(stdout);
-      break;
+      {
+        if (!(key_handler_vm && key_handler_addr)) break;
+        /* handler ( down(-1)/up(0) sym -- ) */
+        Cell keycode = event.key.keysym.sym & ~SDL_SCANCODE_MASK;
+        Push(event.type == SDL_KEYDOWN ? -1 : 0);
+        Push(keycode);
+        Cell old_ip = vm->ip;
+        vm->ip = key_handler_addr;
+        Code code = ARK_OK;
+        while(code == ARK_OK) { code = ark_step(vm); }
+        if (code != ARK_HALT) die("Key handler aborted: %s", ark_err_str(vm->err));
+        vm->ip = old_ip;
+        break;
+      }
     }
   }
 }

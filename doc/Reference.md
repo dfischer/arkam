@@ -228,7 +228,11 @@ Registers
 
 ### 5 KEY
 
-Unimplemented
+```
+0 handler ( q -- )
+  addr of handler ( state sym -- )
+  state: 0:up -1:down
+```
 
 
 ### 6 MOUSE

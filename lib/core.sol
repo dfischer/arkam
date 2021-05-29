@@ -264,6 +264,7 @@ const: stderr 2
     r >hex put
     q 0 = IF RET END q n! AGAIN ;
   : check_min ( minimum number )
+    n 0 = IF "0" pr space rdrop RET END
     n dup neg != IF RET END ( 0x80000000 * -1 = 0x80000000 )
     10 base = IF "-2147483648" pr space rdrop RET END
     16 base = IF "-80000000"   pr space rdrop RET END
