@@ -22,7 +22,12 @@
 
 : test/bi*
   "bi* 1" [ 1 2 [ 1 + ] [ 2 + ] bi* + ( => 2 4 + )     6 = ] CHECK
-  "bi* 2" [ 2 3 [ 1   ] [ + + ] bi*   ( => 2 1 3 + + ) 6 = ] CHECK 
+  "bi* 2" [ 2 3 [ 1   ] [ + + ] bi*   ( => 2 1 3 + + ) 6 = ] CHECK
+;
+
+
+: test/bibi
+  "bibi 1" [ 1 2 [ + ] [ 1 + + ] bibi + ( => 3 4 + ) 7 = ] CHECK
 ;
 
 
@@ -44,11 +49,12 @@
 : main
   test/dip
   test/sip
-  
+
   test/biq
   test/bia
   test/bi*
-  
+  test/bibi
+
   test/triq
   test/tria
   test/tri*

@@ -107,7 +107,14 @@ const: false ng
   # bia - bi arguments application
 
 
-: bi* ( a b q1 q2 aq1 bq2 ) >r swap >r call r> ; ( return to quotation )
+: bi* ( a b q1 q2 -- aq1 bq2 ) >r swap >r call r> ; ( return to quotation )
+
+
+: bibi ( a b q1 q2 -- abq1 abq2 )
+  >r >r 2dup ( a b a b | q2 q1 )
+  r> swap >r ( a b a q1 | q2 b )
+  swap >r    ( a b q1 | q2 b a )
+  call r> r> ; ( return to quotation )
 
 
 : triq ( a q1 q2 q3 -- aq1 aq2 aq3 )
@@ -264,6 +271,7 @@ const: stderr 2
     r >hex put
     q 0 = IF RET END q n! AGAIN ;
   : check_min ( minimum number )
+    n 0 = IF "0" pr space rdrop RET END
     n dup neg != IF RET END ( 0x80000000 * -1 = 0x80000000 )
     10 base = IF "-2147483648" pr space rdrop RET END
     16 base = IF "-80000000"   pr space rdrop RET END

@@ -104,6 +104,7 @@ include: "entity.sol"
     q 0 = IF RET END q n! AGAIN ;
   : check_sign n 0 < IF n neg n! no ELSE yes END posi! ;
   : check_min ( minimum number )
+    n 0 = IF x y "0" put_text rdrop RET END
     n dup neg != IF RET END ( 0x80000000 * -1 = 0x80000000 )
     10 base = IF x y "-2147483648" put_text rdrop RET END
     16 base = IF x y "-80000000"   put_text rdrop RET END
