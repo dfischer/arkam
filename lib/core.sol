@@ -107,7 +107,14 @@ const: false ng
   # bia - bi arguments application
 
 
-: bi* ( a b q1 q2 aq1 bq2 ) >r swap >r call r> ; ( return to quotation )
+: bi* ( a b q1 q2 -- aq1 bq2 ) >r swap >r call r> ; ( return to quotation )
+
+
+: bibi ( a b q1 q2 -- abq1 abq2 )
+  >r >r 2dup ( a b a b | q2 q1 )
+  r> swap >r ( a b a q1 | q2 b )
+  swap >r    ( a b q1 | q2 b a )
+  call r> r> ; ( return to quotation )
 
 
 : triq ( a q1 q2 q3 -- aq1 aq2 aq3 )
