@@ -462,6 +462,18 @@ void setup_keyboard(VM* vm) {
 
 
 
+/* ===== Game Controller (PAD) ===== */
+
+SDL_Joystick* joypad;
+
+void setup_pad(VM* vm) {
+  if (SDL_NumJoysticks() > 0) {
+    joypad = SDL_JoystickOpen(0);
+  }
+}
+
+
+
 /* ===== EMU ===== */
 
 void calc_timer() {
@@ -582,6 +594,34 @@ void poll_sdl_event(VM* vm, PPU* ppu) {
         vm->ip = old_ip;
         break;
       }
+
+    case SDL_JOYAXISMOTION:
+      {
+        printf("JoyAxis(%d): %d %d\n", event.jaxis.which, event.jaxis.axis, event.jaxis.value);
+        fflush(stdout);
+        break;
+      }
+    case SDL_JOYBUTTONUP:
+    case SDL_JOYBUTTONDOWN:
+      {
+        printf("JoyButton(%d) %d %d\n", event.jbutton.which, event.jbutton.button, event.jbutton.state);
+        fflush(stdout);
+        break;
+      }
+    case SDL_CONTROLLERAXISMOTION:
+      {
+        printf("CtrlAxis(%d): %d %d\n", event.caxis.which, event.caxis.axis, event.caxis.value);
+        fflush(stdout);
+        break;
+      }
+    case SDL_CONTROLLERBUTTONUP:
+    case SDL_CONTROLLERBUTTONDOWN:
+      {
+        printf("CtrlButton(%d) %d %d\n", event.cbutton.which, event.cbutton.button, event.cbutton.state);
+        fflush(stdout);
+        break;
+      }      
+
     }
   }
 }
@@ -704,6 +744,7 @@ int main(int argc, char* argv[]) {
   setup_mouse(vm);
   setup_audio(vm);
   setup_keyboard(vm);
+  setup_pad(vm);
   setup_emu(vm);
   setup_app(vm, app_argc, argv + app_argi);
 
