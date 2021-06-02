@@ -462,14 +462,86 @@ void setup_keyboard(VM* vm) {
 
 
 
-/* ===== Game Controller (PAD) ===== */
+/* ===== GamePad ===== */
 
-SDL_Joystick* joypad;
+#define MAX_GAMEPAD 32
+SDL_Joystick* gamepads[MAX_GAMEPAD];
+Cell gamepad_handler_addr = 0;
+
+
+Code handlePAD(VM* vm, Cell op) {
+  switch (op) {
+  case 0: /* refresh_pads ( -- n ) */
+    {
+      if (!ark_has_ds_spaces(vm, 1)) Raise(DS_OVERFLOW);
+      Cell pads = 0;
+      for (int i = 0; i < MAX_GAMEPAD; i++) {
+        if (gamepads[i]) pads++;
+      }
+      Push(pads);
+      return ARK_OK;
+    }
+  case 1: /* handler ( q -- ) */
+    {
+      if (!ark_has_ds_items(vm, 1)) Raise(DS_UNDERFLOW);
+      Cell s; PopValid(&s);
+      gamepad_handler_addr = s;
+      return ARK_OK;
+    }
+  default: Raise(IO_UNKNOWN_OP);
+  }
+}
+
+
+void handle_gamepad_event(VM* vm, SDL_Event* ev) {
+  if (!gamepad_handler_addr) return;
+  SDL_JoyButtonEvent je = ev->jbutton;
+  Cell pad = je.which;
+  if (pad >= MAX_GAMEPAD) return;
+  if (!ark_has_ds_spaces(vm, 3)) die("DS Overflow");
+  
+  Cell button = je.button;
+  Cell state = je.state == SDL_PRESSED ? -1 : 0;
+  Push(state);
+  Push(button);
+  Push(pad);
+  
+  Cell old_ip = vm->ip;
+  Cell code = ARK_OK;
+  vm->ip = gamepad_handler_addr;
+  while (code == ARK_OK) { code = ark_step(vm); }
+  if (code != ARK_HALT) die("Gamepad handler aborted: %s", ark_err_str(vm->err));
+  vm->ip = old_ip;
+}
+
+
+void handle_gamepad_added(VM* vm, SDL_Event* ev) {
+  Cell pad = ev->jdevice.which;
+  if (pad >= MAX_GAMEPAD) return;
+  gamepads[pad] = SDL_JoystickOpen(pad);
+}
+
+
+void handle_gamepad_removed(VM* vm, SDL_Event* ev) {
+  Cell pad = ev->jdevice.which;
+  if (pad >= MAX_GAMEPAD) return;
+  SDL_JoystickClose(gamepads[pad]);
+  gamepads[pad] = NULL;
+}
+
 
 void setup_pad(VM* vm) {
-  if (SDL_NumJoysticks() > 0) {
-    joypad = SDL_JoystickOpen(0);
+  int pads = SDL_NumJoysticks();
+
+  for (int i = 0; i< MAX_GAMEPAD; i++) {
+    gamepads[i] = NULL;
   }
+
+  for (int i = 0; i < pads && i < MAX_GAMEPAD; i++) {
+    gamepads[i] = SDL_JoystickOpen(i);
+  }
+
+  vm->io_handlers[ARK_DEVICE_PAD] = handlePAD;
 }
 
 
@@ -567,17 +639,19 @@ void poll_sdl_event(VM* vm, PPU* ppu) {
     case SDL_QUIT:
       quit(0);
       break;
+
     case SDL_WINDOWEVENT:
       if (event.window.event == SDL_WINDOWEVENT_EXPOSED) render_ppu(ppu);
       break;
-     
+
+      
     case SDL_MOUSEBUTTONUP:
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEMOTION:
-      /* ----- Mouse ----- */
       handle_mouse_event(vm, &event);
       break;
 
+      
     case SDL_KEYDOWN:
     case SDL_KEYUP:
       {
@@ -595,33 +669,17 @@ void poll_sdl_event(VM* vm, PPU* ppu) {
         break;
       }
 
-    case SDL_JOYAXISMOTION:
-      {
-        printf("JoyAxis(%d): %d %d\n", event.jaxis.which, event.jaxis.axis, event.jaxis.value);
-        fflush(stdout);
-        break;
-      }
+      
     case SDL_JOYBUTTONUP:
     case SDL_JOYBUTTONDOWN:
-      {
-        printf("JoyButton(%d) %d %d\n", event.jbutton.which, event.jbutton.button, event.jbutton.state);
-        fflush(stdout);
-        break;
-      }
-    case SDL_CONTROLLERAXISMOTION:
-      {
-        printf("CtrlAxis(%d): %d %d\n", event.caxis.which, event.caxis.axis, event.caxis.value);
-        fflush(stdout);
-        break;
-      }
-    case SDL_CONTROLLERBUTTONUP:
-    case SDL_CONTROLLERBUTTONDOWN:
-      {
-        printf("CtrlButton(%d) %d %d\n", event.cbutton.which, event.cbutton.button, event.cbutton.state);
-        fflush(stdout);
-        break;
-      }      
-
+      handle_gamepad_event(vm, &event);
+      break;
+    case SDL_JOYDEVICEADDED:
+      handle_gamepad_added(vm, &event);
+      break;
+    case SDL_JOYDEVICEREMOVED:
+      handle_gamepad_removed(vm, &event);
+      break;
     }
   }
 }

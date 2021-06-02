@@ -4,6 +4,13 @@ include: "basic_sprite.sol"
 include: "mgui.sol"
 
 
+: gamepad
+  : query 7 io ;
+  : available 0 query ;
+  : handler!  1 query ;
+;
+
+
 : main_loop
   mgui:update
 ;
@@ -19,6 +26,8 @@ include: "mgui.sol"
   basic_sprite:load
 
   30 &main_loop draw_loop:register!
+
+  [ ? drop ? drop ? drop cr HALT ] gamepad:handler!
 
   wait_loop
 ;

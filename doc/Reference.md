@@ -251,7 +251,14 @@ Registers
 
 ### 7 PAD
 
-Unimplemented
+```
+0 available_pads ( -- n )
+
+1 handler ( q -- )
+  addr of handler ( state button pad -- )
+  pad: gamepad id
+  state: 0:up -1:down
+```
 
 
 ### 8 FILE
