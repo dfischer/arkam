@@ -150,7 +150,91 @@ include: "app.sol"
 
 
 
+( ===== Key Queue ===== )
+
+: kq
+  # 0 len
+  # 1 buffer
+  # 2 state_len
+  # 3 state
+  # 4 idx (current)
+  # 5 head
+  const: size 7
+  val: q ( temporary, do not use in recursion )
+  : c@ cells q + @ ;
+  : c! cells q + ! ;
+  : len     0 c@ ; # -- n
+  : len!    0 c! ; # n --
+  : buf     1 c@ ; # -- a
+  : buf!    1 c! ; # a --
+  : slen    2 c@ ; # -- n
+  : slen!   2 c! ; # n --
+  : status  3 c@ ; # -- a
+  : status! 3 c! ; # a --
+  : idx     4 c@ ; # -- n
+  : idx!    4 c! ; # n --
+  : head    5 c@ ; # -- n
+  : head!   5 c! ; # n --
+  : name    6 c@ ; # -- s
+  : name!   6 c! ; # s --
+  : create ( name len state_len -- addr )
+    val: l  val: sl  val: nm
+    sl! l! nm!
+    size cells allot q!
+    l        len!
+    l allot  buf!
+    sl       slen!
+    sl allot status!
+    0        idx!
+    0        head!
+    nm       name!
+    q
+  ;
+  : invalid ( c -- ) ? "invalid code for " epr name panic ;
+  : check   ( c -- c )
+    dup 0    <  IF invalid END
+    dup slen >= IF invalid END
+  ;
+  : state  ( c -- s ) check status + b@ ;
+  : state! ( s c -- ) check status + b! ;
+  : next_i!    idx  1 + len mod idx!  ;
+  : next_head! head 1 + len mod head! ;
+  : empty? idx head = ;
+  : >buf ( c -- ) buf head + b! next_head! ;
+  : buf> ( -- c no | yes )
+    empty? IF yes RET END
+    buf idx + b@ no next_i!
+  ;
+  : push ( up/down code queue -- )
+    val: c  val: s
+    q!
+    check c! s!
+    s IF ( down )
+      c state IF
+        RET ( repeat )
+      ELSE
+        1
+      END
+    ELSE ( up )
+      0
+    END
+    c state!
+    c >buf
+  ;
+  : pop ( queue -- code state no | yes )
+    q! buf> IF yes RET END dup state no
+  ;
+  : pop_each ( q queue -- ) # q: code state --
+    val: cb
+    : loop q pop IF RET END cb call AGAIN ;
+    q! cb! loop
+  ;
+;
+
+
+
 ( ===== keyboard ===== )
+
 : keyboard
   : query 5 io ;
   : handler! 0 query ; # q --
@@ -206,5 +290,33 @@ include: "app.sol"
     : pop_each ( q -- ) # q: keycode state --
       >r pop IF rdrop RET END r> dup >r call r> AGAIN
     ;
+  ;
+;
+
+
+
+( ===== Gamepad ===== )
+
+: gamepad
+  : query 7 io ;
+  : available 0 query ; # -- n
+  : handler!  1 query ; # q -- (q: state button pad )
+
+  ( ----- queue by ring buffer ----- )
+  # only for one controller
+  : queue
+    const: len  32
+    const: slen 64
+    val: q
+    : name "gamepad_queue" ;
+    : init name len slen kq:create q! ;
+    : listen!
+      q not IF init END
+      [ drop ( ignore pad number )
+        q kq:push HALT
+      ] handler!
+    ;
+    : pop ( -- state button pad ) q kq:pop ;
+    : pop_each ( q[state button pad -- ] -- ) q kq:pop_each ;
   ;
 ;
