@@ -4,10 +4,8 @@ include: "basic_sprite.sol"
 include: "mgui.sol"
 
 
-
 : main_loop
   mgui:update
-  [ ? drop ? drop cr ] gamepad:queue:pop_each
 ;
 
 
@@ -21,8 +19,6 @@ include: "mgui.sol"
   basic_sprite:load
 
   30 &main_loop draw_loop:register!
-
-  gamepad:queue:listen!
 
   wait_loop
 ;
