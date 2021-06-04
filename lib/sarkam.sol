@@ -241,55 +241,17 @@ include: "app.sol"
 
   ( ----- queue by ring buffer ----- )
   : queue
-    val: buf    const: len 32        ( keycode ring buffer )
-    val: state  const: state_len 256 ( indexed by keycode. 0:up 1:down )
-    val: i  val: head
-    : invalid ( k -- ) ? "invalid keycode" panic ;
-    : check ( keycode -- keycode )
-      dup 0 <          IF invalid END
-      dup state_len >= IF invalid END
-    ;
-    : key  ( k -- s ) check state + b@ ;
-    : key! ( s k -- ) check state + b! ;
-    : init
-      0 i!
-      0 head!
-      len allot buf!
-      state_len allot state!
-    ;
-    : next_i!    i    1 + len mod i! ;
-    : next_head! head 1 + len mod head! ;
-    : empty? i head = ;
-    : >buf ( k -- ) buf head + b! next_head! ;
-    : buf> ( -- k no | yes )
-      empty? IF yes RET END
-      buf i + b@ no next_i!
-    ;
-    : push ( up/down keycode -- )
-      val: k  val: s
-      check k! s!
-      s IF ( down )
-        k key IF
-          RET ( repeat )
-        ELSE
-          1
-        END
-      ELSE ( up )
-        0
-      END
-      k key!
-      k >buf
-    ;
+    const: len  32
+    const: slen 256
+    val: q
+    : name "keyboard_queue" ;
+    : init name len slen kq:create q! ;
     : listen!
-      buf not IF init END
-      [ push HALT ] handler!
+      q not IF init END
+      [ q kq:push HALT ] handler!
     ;
-    : pop ( -- keycode state no | yes )
-      buf> IF yes RET END dup key no
-    ;
-    : pop_each ( q -- ) # q: keycode state --
-      >r pop IF rdrop RET END r> dup >r call r> AGAIN
-    ;
+    : pop ( -- keycode state ) q kq:pop ;
+    : pop_each ( q[ keycode state -- ] -- ) q kq:pop_each ;
   ;
 ;
 
@@ -316,7 +278,7 @@ include: "app.sol"
         q kq:push HALT
       ] handler!
     ;
-    : pop ( -- state button pad ) q kq:pop ;
-    : pop_each ( q[state button pad -- ] -- ) q kq:pop_each ;
+    : pop ( -- button state ) q kq:pop ;
+    : pop_each ( q[ button state -- ] -- ) q kq:pop_each ;
   ;
 ;
