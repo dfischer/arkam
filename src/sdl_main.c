@@ -439,7 +439,6 @@ void setup_audio(VM* vm) {
 /* ===== Keyboard ===== */
 
 Cell key_handler_addr = 0;
-VM* key_handler_vm = NULL;
 
 Code handleKEY(VM* vm, Cell op) {
   switch (op) {
@@ -456,7 +455,6 @@ Code handleKEY(VM* vm, Cell op) {
 
 void setup_keyboard(VM* vm) {
   SDL_StartTextInput();
-  key_handler_vm = vm;
   vm->io_handlers[ARK_DEVICE_KEY] = handleKEY;
 }
 
@@ -655,7 +653,7 @@ void poll_sdl_event(VM* vm, PPU* ppu) {
     case SDL_KEYDOWN:
     case SDL_KEYUP:
       {
-        if (!(key_handler_vm && key_handler_addr)) break;
+        if (!key_handler_addr) break;
         /* handler ( down(-1)/up(0) sym -- ) */
         Cell keycode = event.key.keysym.sym & ~SDL_SCANCODE_MASK;
         Push(event.type == SDL_KEYDOWN ? -1 : 0);
