@@ -84,6 +84,15 @@ bin/forth.ark: bin/sol tools/forth.sol
 
 
 
+.PHONY: test-forth
+test-forth: bin/forth_test.ark
+	./bin/arkam bin/forth_test.ark
+
+bin/forth_test.ark: bin/forth.ark tools/forth_test.sol
+	./bin/sol tools/forth_test.sol bin/forth_test.ark
+
+
+
 # ===== Prepare =====
 
 bin:
