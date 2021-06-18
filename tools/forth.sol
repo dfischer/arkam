@@ -1,0 +1,1 @@
+: main "forth" prn ;

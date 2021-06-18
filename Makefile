@@ -75,6 +75,15 @@ rand_fm_beat: bin sarkam bin/sol
 
 
 
+.PHONY: forth
+forth: bin arkam bin/forth.ark
+	./bin/arkam bin/forth.ark
+
+bin/forth.ark: bin/sol tools/forth.sol
+	./bin/sol tools/forth.sol bin/forth.ark
+
+
+
 # ===== Prepare =====
 
 bin:
