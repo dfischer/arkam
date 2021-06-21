@@ -59,6 +59,9 @@ const: false ng
 : cells ( n -- n ) 4 * ;
 : align ( n -- n ) 3 + 3 bit-not bit-and ;
 
+: at  ( addr i -- v ) cells + @ ;
+: at! ( v addr i -- ) cells + ! ;
+
 : inc! ( addr -- ) dup @ 1 + swap ! ;
 : dec! ( addr -- ) dup @ 1 - swap ! ;
 
