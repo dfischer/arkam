@@ -31,6 +31,12 @@
       ? "Unknown mode" panic
     ;
     : handle_immed ( xt state -- ... ) drop >r ;
+    : handle_prim ( xt state -- )
+      # xt-> | prim code
+      #      | quot
+      compile_mode [ @ ,            ] ;CASE
+      run_mode     [ 1 cells + @ >r ] ;CASE
+    ;
     ( ----- util ----- )
     : here+! ( n -- ) here + align here! ; # aligned
     ( ----- operation ----- )
@@ -43,6 +49,41 @@
       header name! # --
       &handle_normal header handler!
       here header xt!
+    ;
+  ;
+  : primitives
+    : prim ( n name q -- n )
+      swap dict:create
+      >r
+      dup [ inc ] [ 1 << 1 bit_or ] biq # next code
+      , r> , # put code and quotation
+      dict:handle_prim dict:latest dict:handler!
+    ;
+    : prim_comp ( n name -- n )
+      [ "Don't call in run-mode" panic ] prim
+    ;
+    : setup
+      1
+      "HALT" [ HALT ]  prim
+      "LIT"            prim_comp
+      "RET"  [ rdrop ] prim
+      ( stack )
+      "dup"  [ dup  ] prim
+      "drop" [ drop ] prim
+      "swap" [ swap ] prim
+      "over" [ over ] prim
+      ( arithmetics )
+      "+"    [ +    ] prim
+      "-"    [ -    ] prim
+      "*"    [ *    ] prim
+      "/mod" [ /mod ] prim
+      ( compare )
+      "="  [ =  ] prim
+      "!=" [ != ] prim
+      ">"  [ >  ] prim
+      "<"  [ <  ] prim
+      ( TODO )
+      drop
     ;
   ;
 ;
