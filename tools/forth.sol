@@ -55,15 +55,16 @@
     : prim ( n name q -- n )
       swap dict:create
       >r
-      dup [ inc ] [ 1 << 1 bit_or ] biq # next code
+      dup [ inc ] [ 1 << 1 bit-or ] biq # next code
       , r> , # put code and quotation
       dict:handle_prim dict:latest dict:handler!
+      "TODO test primitives" panic
     ;
     : prim_comp ( n name -- n )
       [ "Don't call in run-mode" panic ] prim
     ;
     : setup
-      1
+      1 ( from HALT )
       "HALT" [ HALT ]  prim
       "LIT"            prim_comp
       "RET"  [ rdrop ] prim
@@ -86,6 +87,11 @@
       drop
     ;
   ;
+  : setup
+    primitives:setup
+  ;
 ;
 
-: main "forth" prn ;
+: main
+  forth:setup
+;

@@ -1,6 +1,10 @@
 include: "tester.sol"
 include: "forth.sol"
 
+
+: HERE "-----HERE-----" prn ;
+
+
 : test_dict
   "create" [ "abcd" forth:dict:create yes ] CHECK
 
@@ -15,5 +19,6 @@ include: "forth.sol"
 ;
 
 : main
+  "setup" [ forth:setup ok ] CHECK
   test_dict
 ;
