@@ -19,6 +19,7 @@ include: "forth.sol"
 ;
 
 : main
+  0xFF ? drop "( <- allot ? area )" prn
   "setup" [ forth:setup ok ] CHECK
   test_dict
 ;

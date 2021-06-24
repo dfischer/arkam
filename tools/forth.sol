@@ -42,23 +42,21 @@
     ( ----- operation ----- )
     : create ( name -- )
       val: header
-      : put_name ( str -- &name ) here >r dup s:len here+! i s:copy r> ;
+      : put_name ( str -- &name ) dup s:len 1 + allot here:align! &s:copy sip ;
       put_name # -- &name
       bytes allot header!
-      latest header next! header latest! # insert link
       header name! # --
+      latest header next! header latest! # insert link
       &handle_normal header handler!
       here header xt!
     ;
   ;
   : primitives
     : prim ( n name q -- n )
-      swap dict:create
-      >r
-      dup [ inc ] [ 1 << 1 bit-or ] biq # next code
+      swap dict:create >r
+      [ inc ] [ 1 << 1 bit-or ] biq # next code
       , r> , # put code and quotation
-      dict:handle_prim dict:latest dict:handler!
-      "TODO test primitives" panic
+      &dict:handle_prim dict:latest dict:handler!
     ;
     : prim_comp ( n name -- n )
       [ "Don't call in run-mode" panic ] prim

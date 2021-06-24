@@ -303,6 +303,8 @@ const: stderr 2
 ;
 
 
+: ?here here ? drop ;
+
 
 ( ===== Stack 2 ===== )
 
