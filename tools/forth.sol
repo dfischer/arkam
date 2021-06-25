@@ -64,9 +64,11 @@
   ;
   
   ( ----- eval ----- )
-  : eval_token ( name -- found? )
-    dict:find not IF no RET END # -- header
+  : eval_token_from ( name link -- found? )
+    dict:find_from not IF no RET END # -- header
     [ dict:xt ] [ dict:handler ] biq mode swap call ok ;
+  ( testing from latest )
+  : eval_token ( name -- found? ) dict:latest eval_token_from ;
   : eval_token_in ( name mode -- found? )
     mode >r mode! eval_token r> mode! ;
   : run_token     ( name -- found? ) run_mode     eval_token_in ;
