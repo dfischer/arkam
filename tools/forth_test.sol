@@ -45,6 +45,7 @@ include: "forth.sol"
 : test_primitives
   ( run mode )
 
+  "dup"  [ 2 "dup" run + 4 = ] CHECK
   "drop" [ ok no "drop" run ] CHECK
   "swap" [ 1 2 "swap" run - 1 = ] CHECK
   "over" [ 1 2 "over" run - + 2 = ] CHECK
