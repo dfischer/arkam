@@ -115,7 +115,7 @@
       ( bitwise )
       "and"     [ bit-and    ] prim
       "or"      [ bit-or     ] prim
-      "not"     [ bit-not    ] prim
+      "bnot"    [ bit-not    ] prim
       "xor"     [ bit-xor    ] prim
       "lshift"  [ bit-lshift ] prim
       "ashift"  [ bit-ashift ] prim
@@ -134,8 +134,45 @@
       drop
     ;
   ;
+  ( setup core words )
+  : corewords
+    : core ( name xt -- ) swap dict:create dict:latest dict:xt! ;
+    : setup
+      "not" &not core
+      ( ----- stack ----- )
+      "nip"   &nip core
+      "2dup"  &2dup core
+      "2drop" &2drop core
+      "3drop" &3drop core
+      ( ----- compare ----- )
+      "<="  &<= core
+      ">="  &>= core
+      "max" &max core
+      "min" &min core
+      ( ----- arithmetics ----- )
+      "/"   &/   core
+      "mod" &mod core
+      "neg" &neg core
+      "abs" &abs core
+      "inc" &inc core
+      "dec" &dec core
+      ( ----- bit ----- )
+      "<<"  &<<  core
+      ">>"  &>>  core
+      ">>>" &>>> core
+      ( ----- memory ----- )
+      "cells" &cells core
+      "align" &align core
+      ( ----- string ----- )
+      "s="     &s=     core
+      "s:copy" &s:copy core
+      "s:put"  &s:put  core
+      "s:len"  &s:len  core
+    ;
+  ;
   : setup
     primitives:setup
+    corewords:setup
   ;
 ;
 

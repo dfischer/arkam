@@ -89,10 +89,10 @@ include: "forth.sol"
   "b!" [ ok &x "b!" run x ] CHECK
 
   ( bitwise )
-  "and" [ 1 3 "and" run ] CHECK
-  "or"  [ 0 1 "or"  run ] CHECK
-  "not" [ 0   "not" run ] CHECK
-  "xor" [ 0 1 "xor" run ] CHECK
+  "and"  [ 1 3 "and"  run ] CHECK
+  "or"   [ 0 1 "or"   run ] CHECK
+  "bnot" [ 0   "bnot" run ] CHECK
+  "xor"  [ 0 1 "xor"  run ] CHECK
   "lshift" [ 1 1 "lshift" run 2 = ] CHECK
   "ashift" [ -1 -1 "ashift" run -1 = ] CHECK
 
@@ -181,6 +181,9 @@ include: "forth.sol"
   [ "or" compile ] build
   "or"  [ 0 1 t ] CHECK
 
+  [ "bnot" compile ] build
+  "bnot" [ 0 t ] CHECK
+
   [ "xor" compile ] build
   "xor" [ 1 0 t ] CHECK
 
@@ -214,10 +217,17 @@ include: "forth.sol"
 ;
 
 
+: test_core
+  "s= 1" [ "foo" "foo" "s=" run     ] CHECK
+  "s= 2" [ "foo" "bar" "s=" run not ] CHECK
+;
+
+
 : main
   0xFF ? drop "( <- allot ? area )" prn
   "setup" [ forth:setup ok ] CHECK
   test_dict
   test_primitives
+  test_core
   "ALL TEST PASSED" prn
 ;
