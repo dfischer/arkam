@@ -3,6 +3,8 @@ include: "forth.sol"
 
 
 : HERE "-----HERE-----" prn ;
+: SECTION ( name -- ) "<< " pr pr " >>" prn ;
+: DONE " ...done" prn ;
 
 
 : compile ( name -- ) dup >r forth:compile_token not IF r> pr " not found" panic END rdrop ;
@@ -11,6 +13,8 @@ include: "forth.sol"
 
 : test_dict
   val: xt
+  "test dict" SECTION
+
   "create" [ "abcd" forth:dict:create yes ] CHECK
 
   "create/align" [ forth:dict:latest dup align = ] CHECK
@@ -39,6 +43,8 @@ include: "forth.sol"
   "RET" compile
 
   "run abcd" [ 1 "abcd" run + 2 = ] CHECK
+
+  DONE
 ;
 
 
@@ -51,7 +57,10 @@ include: "forth.sol"
   "tprim" forth:dict:create ( for testing compiling primitives )
   MARK
 
+  "test primitives" SECTION
+  
   ( ----- run mode ----- )
+  "run mode" pr
 
   "dup"  [ 2 "dup" run + 4 = ] CHECK
   "drop" [ ok no "drop" run ] CHECK
@@ -68,7 +77,11 @@ include: "forth.sol"
   ">"  [ 3 2 ">" run ] CHECK
   "<"  [ 2 3 "<" run ] CHECK
 
+  DONE
+
   ( ----- compile mode ----- )
+  "compile mode" pr
+
   [ "LIT" compile 123 , ] build
   "LIT" [ t 123 = ] CHECK
 
@@ -80,6 +93,32 @@ include: "forth.sol"
 
   [ "over" compile ] build
   "over" [ 1 2 t - + 2 = ] CHECK
+
+  [ "+" compile ] build
+  "+" [ 1 2 t 3 = ] CHECK
+
+  [ "-" compile ] build
+  "-" [ 2 1 t 1 = ] CHECK
+
+  [ "*" compile ] build
+  "*" [ 3 2 t 6 = ] CHECK
+
+  [ "/mod" compile ] build
+  "/mod" [ 3 2 t + 2 = ] CHECK
+
+  [ "=" compile ] build
+  "="  [ 2 2 t ] CHECK
+
+  [ "!=" compile ] build
+  "!=" [ 2 1 t ] CHECK
+
+  [ ">" compile ] build
+  ">"  [ 3 2 t ] CHECK
+
+  [ "<" compile ] build
+  "<"  [ 2 3 t ] CHECK
+
+  DONE
 ;
 
 
