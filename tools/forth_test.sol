@@ -16,10 +16,20 @@ include: "forth.sol"
     forth:dict:latest forth:dict:handler
     &forth:dict:handle_normal =
   ] CHECK
+
+  "find" [
+    "abcd" forth:dict:find not IF no RET END
+    forth:dict:latest =
+  ] CHECK
+
+  "find not found" [
+    "foo" forth:dict:find IF drop no ELSE yes END
+  ] CHECK
 ;
 
 : main
   0xFF ? drop "( <- allot ? area )" prn
   "setup" [ forth:setup ok ] CHECK
   test_dict
+  "ALL TEST PASSED" prn
 ;

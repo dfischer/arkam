@@ -366,8 +366,10 @@ const: stderr 2
 ( ===== String 2 ===== )
 
 : s= ( s1 s2 )
+  : B "BEFORE " pr ;
+  : A "AFTER" prn ;
   : same? ( s1 s2 -- c yes | no )
-    b@ swap b@ dup >r != IF no RET END r> yes ;
+    b@ swap b@ over = IF yes ELSE drop no END ;
   : loop ( s1 s2 -- ? )
     2dup same? not IF 2drop no RET END ( c )
     0 = IF 2drop yes RET END

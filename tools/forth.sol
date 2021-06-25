@@ -50,6 +50,12 @@
       &handle_normal header handler!
       here header xt!
     ;
+    : find_from ( name header -- header yes | no )
+      dup 0 = IF 2drop no RET END
+      2dup name s= IF swap drop yes RET END
+      next AGAIN
+    ;
+    : find ( name -- header yes | no ) latest find_from ;
   ;
   : primitives
     : prim ( n name q -- n )
