@@ -43,7 +43,15 @@ include: "forth.sol"
 
 
 : test_primitives
-  ( run mode )
+  val: there
+  : MARK   here there! ;
+  : FORGET there here! ;
+  : build ( q -- ) FORGET call "RET" compile ;
+  : t "tprim" run ;
+  "tprim" forth:dict:create ( for testing compiling primitives )
+  MARK
+
+  ( ----- run mode ----- )
 
   "dup"  [ 2 "dup" run + 4 = ] CHECK
   "drop" [ ok no "drop" run ] CHECK
@@ -59,6 +67,19 @@ include: "forth.sol"
   "!=" [ 2 1 "!=" run ] CHECK
   ">"  [ 3 2 ">" run ] CHECK
   "<"  [ 2 3 "<" run ] CHECK
+
+  ( ----- compile mode ----- )
+  [ "LIT" compile 123 , ] build
+  "LIT" [ t 123 = ] CHECK
+
+  [ "drop" compile ] build
+  "drop" [ ok no t ] CHECK
+
+  [ "swap" compile ] build
+  "swap" [ 1 2 t - 1 = ] CHECK
+
+  [ "over" compile ] build
+  "over" [ 1 2 t - + 2 = ] CHECK
 ;
 
 
