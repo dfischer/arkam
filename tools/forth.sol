@@ -21,14 +21,14 @@
     val: latest
     : bytes size cells ;
     ( ----- accessors ----- )
-    : next     @     ; # h -- h
-    : next!    !     ; # a h --
-    : name     1 at  ;
-    : name!    1 at! ;
-    : handler  2 at  ;
-    : handler! 2 at! ;
-    : xt       3 at  ;
-    : xt!      3 at! ;
+    : next     @        ; # h -- h
+    : next!    !        ; # a h --
+    : name     1 field  ;
+    : name!    1 field! ;
+    : handler  2 field  ;
+    : handler! 2 field! ;
+    : xt       3 field  ;
+    : xt!      3 field! ;
     ( ----- handler ----- )
     : handle_normal ( xt state -- ... )
       compile_mode [ ,  ] ;CASE
@@ -134,6 +134,7 @@
       drop
     ;
   ;
+
   ( setup core words )
   : corewords
     : core ( name xt -- ) swap dict:create dict:latest dict:xt! ;
@@ -161,13 +162,107 @@
       ">>"  &>>  core
       ">>>" &>>> core
       ( ----- memory ----- )
-      "cells" &cells core
-      "align" &align core
+      "cells"  &cells  core
+      "align"  &align  core
+      "field"  &field  core
+      "field!" &field! core
+      "inc!"   &inc!   core
+      "dec!"   &dec!   core
+      "memcopy" &memcopy core
+      ( ----- combinator ----- )
+      "call"  &call  core
+      "DEFER" &DEFER core
+      "dip"   &dip   core
+      "sip"   &sip   core
+      "biq"   &biq   core
+      "bia"   &bia   core
+      "bi*"   &bi*   core
+      "bibi"  &bibi  core
+      "triq"  &triq  core
+      "tria"  &tria  core
+      "tri*"  &tri*  core
+      ( ----- iterator ----- )
+      "times" &times core
+      "for"   &for   core
+      ( ----- stdio ----- )
+      "stdio:ready?" &stdio:ready? core
+      "putc" &putc core
+      "getc" &getc core
+      "stdio:port"  &stdio:port  core
+      "stdio:port!" &stdio:port! core
+      "cr"    &cr    core
+      "space" &space core
+      "pr"  &pr  core
+      "prn" &prn core
+      "call/port" &call/port core
+      ">stdout" &>stdout core
+      ">stderr" &>stderr core
+      "epr"  &epr  core
+      "eprn" &eprn core
+      ( ----- system ----- )
+      "sys" &sys core
+      "sys:size"      &sys:info:size      core
+      "sys:ds_size"   &sys:info:ds_size   core
+      "sys:ds"        &sys:info:ds        core
+      "sys:rs_size"   &sys:info:rs_size   core
+      "sys:rs"        &sys:info:rs        core
+      "sys:cell_size" &sys:info:cell_size core
+      "sys:max_int"   &sys:info:max_int   core
+      "sys:min_int"   &sys:info:min_int   core
+      ( ----- exception ----- )
+      "die"   &die   core
+      "panic" &panic core
+      ( ----- address validation ----- )
+      "valid:dict" &valid:dict core
+      "valid:ds"   &valid:ds   core
+      "valid:rs"   &valid:rs   core
+      ( ----- memory 2 ----- )
+      "here"        &here        core
+      "here:addr"   &here:addr   core
+      "here:align!" &here:align! core
+      "here!"       &here!       core
+      ","  &,  core
+      "b," &b, core
+      "allot" &allot core
+      ( ----- debug print ----- )
+      ">hex" &>hex core
+      "?"      &?      core
+      "?hex"   &?hex   core
+      "?ff"    &?ff    core
+      "?stack" &?stack core
+      "?here"  &?here  core
+      ( ----- stack 2 ----- )
+      "pick"  &pick  core
+      "rpick" &rpick core
+      "i"     &i     core
+      "j"     &j     core
+      ( ----- return stack ----- )
+      "IFRET" &IFRET core
+      ";IF"   &;IF   core
+      ";CASE" &;CASE core
+      ";EQ"   &;EQ   core
+      ";INIT" &;INIT core
+      "init!" &init! core
       ( ----- string ----- )
       "s="     &s=     core
       "s:copy" &s:copy core
       "s:put"  &s:put  core
       "s:len"  &s:len  core
+      ( ----- random by I/O ----- )
+      "rand"       &rand       core
+      "rand:seed!" &rand:seed! core
+      "rand:init"  &rand:init  core
+      ( ----- file ----- )
+      "file:open"    &file:open    core
+      "file:close"   &file:close   core
+      "file:read"    &file:read    core
+      "file:write"   &file:write   core
+      "file:seek"    &file:seek    core
+      "file:exists?" &file:exists? core
+      "file:open!"   &file:open!   core
+      "file:close!"  &file:close!  core
+      "file:read!"   &file:read!   core
+      "file:write!"  &file:write!  core
     ;
   ;
   : setup

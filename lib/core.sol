@@ -59,8 +59,8 @@ const: false ng
 : cells ( n -- n ) 4 * ;
 : align ( n -- n ) 3 + 3 bit-not bit-and ;
 
-: at  ( addr i -- v ) cells + @ ;
-: at! ( v addr i -- ) cells + ! ;
+: field  ( addr i -- v ) cells + @ ;
+: field! ( v addr i -- ) cells + ! ;
 
 : inc! ( addr -- ) dup @ 1 + swap ! ;
 : dec! ( addr -- ) dup @ 1 - swap ! ;
@@ -363,7 +363,7 @@ const: stderr 2
   swap >r call dup r> ! ;
 
 
-( ===== String 2 ===== )
+( ===== String ===== )
 
 : s= ( s1 s2 )
   : B "BEFORE " pr ;
