@@ -306,6 +306,22 @@ const: stderr 2
 : ?here here ? drop ;
 
 
+: dump ( addr len -- )
+  const: bpl 16 ( bytes per line )
+  : space " " epr ;
+  : cr "" eprn ;
+  : ?addr ( a -- ) dup 8 >> ?ff ?ff space ;
+  : line ( addr len q -- ) swap [ 2dup [ b@ ] dip call &inc dip ] times 2drop ;
+  : rest ( len q -- ) swap bpl swap - swap times ;
+  : ascii? ( c -- ? ) dup 0x20 < IF drop no RET END 0x7E <= ;
+  : pchar ( c -- ) dup ascii? IF [ putc ] >stderr ELSE drop "." epr END ;
+  : ?bytes ( addr len -- ) swap over [ ?ff space ] line [ space space space ] rest ;
+  : ?ascii ( addr len -- ) [ pchar ] line ;
+  : ?line ( addr len -- ) over ?addr 2dup ?bytes ?ascii cr ;
+  : loop ( addr len -- ) dup bpl > IF over bpl ?line [ bpl + ] [ bpl - ] bi* AGAIN END ?line ;
+  loop
+;
+
 ( ===== Stack 2 ===== )
 
 : pick ( n -- v ) 2 + cells sp + valid:ds @ ;
