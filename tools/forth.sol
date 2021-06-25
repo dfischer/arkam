@@ -106,6 +106,11 @@
       ( jump )
       "JMP"  prim_comp
       "ZJMP" prim_comp
+      ( get/set )
+      "@"  [ @  ] prim
+      "!"  [ !  ] prim
+      "b@" [ b@ ] prim
+      "b!" [ b! ] prim
       ( TODO )
       drop
     ;

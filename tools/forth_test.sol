@@ -50,6 +50,7 @@ include: "forth.sol"
 
 : test_primitives
   val: there
+  val: x ( for get/set )
   : MARK   here there! ;
   : FORGET there here! ;
   : build ( q -- ) FORGET call "RET" compile ;
@@ -76,6 +77,16 @@ include: "forth.sol"
   "!=" [ 2 1 "!=" run ] CHECK
   ">"  [ 3 2 ">" run ] CHECK
   "<"  [ 2 3 "<" run ] CHECK
+
+  ( get/set )
+  ok x!
+  "@" [ &x "@" run ] CHECK
+  ng x!
+  "!" [ ok &x "!" run x ] CHECK
+  ok x!
+  "b@" [ &x "b@" run ] CHECK
+  ng x!
+  "b!" [ ok &x "b!" run x ] CHECK
 
   DONE
 
@@ -130,6 +141,23 @@ include: "forth.sol"
     "drop" compile
   ] build
   "ZJMP" [ 1 0 t ok ] CHECK
+
+  ( get/set )
+  ok x!
+  [ "@" compile ] build
+  "@" [ &x t ] CHECK
+
+  ng x!
+  [ "!" compile ] build
+  "!" [ ok &x t x ] CHECK
+
+  ok x!
+  [ "b@" compile ] build
+  "b@" [ &x t ] CHECK
+
+  ng x!
+  [ "b!" compile ] build
+  "b!" [ ok &x t x ] CHECK
 
   DONE
 ;
