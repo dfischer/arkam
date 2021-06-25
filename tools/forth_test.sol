@@ -98,7 +98,11 @@ include: "forth.sol"
 
   ( i/o )
   "i/o" [ 0 0 io 0 0 "io" run = ] CHECK
-  
+
+  ( sp )
+  "sp"  [ "sp" run "sp" run - 1 cells = ] CHECK
+  "sp!" [ "sp" run "sp!" run ok ] CHECK
+
   DONE
 
   ( ----- compile mode ----- )
@@ -195,6 +199,16 @@ include: "forth.sol"
   ">r, r>" [ 1 t ] CHECK
   [ ">r" compile "rdrop" compile ] build
   "rdrop" [ ok 0 t ] CHECK
+
+  ( sp/rp )
+  [ "sp" compile "sp" compile ] build
+  "sp" [ t - 1 cells = ] CHECK
+
+  [ "sp" compile "sp!" compile ] build
+  "sp!" [ t ok ] CHECK
+
+  [ "rp" compile ( "LIT" compile 4 , "+" compile ) "rp!" compile ] build
+  "rp/rp!" [ t ok ] CHECK
 
   DONE
 ;

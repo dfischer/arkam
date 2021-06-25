@@ -124,7 +124,12 @@
       ">r"    prim_comp
       "r>"    prim_comp
       "rdrop" prim_comp
-      ( TODO )
+      ( sp/rp )
+      "sp"  [ sp  ] prim
+      "sp!" [ sp! ] prim
+      "rp"  prim_comp
+      "rp!" prim_comp
+      ( clean )
       drop
     ;
   ;
