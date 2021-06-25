@@ -1,4 +1,11 @@
 : forth
+  const: run_mode     0
+  const: compile_mode 1
+  val: mode
+  : run_mode!     run_mode     mode! ;
+  : compile_mode! compile_mode mode! ;
+
+  ( ----- dictionary ----- )
   : dict
     # Structure
     #   | name ...
@@ -11,8 +18,6 @@
     #   |-----
     #   | code...
     const: size         4
-    const: run_mode     0
-    const: compile_mode 1
     val: latest
     : bytes size cells ;
     ( ----- accessors ----- )
@@ -57,6 +62,17 @@
     ;
     : find ( name -- header yes | no ) latest find_from ;
   ;
+  
+  ( ----- eval ----- )
+  : eval_token ( name -- found? )
+    dict:find not IF no RET END # -- header
+    [ dict:xt ] [ dict:handler ] biq mode swap call ok ;
+  : eval_token_in ( name mode -- found? )
+    mode >r mode! eval_token r> mode! ;
+  : run_token     ( name -- found? ) run_mode     eval_token_in ;
+  : compile_token ( name -- found? ) compile_mode eval_token_in ;
+
+  ( ----- setup primitives ----- )
   : primitives
     : prim ( n name q -- n )
       swap dict:create >r
