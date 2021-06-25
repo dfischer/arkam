@@ -88,6 +88,14 @@ include: "forth.sol"
   ng x!
   "b!" [ ok &x "b!" run x ] CHECK
 
+  ( bitwise )
+  "and" [ 1 3 "and" run ] CHECK
+  "or"  [ 0 1 "or"  run ] CHECK
+  "not" [ 0   "not" run ] CHECK
+  "xor" [ 0 1 "xor" run ] CHECK
+  "lshift" [ 1 1 "lshift" run 2 = ] CHECK
+  "ashift" [ -1 -1 "ashift" run -1 = ] CHECK
+
   DONE
 
   ( ----- compile mode ----- )
@@ -158,6 +166,22 @@ include: "forth.sol"
   ng x!
   [ "b!" compile ] build
   "b!" [ ok &x t x ] CHECK
+
+  ( bitwise )
+  [ "and" compile ] build
+  "and" [ 1 3 t ] CHECK
+
+  [ "or" compile ] build
+  "or"  [ 0 1 t ] CHECK
+
+  [ "xor" compile ] build
+  "xor" [ 1 0 t ] CHECK
+
+  [ "lshift" compile ] build
+  "lshift" [ 1 1 t 2 = ] CHECK
+
+  [ "ashift" compile ] build
+  "ashift" [ -1 -1 t -1 = ] CHECK
 
   DONE
 ;

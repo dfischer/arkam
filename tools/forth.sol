@@ -111,6 +111,13 @@
       "!"  [ !  ] prim
       "b@" [ b@ ] prim
       "b!" [ b! ] prim
+      ( bitwise )
+      "and"     [ bit-and    ] prim
+      "or"      [ bit-or     ] prim
+      "not"     [ bit-not    ] prim
+      "xor"     [ bit-xor    ] prim
+      "lshift"  [ bit-lshift ] prim
+      "ashift"  [ bit-ashift ] prim
       ( TODO )
       drop
     ;
