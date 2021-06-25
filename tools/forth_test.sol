@@ -42,9 +42,29 @@ include: "forth.sol"
 ;
 
 
+: test_primitives
+  ( run mode )
+
+  "drop" [ ok no "drop" run ] CHECK
+  "swap" [ 1 2 "swap" run - 1 = ] CHECK
+  "over" [ 1 2 "over" run - + 2 = ] CHECK
+
+  "+" [ 1 2 "+" run 3 = ] CHECK
+  "-" [ 2 1 "-" run 1 = ] CHECK
+  "*" [ 3 2 "*" run 6 = ] CHECK
+  "/mod" [ 3 2 "/mod" run + 2 = ] CHECK
+
+  "="  [ 2 2 "="  run ] CHECK
+  "!=" [ 2 1 "!=" run ] CHECK
+  ">"  [ 3 2 ">" run ] CHECK
+  "<"  [ 2 3 "<" run ] CHECK
+;
+
+
 : main
   0xFF ? drop "( <- allot ? area )" prn
   "setup" [ forth:setup ok ] CHECK
   test_dict
+  test_primitives
   "ALL TEST PASSED" prn
 ;
