@@ -103,6 +103,9 @@
       "!=" [ != ] prim
       ">"  [ >  ] prim
       "<"  [ <  ] prim
+      ( jump )
+      "JMP"  prim_comp
+      "ZJMP" prim_comp
       ( TODO )
       drop
     ;

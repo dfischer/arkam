@@ -118,6 +118,19 @@ include: "forth.sol"
   [ "<" compile ] build
   "<"  [ 2 3 t ] CHECK
 
+  ( jmp )
+  [ "JMP" compile here 0 ,
+    "dup" compile here swap ! ( skip dup )
+    "drop" compile
+  ] build
+  "JMP" [ 1 t ok ] CHECK
+
+  [ "ZJMP" compile here 0 ,
+    "dup"  compile here swap ! ( skip dup if tos is 0 )
+    "drop" compile
+  ] build
+  "ZJMP" [ 1 0 t ok ] CHECK
+
   DONE
 ;
 
