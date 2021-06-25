@@ -118,6 +118,12 @@
       "xor"     [ bit-xor    ] prim
       "lshift"  [ bit-lshift ] prim
       "ashift"  [ bit-ashift ] prim
+      ( I/O )
+      "io" [ io ] prim
+      ( rstack )
+      ">r"    prim_comp
+      "r>"    prim_comp
+      "rdrop" prim_comp
       ( TODO )
       drop
     ;

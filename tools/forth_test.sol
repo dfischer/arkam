@@ -96,6 +96,9 @@ include: "forth.sol"
   "lshift" [ 1 1 "lshift" run 2 = ] CHECK
   "ashift" [ -1 -1 "ashift" run -1 = ] CHECK
 
+  ( i/o )
+  "i/o" [ 0 0 io 0 0 "io" run = ] CHECK
+  
   DONE
 
   ( ----- compile mode ----- )
@@ -182,6 +185,16 @@ include: "forth.sol"
 
   [ "ashift" compile ] build
   "ashift" [ -1 -1 t -1 = ] CHECK
+
+  ( I/O )
+  [ "io" compile ] build
+  "i/o" [ 0 0 io 0 0 "io" run = ] CHECK
+
+  ( rstack )
+  [ ">r" compile "r>" compile ] build
+  ">r, r>" [ 1 t ] CHECK
+  [ ">r" compile "rdrop" compile ] build
+  "rdrop" [ ok 0 t ] CHECK
 
   DONE
 ;
