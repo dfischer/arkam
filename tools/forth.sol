@@ -62,6 +62,10 @@
     ;
     : find ( name -- header yes | no ) latest find_from ;
   ;
+  : words
+    : loop dup IF dup dict:name pr space dict:next AGAIN END ;
+    dict:latest loop
+  ;
   
   ( ----- eval ----- )
   : eval_token_from ( name link -- found? )
