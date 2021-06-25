@@ -74,9 +74,10 @@
 
   ( ----- setup primitives ----- )
   : primitives
+    : primcode ( n -- code ) 1 << 1 bit-or ;
     : prim ( n name q -- n )
       swap dict:create >r
-      [ inc ] [ 1 << 1 bit-or ] biq # next code
+      [ inc ] [ primcode ] biq # next code
       , r> , # put code and quotation
       &dict:handle_prim dict:latest dict:handler!
     ;
