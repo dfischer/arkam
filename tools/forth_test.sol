@@ -25,7 +25,7 @@ include: "forth.sol"
 
   "create/handler" [
     forth:dict:latest forth:dict:handler
-    &forth:dict:handle_normal =
+    &forth:handle_normal =
   ] CHECK
 
   "find" [
@@ -223,11 +223,27 @@ include: "forth.sol"
 ;
 
 
+: test_data_handler
+  "foo" forth:dict:create
+  &forth:handle_data forth:dict:latest forth:dict:handler!
+  123 forth:dict:latest forth:dict:xt!
+
+  ( run )
+  "run" [ "foo" run 123 = ] CHECK
+
+  ( compile )
+  "bar" forth:dict:create
+  "foo" compile "RET" compile
+  "compile" [ "bar" run 123 = ] CHECK
+;
+
+
 : main
   0xFF ? drop "( <- allot ? area )" prn
   "setup" [ forth:setup ok ] CHECK
   test_dict
   test_primitives
   test_core
+  test_data_handler
   "ALL TEST PASSED" prn
 ;

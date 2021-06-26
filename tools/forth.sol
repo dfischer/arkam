@@ -4,6 +4,22 @@
   val: mode
   : run_mode!     run_mode     mode! ;
   : compile_mode! compile_mode mode! ;
+  : unknown_mode ( mode -- ) ? " : Unknown mode" panic ;
+
+  ( ----- handler ----- )
+  : handle_normal ( xt mode -- ... )
+    compile_mode [ ,  ] ;CASE
+    run_mode     [ >r ] ;CASE
+    unknown_mode
+  ;
+  : handle_immed ( xt mode -- ... ) drop >r ;
+  : handle_prim ( xt mode -- )
+    # xt-> | prim code
+    #      | quot
+    compile_mode [ @ ,            ] ;CASE
+    run_mode     [ 1 cells + @ >r ] ;CASE
+    unknown_mode
+  ;
 
   ( ----- dictionary ----- )
   : dict
@@ -29,19 +45,6 @@
     : handler! 2 field! ;
     : xt       3 field  ;
     : xt!      3 field! ;
-    ( ----- handler ----- )
-    : handle_normal ( xt state -- ... )
-      compile_mode [ ,  ] ;CASE
-      run_mode     [ >r ] ;CASE
-      ? "Unknown mode" panic
-    ;
-    : handle_immed ( xt state -- ... ) drop >r ;
-    : handle_prim ( xt state -- )
-      # xt-> | prim code
-      #      | quot
-      compile_mode [ @ ,            ] ;CASE
-      run_mode     [ 1 cells + @ >r ] ;CASE
-    ;
     ( ----- util ----- )
     : here+! ( n -- ) here + align here! ; # aligned
     ( ----- operation ----- )
@@ -139,6 +142,13 @@
       ( clean )
       drop
     ;
+  ;
+
+  ( handler 2 )
+  : handle_data ( xt state -- )
+    compile_mode [ "LIT" compile_token drop , ] ;CASE
+    run_mode     [ ( push xt )                ] ;CASE
+    unknown_mode
   ;
 
   ( setup core words )
