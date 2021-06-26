@@ -160,6 +160,19 @@
     unknown_mode
   ;
 
+  ( eval )
+  : eval ( str -- ... )
+    val: in
+    val: buf
+    const: max_token 255
+    : init max_token 1 + allot buf! ;
+    : buf buf [ init buf ] ;INIT ;
+    : setup_in ( str -- ) in swap in! DEFER in! ;
+    : parse "TODO parse" panic ;
+    setup_in
+    parse
+  ;
+
   ( setup core words )
   : corewords
     : core ( name xt -- ) swap dict:create dict:latest dict:xt! ;

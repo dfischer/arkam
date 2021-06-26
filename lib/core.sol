@@ -368,9 +368,9 @@ const: stderr 2
 
 : ;INIT ( v q -- v | inited )
   # v != 0: return v
-  # v  = 0: call q and dup its value
+  # v  = 0: call q
   over IF drop rdrop RET END
-  swap drop call dup ;
+  swap drop >r ;
 
 : init! ( addr q -- v | inited )
   # v of addr != 0: return v
