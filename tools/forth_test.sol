@@ -249,6 +249,25 @@ include: "forth.sol"
 ;
 
 
+: test_eval
+  "read token 1" [
+    "  +" forth:eval
+    forth:eval:buf prn ok
+  ] CHECK
+
+  "read token 2" [
+    "dup swap" forth:eval
+    forth:eval:buf prn ok
+  ] CHECK
+
+  "read token3" [
+    "" forth:eval
+    forth:eval:buf prn ok
+  ] CHECK
+
+;
+
+
 : main
   0xFF ? drop "( <- allot ? area )" prn
   "setup" [ forth:setup ok ] CHECK
@@ -256,5 +275,6 @@ include: "forth.sol"
   test_primitives
   test_core
   test_data_handler
+  test_eval
   "ALL TEST PASSED" prn
 ;

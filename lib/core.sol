@@ -82,7 +82,7 @@ const: false ng
 : call ( q -- ) >r ;
 
 
-: DEFER ( -- ) r> r> swap r> r> ;
+: DEFER ( -- ) r> r> swap >r >r ;
   # defers caller's rest process until caller's caller return
   # example:
   #   : foo bar "foo" pr sp ;
@@ -155,6 +155,12 @@ const: false ng
     >r >r swap dup >r # i q | i+1 n q
     call r> r> r> AGAIN ;
   swap 0 loop
+;
+
+
+: while ( q -- )
+  # loop while q put yes to TOS
+  dup >r call IF r> AGAIN END rdrop
 ;
 
 

@@ -167,10 +167,28 @@
     const: max_token 255
     : init max_token 1 + allot buf! ;
     : buf buf [ init buf ] ;INIT ;
+    : in++ in inc in! ;
     : setup_in ( str -- ) in swap in! DEFER in! ;
-    : parse "TODO parse" panic ;
-    setup_in
-    parse
+    : space? ( c -- yes | c no ) 0 ;EQ 32 ;EQ 10 ;EQ no ;
+    : skip_spaces ( -- rest? )
+      [ in b@
+        dup 0 = IF drop no no RET END
+        space?  IF in++ yes RET END
+        drop yes no
+      ] while
+    ;
+    : read ( -- read? )
+      : loop ( n -- )
+        dup max_token >= IF buf epr " ...Too long token" panic END
+        buf over +
+        in b@ space? IF 0 swap b! drop RET END
+        swap b! inc in++ AGAIN
+      ;
+      skip_spaces not IF no RET END
+      0 loop yes
+    ;
+    setup_in # -- old_in
+    read not IF RET END ( no token )
   ;
 
   ( setup core words )
