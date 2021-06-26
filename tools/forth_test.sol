@@ -37,6 +37,17 @@ include: "forth.sol"
     "foo" forth:dict:find IF drop no ELSE yes END
   ] CHECK
 
+  "hide" [
+    forth:dict:latest forth:dict:hide!
+    "abcd" forth:dict:find  IF drop no ELSE yes END
+  ] CHECK
+
+  "show" [
+    forth:dict:latest forth:dict:show!
+    "abcd" forth:dict:find not IF no RET END
+    forth:dict:latest =
+  ] CHECK
+
   ( ----- Compile codes of abcd ----- )
   "prereq" [ xt here = ] CHECK
   "dup" compile

@@ -29,11 +29,13 @@
     #   |-----
     #   | next
     #   | name addr
+    #   | flags
     #   | handler
     #   | xt (code addr)
     #   |-----
     #   | code...
-    const: size         4
+    const: size         5
+    const: flag_show 0x01
     val: latest
     : bytes size cells ;
     ( ----- accessors ----- )
@@ -41,10 +43,15 @@
     : next!    !        ; # a h --
     : name     1 field  ;
     : name!    1 field! ;
-    : handler  2 field  ;
-    : handler! 2 field! ;
-    : xt       3 field  ;
-    : xt!      3 field! ;
+    : flags    2 field  ;
+    : flags!   2 field! ;
+    : handler  3 field  ;
+    : handler! 3 field! ;
+    : xt       4 field  ;
+    : xt!      4 field! ;
+    : show!   ( h -- ) dup flags flag_show bit-or  swap flags! ;
+    : hide!   ( h -- ) dup flags flag_show bit-xor swap flags! ;
+    : hidden? ( h -- ) flags flag_show bit-and not ;
     ( ----- util ----- )
     : here+! ( n -- ) here + align here! ; # aligned
     ( ----- operation ----- )
@@ -54,12 +61,14 @@
       put_name # -- &name
       bytes allot header!
       header name! # --
+      header show!
       latest header next! header latest! # insert link
       &handle_normal header handler!
       here header xt!
     ;
     : find_from ( name header -- header yes | no )
       dup 0 = IF 2drop no RET END
+      dup hidden? IF next AGAIN END
       2dup name s= IF swap drop yes RET END
       next AGAIN
     ;
