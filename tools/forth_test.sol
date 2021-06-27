@@ -266,6 +266,8 @@ include: "forth.sol"
   "string escape" [
     "\"\\\"foo\\\"\"" forth:eval "\"foo\"" s=
   ] CHECK
+
+  "comment" [ "(ignored) ( ignored ) 1" forth:eval ] CHECK
 ;
 
 

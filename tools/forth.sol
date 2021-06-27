@@ -170,6 +170,8 @@
     : >in check_insp insp cell + insp! in! ;
     : drop_in insp cell - insp! ;
     : in++ in inc in! ;
+    : peek in b@ ;
+    : take peek in++ ;
     ( parse a token )
     : space? ( c -- yes | c no ) 0 ;EQ 32 ;EQ 10 ;EQ no ;
     : skip_spaces ( -- rest? )
@@ -182,6 +184,8 @@
     ( string )
     const: dquote 34
     const: bslash 92
+    const: lparen 40
+    const: rparen 41
     : escaped ( c -- c )
       0   [ "Unclosed string" panic ] ;CASE
       110 [ 10                      ] ;CASE # n: newline
@@ -209,7 +213,15 @@
       END
       yes
     ;
-    ( read a token to buf)
+    : parse_comment ( -- parsed? )
+      peek lparen != IF no RET END in++
+      [ take
+        0      [ "Unclosed comment" panic ] ;CASE
+        rparen [ STOP                     ] ;CASE
+        drop GO
+      ] while yes
+    ;
+    ( read a token to buf )
     : read_token ( -- )
       : loop ( n -- )
         dup max_token >= IF buf epr " ...Too long token" panic END
@@ -236,6 +248,7 @@
     [ in not          IF ng RET END ( no input source )
       skip_spaces not IF ng RET END ( no more chars )
       parse_str       IF ok RET END
+      parse_comment   IF ok RET END
       read_token
       buf eval_token  IF ok RET END
       parse_num       IF eval_num ok RET END
@@ -389,8 +402,10 @@
       "file:read!"   &file:read!   core
       "file:write!"  &file:write!  core
       ( ----- forth ----- )
-      ":" &colon     core
-      ";" &semicolon immed
+      ":"    &colon      core
+      ";"    &semicolon  immed
+      "peek" &eval:peek core
+      "take" &eval:take core
     ;
   ;
   : setup
