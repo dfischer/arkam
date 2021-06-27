@@ -258,6 +258,14 @@ include: "forth.sol"
   "colon/semicolon" [
     ": foo 1 + ; 2 foo" forth:eval 3 =
   ] CHECK
+
+  "string" [
+    "\"foo\"" forth:eval "foo" s=
+  ] CHECK
+
+  "string escape" [
+    "\"\\\"foo\\\"\"" forth:eval "\"foo\"" s=
+  ] CHECK
 ;
 
 

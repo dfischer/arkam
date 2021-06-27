@@ -179,16 +179,50 @@
         drop yes no
       ] while
     ;
-    : read ( -- read? ) # read a token to buf
+    ( string )
+    const: dquote 34
+    const: bslash 92
+    : escaped ( c -- c )
+      0   [ "Unclosed string" panic ] ;CASE
+      110 [ 10                      ] ;CASE # n: newline
+      ( as is )
+    ;
+    : parse_str ( -- parsed? )
+      in b@ dquote != IF no RET END in++
+
+      mode compile_mode = IF
+        "JMP" compile, here 0 , # -- addr
+      ELSE
+        here # -- addr
+      END
+
+      [ in b@
+        0      [ "Unclosed string" panic       ] ;CASE
+        bslash [ in++ in b@ escaped b, in++ GO ] ;CASE
+        dquote [ 0 b, in++ STOP                ] ;CASE
+        b, in++ GO
+      ] while
+      here:align!
+
+      mode compile_mode = IF
+        here swap ! # backpatch
+      END
+      yes
+    ;
+    ( read a token to buf)
+    : read_token ( -- )
       : loop ( n -- )
         dup max_token >= IF buf epr " ...Too long token" panic END
         buf over +
         in b@ space? IF 0 swap b! drop RET END
         swap b! inc in++ AGAIN
       ;
+      0 loop
+    ;
+    : read ( -- read? ) # for defining words
       in not IF no RET END
       skip_spaces not IF no RET END
-      0 loop yes
+      read_token yes
     ;
     ( num )
     : parse_num ( -- n yes | no ) buf s>dec ;
@@ -199,9 +233,12 @@
     ;
     ( main )
     >in [ drop_in ] defer
-    [ read not       IF ng RET END ( no token )
-      buf eval_token IF ok RET END
-      parse_num      IF eval_num ok RET END
+    [ in not          IF ng RET END ( no input source )
+      skip_spaces not IF ng RET END ( no more chars )
+      parse_str       IF ok RET END
+      read_token
+      buf eval_token  IF ok RET END
+      parse_num       IF eval_num ok RET END
       buf epr " ?" eprn ng
     ] while
   ;

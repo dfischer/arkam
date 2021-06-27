@@ -12,6 +12,9 @@ const: no  ng
 const: true  ok
 const: false ng
 
+const: GO   ok
+const: STOP ng
+
 
 : not 0 = IF true RET END false ;
 
