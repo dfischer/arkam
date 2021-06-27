@@ -175,10 +175,10 @@
     ( parse a token )
     : space? ( c -- yes | c no ) 0 ;EQ 32 ;EQ 10 ;EQ no ;
     : skip_spaces ( -- rest? )
-      [ in b@
-        dup 0 = IF drop no no RET END
-        space?  IF in++ yes RET END
-        drop yes no
+      [ peek
+        dup 0 = IF drop no STOP RET END
+        space?  IF in++      GO RET END
+        drop yes STOP
       ] while
     ;
     ( string )
@@ -192,7 +192,7 @@
       ( as is )
     ;
     : parse_str ( -- parsed? )
-      in b@ dquote != IF no RET END in++
+      peek dquote != IF no RET END in++
 
       mode compile_mode = IF
         "JMP" compile, here 0 , # -- addr
@@ -200,11 +200,11 @@
         here # -- addr
       END
 
-      [ in b@
-        0      [ "Unclosed string" panic       ] ;CASE
-        bslash [ in++ in b@ escaped b, in++ GO ] ;CASE
-        dquote [ 0 b, in++ STOP                ] ;CASE
-        b, in++ GO
+      [ take
+        0      [ "Unclosed string" panic ] ;CASE
+        bslash [ take escaped b, GO      ] ;CASE
+        dquote [ 0 b, STOP               ] ;CASE
+        b, GO
       ] while
       here:align!
 
@@ -226,7 +226,7 @@
       : loop ( n -- )
         dup max_token >= IF buf epr " ...Too long token" panic END
         buf over +
-        in b@ space? IF 0 swap b! drop RET END
+        peek space? IF 0 swap b! drop RET END
         swap b! inc in++ AGAIN
       ;
       0 loop
@@ -252,7 +252,7 @@
       read_token
       buf eval_token  IF ok RET END
       parse_num       IF eval_num ok RET END
-      buf epr " ?" eprn ng
+      "'" epr buf epr "'" epr " ?" eprn ng
     ] while
   ;
 
@@ -402,10 +402,10 @@
       "file:read!"   &file:read!   core
       "file:write!"  &file:write!  core
       ( ----- forth ----- )
-      ":"    &colon      core
-      ";"    &semicolon  immed
-      "peek" &eval:peek core
-      "take" &eval:take core
+      ":"       &colon      core
+      ";"       &semicolon  immed
+      "in:peek" &eval:peek core
+      "in:take" &eval:take core
     ;
   ;
   : setup
