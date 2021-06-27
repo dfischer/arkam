@@ -162,12 +162,23 @@
 
   ( eval )
   : eval ( str -- ... )
-    val: in
+    val: instack
+    val: insp
     val: buf
     const: max_token 255
+    const: instack_size 64
     : init max_token 1 + allot buf! ;
     : buf buf [ init buf ] ;INIT ;
+    ( input stack )
+    : instack instack [ instack_size allot dup instack! ] ;INIT ;
+    : insp insp [ instack dup insp! ] ;INIT ;
+    : in  insp cell - @ ;
+    : in! insp cell - ! ;
+    : check_insp insp instack instack_size + >= IF "input stack overflow" panic END ;
+    : >in check_insp insp cell + insp! in! ;
+    : drop_in insp cell - insp! ;
     : in++ in inc in! ;
+    ( parse a token )
     : space? ( c -- yes | c no ) 0 ;EQ 32 ;EQ 10 ;EQ no ;
     : skip_spaces ( -- rest? )
       [ in b@
@@ -186,17 +197,19 @@
       skip_spaces not IF no RET END
       0 loop yes
     ;
+    ( num )
     : parse_num ( -- n yes | no ) buf s>dec ;
     : eval_num ( n -- ) mode
       compile_mode [ "LIT" compile_token , ] ;CASE
       run_mode     [ ( remain on TOS )     ] ;CASE
       unknown_mode
     ;
-    in!
+    ( main )
+    >in [ drop_in ] defer
     [ read not       IF ng RET END ( no token )
       buf eval_token IF ok RET END
       parse_num      IF eval_num ok RET END
-      buf epr " not found" panic
+      buf epr " ?" eprn ng
     ] while
   ;
 

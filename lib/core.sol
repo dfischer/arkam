@@ -56,7 +56,8 @@ const: false ng
 
 ( ===== Memory ===== )
 
-: cells ( n -- n ) 4 * ;
+const: cell 4
+: cells ( n -- n ) cell * ;
 : align ( n -- n ) 3 + 3 bit-not bit-and ;
 
 : field  ( addr i -- v ) cells + @ ;
