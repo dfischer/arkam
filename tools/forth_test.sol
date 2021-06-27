@@ -253,6 +253,7 @@ include: "forth.sol"
   forth:run_mode!
   "num"    [ "123" forth:eval 123 = ] CHECK
   "a word" [ 1 "dup" forth:eval + 2 = ] CHECK
+  "words" [ "2 dup +" forth:eval 4 = ] CHECK
 ;
 
 

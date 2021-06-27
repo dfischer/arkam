@@ -193,10 +193,11 @@
       unknown_mode
     ;
     in!
-    read not IF drop RET END ( no token )
-    buf eval_token IF RET END
-    parse_num IF eval_num RET END
-    buf epr " not found" panic
+    [ read not       IF ng RET END ( no token )
+      buf eval_token IF ok RET END
+      parse_num      IF eval_num ok RET END
+      buf epr " not found" panic
+    ] while
   ;
 
   ( setup core words )
