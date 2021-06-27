@@ -309,6 +309,11 @@
       "init!" &init! core
       ( ----- string ----- )
       "s="     &s=     core
+      "c:digit?" &c:digit? core
+      "c:upper?" &c:upper? core
+      "c:lower?" &c:lower? core
+      "c>dec"    &c>dec    core
+      "s>dec"  &s>dec  core
       "s:copy" &s:copy core
       "s:put"  &s:put  core
       "s:len"  &s:len  core
