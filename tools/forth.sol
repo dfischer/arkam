@@ -2,6 +2,7 @@
   const: run_mode     0
   const: compile_mode 1
   val: mode
+  val: repl?
   : run_mode!     run_mode     mode! ;
   : compile_mode! compile_mode mode! ;
   : unknown_mode ( mode -- ) ? " : Unknown mode" panic ;
@@ -237,12 +238,12 @@
       skip_spaces not IF no RET END
       read_token yes
     ;
-    : notfound ( name -- ) "'" epr epr "'" epr " ?" eprn ;
+    : notfound ( name -- ) "'" epr epr "'" epr " ?" repl? IF eprn ELSE panic END ;
     ( num )
     : parse_num ( -- n yes | no ) buf s>dec ;
     : eval_num ( n -- ) mode
-      compile_mode [ "LIT" compile, , ] ;CASE
-      run_mode     [ ( remain on TOS )     ] ;CASE
+      compile_mode [ "LIT" compile, ,  ] ;CASE
+      run_mode     [ ( remain on TOS ) ] ;CASE
       unknown_mode
     ;
     ( reference )
@@ -330,20 +331,25 @@
       "dec!"   &dec!   core
       "memcopy" &memcopy core
       ( ----- combinator ----- )
-      "call"  &call  core
-      "DEFER" &DEFER core
-      "dip"   &dip   core
-      "sip"   &sip   core
-      "biq"   &biq   core
-      "bia"   &bia   core
-      "bi*"   &bi*   core
-      "bibi"  &bibi  core
-      "triq"  &triq  core
-      "tria"  &tria  core
-      "tri*"  &tri*  core
+      "call"   &call  core
+      "DEFER"  &DEFER core
+      "defer"  &defer core
+      "if"     &if    core
+      "when"   &when  core
+      "unless" &unless core
+      "dip"    &dip   core
+      "sip"    &sip   core
+      "biq"    &biq   core
+      "bia"    &bia   core
+      "bi*"    &bi*   core
+      "bibi"   &bibi  core
+      "triq"   &triq  core
+      "tria"   &tria  core
+      "tri*"   &tri*  core
       ( ----- iterator ----- )
       "times" &times core
       "for"   &for   core
+      "while" &while core
       ( ----- stdio ----- )
       "stdio:ready?" &stdio:ready? core
       "putc" &putc core
