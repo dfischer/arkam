@@ -270,6 +270,9 @@ include: "forth.sol"
   "comment" [ "(ignored) ( ignored ) 1" forth:eval ] CHECK
 
   "ref" [ ": foo 1 + ; : bar &foo >r ; 2 bar" forth:eval 3 = ] CHECK
+
+  "quot/compile" [ ": foo [ 1 + ] ; 2 foo call" forth:eval 3 = ] CHECK
+  "quot/run"     [ "1 2 [ 1 + ] dip +" forth:eval 4 = ] CHECK
 ;
 
 

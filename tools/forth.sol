@@ -248,8 +248,8 @@
     ( reference )
     : parse_amp ( -- parsed? )
       buf b@ amp != IF no RET END
-      buf inc # -- actual
-      dict:find not IF notfound no RET END # -- header
+      buf inc dup >r # -- actual
+      dict:find not IF r> notfound no RET END rdrop # -- header
       dict:xt
       mode
       compile_mode [ "LIT" compile, ,  yes ] ;CASE
@@ -266,7 +266,7 @@
       parse_amp       IF ok RET END
       buf eval_token  IF ok RET END
       parse_num       IF eval_num ok RET END
-      notfound ng
+      buf notfound ng
     ] while
   ;
 
@@ -285,6 +285,19 @@
       eval:read not IF "word name required" panic END
       eval:buf dict:create dict:latest dict:hide! compile_mode! ;
     : semicolon "RET" compile, dict:latest dict:show! run_mode! ;
+    : open_quot ( -- compile: &quot &back mode | run: &quot mode )
+      here:align!
+      mode
+      compile_mode [ "JMP" compile, here 0 , here swap mode compile_mode! ] ;CASE
+      run_mode     [ here                              mode compile_mode! ] ;CASE
+      unknown_mode
+    ; 
+    : close_quot ( &quot &back compile_mode | &quot run_mode -- )
+      "RET" compile, dup mode! ( restore mode )
+      compile_mode [ here swap ! "LIT" compile, ,     ] ;CASE
+      run_mode     [ ( remain quotation addr on TOS ) ] ;CASE
+      unknown_mode
+    ; ( mode &quot &back -- )
     : setup
       "not" &not core
       ( ----- stack ----- )
@@ -418,8 +431,10 @@
       ( ----- forth ----- )
       ":"       &colon      core
       ";"       &semicolon  immed
-      "in:peek" &eval:peek core
-      "in:take" &eval:take core
+      "["       &open_quot  immed
+      "]"       &close_quot immed
+      "in:peek" &eval:peek  core
+      "in:take" &eval:take  core
     ;
   ;
   : setup
