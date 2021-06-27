@@ -168,7 +168,6 @@
     : init max_token 1 + allot buf! ;
     : buf buf [ init buf ] ;INIT ;
     : in++ in inc in! ;
-    : setup_in ( str -- ) in swap in! DEFER in! ;
     : space? ( c -- yes | c no ) 0 ;EQ 32 ;EQ 10 ;EQ no ;
     : skip_spaces ( -- rest? )
       [ in b@
@@ -187,9 +186,17 @@
       skip_spaces not IF no RET END
       0 loop yes
     ;
-    : parse_num ( -- n yes | no ) buf s>n ;
-    setup_in # -- old_in
-    read not IF RET END ( no token )
+    : parse_num ( -- n yes | no ) buf s>dec ;
+    : eval_num ( n -- ) mode
+      compile_mode [ "LIT" compile_token , ] ;CASE
+      run_mode     [ ( remain on TOS )     ] ;CASE
+      unknown_mode
+    ;
+    in!
+    read not IF drop RET END ( no token )
+    buf eval_token IF RET END
+    parse_num IF eval_num RET END
+    buf epr " not found" panic
   ;
 
   ( setup core words )

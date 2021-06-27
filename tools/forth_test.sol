@@ -250,21 +250,9 @@ include: "forth.sol"
 
 
 : test_eval
-  "read token 1" [
-    "  +" forth:eval
-    forth:eval:buf prn ok
-  ] CHECK
-
-  "read token 2" [
-    "dup swap" forth:eval
-    forth:eval:buf prn ok
-  ] CHECK
-
-  "read token3" [
-    "" forth:eval
-    forth:eval:buf prn ok
-  ] CHECK
-
+  forth:run_mode!
+  "num"    [ "123" forth:eval 123 = ] CHECK
+  "a word" [ 1 "dup" forth:eval + 2 = ] CHECK
 ;
 
 
