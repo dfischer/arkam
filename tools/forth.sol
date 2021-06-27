@@ -177,7 +177,7 @@
         drop yes no
       ] while
     ;
-    : read ( -- read? )
+    : read ( -- read? ) # read a token to buf
       : loop ( n -- )
         dup max_token >= IF buf epr " ...Too long token" panic END
         buf over +
@@ -187,6 +187,7 @@
       skip_spaces not IF no RET END
       0 loop yes
     ;
+    : parse_num ( -- n yes | no ) buf s>n ;
     setup_in # -- old_in
     read not IF RET END ( no token )
   ;

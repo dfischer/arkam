@@ -85,9 +85,24 @@ const: false ng
 : DEFER ( -- ) r> r> swap >r >r ;
   # defers caller's rest process until caller's caller return
   # example:
-  #   : foo bar "foo" pr sp ;
   #   : bar "bar1" pr sp DEFER "bar2" pr ;
-  # => prints bar1 foo bar2
+  #   : foo bar "foo" pr sp ;
+  # foo => bar1 foo bar2
+
+
+: defer ( q -- ) r> swap r> swap >r >r >r ;
+  # example:
+  #   : foo "foo" pr [ "baz" pr ] defer "bar" pr ;
+  # foo => foobarbaz
+
+
+: if ( ? q1 q2 -- ) >r swap IF rdrop >r ELSE drop END ;
+  # example:
+  #   yes [ "hello" ] [ "world" ] if pr
+  # => hello
+
+: when   ( ? q -- ) swap IF >r ELSE drop END ;
+: unless ( ? q -- ) swap IF drop ELSE >r END ;
 
 
 : dip ( a q -- ... ) swap >r call r> ;
@@ -397,6 +412,31 @@ const: stderr 2
     0 = IF 2drop yes RET END
     1 + swap 1 + AGAIN ;
   loop ;
+
+
+: c:digit? ( c -- ? ) dup 48 < IF drop no RET END 57  <= ;
+: c:upper? ( c -- ? ) dup 65 < IF drop no RET END 90  <= ;
+: c:lower? ( c -- ? ) dup 97 < IF drop no RET END 122 <= ;
+
+
+: c>dec ( c -- n yes | no )
+  dup c:digit? [ 48 - yes ] [ drop no ] if
+;
+
+
+: s>dec ( s -- n yes | no )
+  val: acc val: sign
+  0 acc! 1 sign!
+  ( negative ) dup b@ 45 = IF -1 sign! inc END
+  ( empty ) dup b@ 0 = IF drop no RET END
+  [ dup b@
+    dup 0 = IF 2drop yes ng RET END
+    c>dec   IF acc 10 * + acc! inc ok RET END
+    drop no ng
+  ] while ( -- num? )
+  IF acc sign * yes ELSE no END
+;
+
 
 : s
   : copy ( src dst -- )
