@@ -186,6 +186,7 @@
     const: bslash 92
     const: lparen 40
     const: rparen 41
+    const: amp    38
     : escaped ( c -- c )
       0   [ "Unclosed string" panic ] ;CASE
       110 [ 10                      ] ;CASE # n: newline
@@ -236,11 +237,23 @@
       skip_spaces not IF no RET END
       read_token yes
     ;
+    : notfound ( name -- ) "'" epr epr "'" epr " ?" eprn ;
     ( num )
     : parse_num ( -- n yes | no ) buf s>dec ;
     : eval_num ( n -- ) mode
       compile_mode [ "LIT" compile, , ] ;CASE
       run_mode     [ ( remain on TOS )     ] ;CASE
+      unknown_mode
+    ;
+    ( reference )
+    : parse_amp ( -- parsed? )
+      buf b@ amp != IF no RET END
+      buf inc # -- actual
+      dict:find not IF notfound no RET END # -- header
+      dict:xt
+      mode
+      compile_mode [ "LIT" compile, ,  yes ] ;CASE
+      run_mode     [ ( remain on TOS ) yes ] ;CASE
       unknown_mode
     ;
     ( main )
@@ -250,9 +263,10 @@
       parse_str       IF ok RET END
       parse_comment   IF ok RET END
       read_token
+      parse_amp       IF ok RET END
       buf eval_token  IF ok RET END
       parse_num       IF eval_num ok RET END
-      "'" epr buf epr "'" epr " ?" eprn ng
+      notfound ng
     ] while
   ;
 
