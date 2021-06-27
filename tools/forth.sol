@@ -152,6 +152,7 @@
     mode >r mode! eval_token r> mode! ;
   : run_token     ( name -- found? ) run_mode     eval_token_in ;
   : compile_token ( name -- found? ) compile_mode eval_token_in ;
+  : compile, ( name -- ) dup >r compile_token not IF r> epr " ?" panic END rdrop ;
   : eval ( str -- ... )
     val: instack
     val: insp
@@ -185,13 +186,14 @@
         in b@ space? IF 0 swap b! drop RET END
         swap b! inc in++ AGAIN
       ;
+      in not IF no RET END
       skip_spaces not IF no RET END
       0 loop yes
     ;
     ( num )
     : parse_num ( -- n yes | no ) buf s>dec ;
     : eval_num ( n -- ) mode
-      compile_mode [ "LIT" compile_token , ] ;CASE
+      compile_mode [ "LIT" compile, , ] ;CASE
       run_mode     [ ( remain on TOS )     ] ;CASE
       unknown_mode
     ;
@@ -206,7 +208,7 @@
 
   ( ----- handler 2 ----- )
   : handle_data ( xt state -- )
-    compile_mode [ "LIT" compile_token drop , ] ;CASE
+    compile_mode [ "LIT" compile, , ] ;CASE
     run_mode     [ ( push xt )                ] ;CASE
     unknown_mode
   ;
@@ -214,6 +216,11 @@
   ( setup core words )
   : corewords
     : core ( name xt -- ) swap dict:create dict:latest dict:xt! ;
+    : immed ( name xt -- ) core &handle_immed dict:latest dict:handler! ;
+    : colon
+      eval:read not IF "word name required" panic END
+      eval:buf dict:create dict:latest dict:hide! compile_mode! ;
+    : semicolon "RET" compile, dict:latest dict:show! run_mode! ;
     : setup
       "not" &not core
       ( ----- stack ----- )
@@ -344,6 +351,9 @@
       "file:close!"  &file:close!  core
       "file:read!"   &file:read!   core
       "file:write!"  &file:write!  core
+      ( ----- forth ----- )
+      ":" &colon     core
+      ";" &semicolon immed
     ;
   ;
   : setup

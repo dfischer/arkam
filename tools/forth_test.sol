@@ -254,6 +254,10 @@ include: "forth.sol"
   "num"    [ "123" forth:eval 123 = ] CHECK
   "a word" [ 1 "dup" forth:eval + 2 = ] CHECK
   "words" [ "2 dup +" forth:eval 4 = ] CHECK
+
+  "colon/semicolon" [
+    ": foo 1 + ; 2 foo" forth:eval 3 =
+  ] CHECK
 ;
 
 
