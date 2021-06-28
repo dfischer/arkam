@@ -503,7 +503,33 @@
   ;
 ;
 
+: arg
+  : query 12 io ;
+  : count 0 query ; # -- n
+  : read  1 query ; # buf i len -- ok?
+;
+
+: option
+  val: repl
+  val: buf
+  const: len 256
+  : buf buf [ len allot dup buf! ] ;INIT ;
+  : read buf swap len arg:read not IF "too long option" panic END ; # i --
+  : parse_all
+    yes repl!
+    arg:count 2 < IF RET END
+    no repl!    
+    arg:count dec [
+      inc read
+      buf "--repl" s= IF yes repl! RET END
+      buf "--quit" s= IF no  repl! RET END
+      buf forth:eval:include
+    ] for
+  ;
+;
+
 : main
   forth:setup
-  forth:repl
+  option:parse_all
+  option:repl IF forth:repl END
 ;

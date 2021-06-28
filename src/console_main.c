@@ -8,9 +8,10 @@ void usage() {
 
 
 int main(int argc, char* argv[]) {
-  if (argc != 2) usage();
+  if (argc < 2) usage();
 
   VM* vm = setup_arkam_vm(argv[1]);
+  setup_app(vm, argc-1, argv+1);
 
   Code code = ark_get(vm, ARK_ADDR_START);
   guard_err(vm, code);
