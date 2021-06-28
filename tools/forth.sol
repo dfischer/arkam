@@ -171,8 +171,8 @@
     : >in check_insp insp cell + insp! in! ;
     : drop_in insp cell - insp! ;
     : in++ in inc in! ;
-    : peek in b@ ;
-    : take peek in++ ;
+    : peek in dup IF b@ END ; ( 0 when no input buffer )
+    : take peek dup IF in++ END ; ( do not advance empty str )
     ( parse a token )
     : space? ( c -- yes | c no ) 0 ;EQ 32 ;EQ 10 ;EQ no ;
     : skip_spaces ( -- rest? )
@@ -228,8 +228,8 @@
       : loop ( n -- )
         dup max_token >= IF buf epr " ...Too long token" panic END
         buf over +
-        peek space? IF 0 swap b! drop RET END
-        swap b! inc in++ AGAIN
+        take space? IF 0 swap b! drop RET END
+        swap b! inc AGAIN
       ;
       0 loop
     ;
