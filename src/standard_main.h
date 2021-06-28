@@ -48,6 +48,7 @@ void setup_app(VM* vm, int argc, char* argv[]);
 
 void read_image(VM* vm, char* fname);
 VM* setup_arkam_vm(char* image_name);
+VM* setup_arkam_with_image(Byte* image, Cell size);
 
 
 #endif
