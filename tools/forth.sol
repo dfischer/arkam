@@ -503,11 +503,13 @@
   ;
 ;
 
+
 : arg
   : query 12 io ;
   : count 0 query ; # -- n
   : read  1 query ; # buf i len -- ok?
 ;
+
 
 : option
   val: repl
@@ -527,6 +529,7 @@
     ] for
   ;
 ;
+
 
 : main
   forth:setup
