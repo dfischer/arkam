@@ -155,19 +155,16 @@
   : compile_token ( name -- found? ) compile_mode eval_token_in ;
   : compile, ( name -- ) dup >r compile_token not IF r> epr " ?" panic END rdrop ;
   : eval ( str -- ... )
-    val: instack
-    val: insp
     val: buf
     const: max_token 255
-    const: instack_size 64
     : init max_token 1 + allot buf! ;
     : buf buf [ init buf ] ;INIT ;
     ( input stack )
     val: source
-    : in source ;
-    : in++ source inc source! ;
-    : peek in dup IF b@ END ; ( 0 when no input buffer )
-    : take peek dup IF in++ END ; ( do not advance empty str )
+    val: stream
+    : peek source yes stream call source! ;
+    : take source no  stream call source! ;
+    : in++ take drop ;
     ( parse a token )
     : space? ( c -- yes | c no ) 0 ;EQ 32 ;EQ 10 ;EQ no ;
     : skip_spaces ( -- rest? )
@@ -229,7 +226,7 @@
       0 loop
     ;
     : read ( -- read? ) # for defining words
-      in not IF no RET END
+      stream not IF no RET END
       skip_spaces not IF no RET END
       read_token yes
     ;
@@ -254,18 +251,30 @@
     ;
     : HERE "-----HERE-----" eprn ;
     ( main )
-    source >r source!
-    [ in not          IF ng RET END ( no input source )
-      skip_spaces not IF ng RET END ( no more chars )
-      parse_str       IF ok RET END
-      parse_comment   IF ok RET END
-      read_token
-      parse_amp       IF ok RET END
-      buf eval_token  IF ok RET END
-      parse_num       IF eval_num ok RET END
-      buf notfound ng
-    ] while
-    r> source! ( restore )
+    : run ( source stream -- )
+      stream >r source >r stream! source!
+      peek drop
+      [ stream not      IF ng RET END ( no input stream )
+        skip_spaces not IF ng RET END ( no more chars )
+        parse_str       IF ok RET END
+        parse_comment   IF ok RET END
+        read_token
+        parse_amp       IF ok RET END
+        buf eval_token  IF ok RET END
+        parse_num       IF eval_num ok RET END
+        buf notfound ng
+      ] while
+      r> source! r> stream! ( restore ) ;
+    ( string )
+    [ ( data peek? -- c data )
+      over b@
+      0 [ drop 0 swap ] ;CASE
+      swap IF ( data c -- )
+        swap
+      ELSE
+        swap inc
+      END
+    ] run
   ;
 
   ( ----- handler 2 ----- )
@@ -439,6 +448,7 @@
       "]"       &close_quot immed
       "in:peek" &eval:peek  core
       "in:take" &eval:take  core
+      "eval"    &eval       core
       "bye"     [ 0 HALT ]  core
     ;
   ;
