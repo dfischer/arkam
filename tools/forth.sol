@@ -123,7 +123,7 @@
       ( bitwise )
       "and"     [ bit-and    ] prim
       "or"      [ bit-or     ] prim
-      "bnot"    [ bit-not    ] prim
+      "invert"  [ bit-not    ] prim
       "xor"     [ bit-xor    ] prim
       "lshift"  [ bit-lshift ] prim
       "ashift"  [ bit-ashift ] prim

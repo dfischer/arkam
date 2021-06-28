@@ -100,10 +100,10 @@ include: "forth.sol"
   "b!" [ ok &x "b!" run x ] CHECK
 
   ( bitwise )
-  "and"  [ 1 3 "and"  run ] CHECK
-  "or"   [ 0 1 "or"   run ] CHECK
-  "bnot" [ 0   "bnot" run ] CHECK
-  "xor"  [ 0 1 "xor"  run ] CHECK
+  "and"    [ 1 3 "and" run ] CHECK
+  "or"     [ 0 1 "or"  run ] CHECK
+  "invert" [ 0   "invert" run ] CHECK
+  "xor"    [ 0 1 "xor" run ] CHECK
   "lshift" [ 1 1 "lshift" run 2 = ] CHECK
   "ashift" [ -1 -1 "ashift" run -1 = ] CHECK
 
@@ -192,8 +192,8 @@ include: "forth.sol"
   [ "or" compile ] build
   "or"  [ 0 1 t ] CHECK
 
-  [ "bnot" compile ] build
-  "bnot" [ 0 t ] CHECK
+  [ "invert" compile ] build
+  "invert" [ 0 t ] CHECK
 
   [ "xor" compile ] build
   "xor" [ 1 0 t ] CHECK
