@@ -82,6 +82,9 @@ forth: bin arkam bin/forth.ark
 bin/forth.ark: bin/sol tools/forth.sol
 	./bin/sol tools/forth.sol bin/forth.ark
 
+out/forth.ark.h: bin/forth.ark bin/text2c
+	./bin/text2c -b forth bin/forth.ark out/forth.ark.h
+
 
 
 .PHONY: test-forth
