@@ -267,6 +267,10 @@ include: "forth.sol"
     "\"\\\"foo\\\"\"" forth:eval "\"foo\"" s=
   ] CHECK
 
+  "string in compile" [
+    ": foo \"foo\" ; foo" forth:eval "foo" s=
+  ] CHECK
+
   "comment" [ "(ignored) ( ignored ) 1" forth:eval ] CHECK
 
   "ref" [ ": foo 1 + ; : bar &foo >r ; 2 bar" forth:eval 3 = ] CHECK

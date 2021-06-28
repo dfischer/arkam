@@ -188,7 +188,7 @@
       dup dquote != IF no RET END drop
 
       mode compile_mode = IF
-        "JMP" compile, here 0 , # -- addr
+        "JMP" compile, here 0 , here swap # -- &str &back
       ELSE
         here # -- addr
       END
@@ -203,6 +203,7 @@
 
       mode compile_mode = IF
         here swap ! # backpatch
+        "LIT" compile, , # str
       END
       yes
     ;
@@ -279,15 +280,26 @@
     run_mode     [ ( push xt )                ] ;CASE
     unknown_mode
   ;
+  : handle_compile ( xt state -- )
+    compile_mode [ >r                             ] ;CASE
+    run_mode     [ "Don't call in run mode" panic ] ;CASE
+    unknown_mode
+  ;
 
   ( setup core words )
   : corewords
     : core ( name xt -- ) swap dict:create dict:latest dict:xt! ;
-    : immed ( name xt -- ) core &handle_immed dict:latest dict:handler! ;
+    : immed ( name xt -- ) core &handle_immed   dict:latest dict:handler! ;
+    : const ( name v -- )  core &handle_data    dict:latest dict:handler! ;
+    : comp  ( name xt -- ) core &handle_compile dict:latest dict:handler! ;
     : colon
       eval:read not IF "word name required" panic END
       eval:buf dict:create dict:latest dict:hide! compile_mode! ;
     : semicolon "RET" compile, dict:latest dict:show! run_mode! ;
+    : defconst ( v -- )
+      eval:read not IF "const name required" panic END
+      eval:buf swap const
+    ;
     : open_quot ( -- compile: &quot &back mode | run: &quot mode )
       here:align!
       mode
@@ -304,6 +316,15 @@
     : include ( fname -- ) eval:include ;
     : include_colon eval:read not IF "file name required" panic END eval:buf include ;
     : setup
+      "ok" ok const
+      "ng" ng const
+      "yes" yes const
+      "no"  no const
+      "true"  true const
+      "false" false const
+      "GO"   GO const
+      "STOP" STOP const
+      
       "not" &not core
       ( ----- stack ----- )
       "nip"   &nip core
@@ -327,6 +348,7 @@
       ">>"  &>>  core
       ">>>" &>>> core
       ( ----- memory ----- )
+      "cell" cell const
       "cells"  &cells  core
       "align"  &align  core
       "field"  &field  core
@@ -360,6 +382,8 @@
       "getc" &getc core
       "stdio:port"  &stdio:port  core
       "stdio:port!" &stdio:port! core
+      "stdout" stdout const
+      "stderr" stderr const
       "cr"    &cr    core
       "space" &space core
       "pr"  &pr  core
@@ -439,14 +463,20 @@
       "file:close!"  &file:close!  core
       "file:read!"   &file:read!   core
       "file:write!"  &file:write!  core
+      
       ( ----- forth ----- )
       ":"       &colon      core
       ";"       &semicolon  immed
       "["       &open_quot  immed
       "]"       &close_quot immed
+      "const:"  &defconst   core
       "in:take" &eval:take  core
       "eval"    &eval       core
       "bye"     [ 0 HALT ]  core
+      "IF"   [ "ZJMP" compile, here 0 , ] comp
+      "ELSE" [ "JMP" compile, here 0 , swap here swap ! ] comp
+      "END"  [ here swap ! ] comp
+      "AGAIN" [ "JMP" compile, dict:latest dict:xt , ] comp
       
       "include"  &include       core
       "include:" &include_colon core
