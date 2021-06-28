@@ -276,6 +276,10 @@ Registers
   origin: 0 SEEK_SET, 1 SEEK_CUR, 2 SEEK_END
 
 5 access ( path -- ? )
+
+6 getc ( id -- c | 0 )
+
+7 peek ( id -- c | 0 )
 ```
 
 

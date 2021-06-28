@@ -249,7 +249,6 @@
       run_mode     [ ( remain on TOS ) yes ] ;CASE
       unknown_mode
     ;
-    : HERE "-----HERE-----" eprn ;
     ( main )
     : run ( source stream -- )
       stream >r source >r stream! source!
@@ -265,16 +264,26 @@
         buf notfound ng
       ] while
       r> source! r> stream! ( restore ) ;
-    ( string )
-    [ ( data peek? -- c data )
-      over b@
-      0 [ drop 0 swap ] ;CASE
-      swap IF ( data c -- )
-        swap
-      ELSE
-        swap inc
-      END
-    ] run
+    : str ( src -- )
+      [ ( data peek? -- c data )
+        over b@
+        0 [ drop 0 swap ] ;CASE
+        swap IF ( data c -- )
+          swap
+        ELSE
+          swap inc
+        END
+      ] run
+    ;
+    : include ( fname -- )
+      # TODO: detect circular deps
+      "r" file:open! dup >r
+      [ ( id peek? -- c id )
+        [ dup file:peek ] [ dup file:getc ] if swap
+      ] run
+      r> file:close!
+    ;
+    str
   ;
 
   ( ----- handler 2 ----- )
@@ -305,6 +314,8 @@
       run_mode     [ ( remain quotation addr on TOS ) ] ;CASE
       unknown_mode
     ; ( mode &quot &back -- )
+    : include ( fname -- ) eval:include ;
+    : include_colon eval:read not IF "file name required" panic END eval:buf include ;
     : setup
       "not" &not core
       ( ----- stack ----- )
@@ -450,6 +461,9 @@
       "in:take" &eval:take  core
       "eval"    &eval       core
       "bye"     [ 0 HALT ]  core
+      
+      "include"  &include       core
+      "include:" &include_colon core
     ;
   ;
   : repl

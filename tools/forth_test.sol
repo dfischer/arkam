@@ -273,6 +273,8 @@ include: "forth.sol"
 
   "quot/compile" [ ": foo [ 1 + ] ; 2 foo call" forth:eval 3 = ] CHECK
   "quot/run"     [ "1 2 [ 1 + ] dip +" forth:eval 4 = ] CHECK
+
+  "include" [ "include: ./test/forth/include.f" forth:eval ] CHECK
 ;
 
 

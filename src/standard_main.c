@@ -196,6 +196,31 @@ Code handleFILE(VM* vm, Cell op) {
       Push(access(path, F_OK) == 0 ? -1 : 0);
       return ARK_OK;
     }
+
+  case 6: // getc ( id -- c | 0 )
+    {
+      if (!ark_has_ds_items(vm, 1)) Raise(DS_UNDERFLOW);
+      Cell id = Pop();
+      FILE* file = fetch_file(id);
+      if (!file) die("invalid file id: %d", id);
+
+      char c = fgetc(file);
+      Push(c == EOF ? 0 : c);
+      return ARK_OK;
+    }
+
+  case 7: // peek ( id -- c | 0 )
+    {
+      if (!ark_has_ds_items(vm, 1)) Raise(DS_UNDERFLOW);
+      Cell id = Pop();
+      FILE* file = fetch_file(id);
+      if (!file) die("invalid file id: %d", id);
+
+      char c = fgetc(file);
+      ungetc(c, file);
+      Push(c == EOF ? 0 : c);
+      return ARK_OK;      
+    }
   }
 
   Raise(IO_UNKNOWN_OP);
