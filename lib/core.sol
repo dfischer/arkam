@@ -504,3 +504,16 @@ const: stderr 2
   : read!  read  IF RET END "Can't read" panic ;
   : write! write IF RET END "Can't write" panic ;
 ;
+
+
+( ===== Stdio 2 ===== )
+
+: getline ( buf len -- success? )
+  swap ( len buf )
+  [ over 1 < [ ng STOP ] ;IF
+    getc ( len buf c )
+    0  [ 0 swap b! drop ok STOP ] ;CASE
+    10 [ 0 swap b! drop ok STOP ] ;CASE
+    over b! [ dec ] [ inc ] bi* GO
+  ] while
+;

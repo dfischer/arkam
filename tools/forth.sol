@@ -451,4 +451,5 @@
 
 : main
   forth:setup
+  10 allot dup 10 getline [ prn ] [ "too long" panic ] if
 ;
