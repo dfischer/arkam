@@ -480,6 +480,8 @@
       
       "include"  &include       core
       "include:" &include_colon core
+
+      "." [ ? drop ] core
     ;
   ;
   : repl
