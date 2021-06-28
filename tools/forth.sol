@@ -441,7 +441,21 @@
       "]"       &close_quot immed
       "in:peek" &eval:peek  core
       "in:take" &eval:take  core
+      "bye"     [ 0 HALT ]  core
     ;
+  ;
+  : repl
+    val: buf
+    const: len 256
+    : buf buf [ len allot dup buf! ] ;INIT ;
+    : read buf len getline ; ( -- ok? )
+    : depth sp cell + sys:info:ds sys:info:ds_size cells + swap - cell / ;
+    : prompt "|" epr depth ? drop "> " epr ;
+    yes repl?!
+    [ prompt
+      read not IF "too long" eprn GO RET END
+      buf eval GO
+    ] while
   ;
   : setup
     primitives:setup
@@ -451,5 +465,5 @@
 
 : main
   forth:setup
-  10 allot dup 10 getline [ prn ] [ "too long" panic ] if
+  forth:repl
 ;
