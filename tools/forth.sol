@@ -163,14 +163,9 @@
     : init max_token 1 + allot buf! ;
     : buf buf [ init buf ] ;INIT ;
     ( input stack )
-    : instack instack [ instack_size allot dup instack! ] ;INIT ;
-    : insp insp [ instack dup insp! ] ;INIT ;
-    : in  insp cell - @ ;
-    : in! insp cell - ! ;
-    : check_insp insp instack instack_size + >= IF "input stack overflow" panic END ;
-    : >in check_insp insp cell + insp! in! ;
-    : drop_in insp cell - insp! ;
-    : in++ in inc in! ;
+    val: source
+    : in source ;
+    : in++ source inc source! ;
     : peek in dup IF b@ END ; ( 0 when no input buffer )
     : take peek dup IF in++ END ; ( do not advance empty str )
     ( parse a token )
@@ -257,8 +252,9 @@
       run_mode     [ ( remain on TOS ) yes ] ;CASE
       unknown_mode
     ;
+    : HERE "-----HERE-----" eprn ;
     ( main )
-    >in [ drop_in ] defer
+    source >r source!
     [ in not          IF ng RET END ( no input source )
       skip_spaces not IF ng RET END ( no more chars )
       parse_str       IF ok RET END
@@ -269,6 +265,7 @@
       parse_num       IF eval_num ok RET END
       buf notfound ng
     ] while
+    r> source! ( restore )
   ;
 
   ( ----- handler 2 ----- )
