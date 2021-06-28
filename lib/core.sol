@@ -12,6 +12,9 @@ const: no  ng
 const: true  ok
 const: false ng
 
+const: GO   ok
+const: STOP ng
+
 
 : not 0 = IF true RET END false ;
 
@@ -56,8 +59,12 @@ const: false ng
 
 ( ===== Memory ===== )
 
-: cells ( n -- n ) 4 * ;
+const: cell 4
+: cells ( n -- n ) cell * ;
 : align ( n -- n ) 3 + 3 bit-not bit-and ;
+
+: field  ( addr i -- v ) cells + @ ;
+: field! ( v addr i -- ) cells + ! ;
 
 : inc! ( addr -- ) dup @ 1 + swap ! ;
 : dec! ( addr -- ) dup @ 1 - swap ! ;
@@ -79,12 +86,27 @@ const: false ng
 : call ( q -- ) >r ;
 
 
-: DEFER ( -- ) r> r> swap r> r> ;
+: DEFER ( -- ) r> r> swap >r >r ;
   # defers caller's rest process until caller's caller return
   # example:
-  #   : foo bar "foo" pr sp ;
   #   : bar "bar1" pr sp DEFER "bar2" pr ;
-  # => prints bar1 foo bar2
+  #   : foo bar "foo" pr sp ;
+  # foo => bar1 foo bar2
+
+
+: defer ( q -- ) r> swap r> swap >r >r >r ;
+  # example:
+  #   : foo "foo" pr [ "baz" pr ] defer "bar" pr ;
+  # foo => foobarbaz
+
+
+: if ( ? q1 q2 -- ) >r swap IF rdrop >r ELSE drop END ;
+  # example:
+  #   yes [ "hello" ] [ "world" ] if pr
+  # => hello
+
+: when   ( ? q -- ) swap IF >r ELSE drop END ;
+: unless ( ? q -- ) swap IF drop ELSE >r END ;
 
 
 : dip ( a q -- ... ) swap >r call r> ;
@@ -155,6 +177,12 @@ const: false ng
 ;
 
 
+: while ( q -- )
+  # loop while q put yes to TOS
+  dup >r call IF r> AGAIN END rdrop
+;
+
+
 ( ===== Stdio ===== )
 
 # port 1:stdout 2:stderr
@@ -206,6 +234,7 @@ const: stderr 2
     : cell_size 6 query ;
     : max_int   7 query ;
     : min_int   8 query ;
+    : depth sp cell + ds ds_size cells + swap - cell / ;
     ;
   query
 ;
@@ -300,6 +329,24 @@ const: stderr 2
 ;
 
 
+: ?here here ? drop ;
+
+
+: dump ( addr len -- )
+  const: bpl 16 ( bytes per line )
+  : space " " epr ;
+  : cr "" eprn ;
+  : ?addr ( a -- ) dup 8 >> ?ff ?ff space ;
+  : line ( addr len q -- ) swap [ 2dup [ b@ ] dip call &inc dip ] times 2drop ;
+  : rest ( len q -- ) swap bpl swap - swap times ;
+  : ascii? ( c -- ? ) dup 0x20 < IF drop no RET END 0x7E <= ;
+  : pchar ( c -- ) dup ascii? IF [ putc ] >stderr ELSE drop "." epr END ;
+  : ?bytes ( addr len -- ) swap over [ ?ff space ] line [ space space space ] rest ;
+  : ?ascii ( addr len -- ) [ pchar ] line ;
+  : ?line ( addr len -- ) over ?addr 2dup ?bytes ?ascii cr ;
+  : loop ( addr len -- ) dup bpl > IF over bpl ?line [ bpl + ] [ bpl - ] bi* AGAIN END ?line ;
+  loop
+;
 
 ( ===== Stack 2 ===== )
 
@@ -347,9 +394,9 @@ const: stderr 2
 
 : ;INIT ( v q -- v | inited )
   # v != 0: return v
-  # v  = 0: call q and dup its value
+  # v  = 0: call q
   over IF drop rdrop RET END
-  swap drop call dup ;
+  swap drop >r ;
 
 : init! ( addr q -- v | inited )
   # v of addr != 0: return v
@@ -358,16 +405,43 @@ const: stderr 2
   swap >r call dup r> ! ;
 
 
-( ===== String 2 ===== )
+( ===== String ===== )
 
 : s= ( s1 s2 )
+  : B "BEFORE " pr ;
+  : A "AFTER" prn ;
   : same? ( s1 s2 -- c yes | no )
-    b@ swap b@ dup >r != IF no RET END r> yes ;
+    b@ swap b@ over = IF yes ELSE drop no END ;
   : loop ( s1 s2 -- ? )
     2dup same? not IF 2drop no RET END ( c )
     0 = IF 2drop yes RET END
     1 + swap 1 + AGAIN ;
   loop ;
+
+
+: c:digit? ( c -- ? ) dup 48 < IF drop no RET END 57  <= ;
+: c:upper? ( c -- ? ) dup 65 < IF drop no RET END 90  <= ;
+: c:lower? ( c -- ? ) dup 97 < IF drop no RET END 122 <= ;
+
+
+: c>dec ( c -- n yes | no )
+  dup c:digit? [ 48 - yes ] [ drop no ] if
+;
+
+
+: s>dec ( s -- n yes | no )
+  val: acc val: sign
+  0 acc! 1 sign!
+  ( negative ) dup b@ 45 = IF -1 sign! inc END
+  ( empty ) dup b@ 0 = IF drop no RET END
+  [ dup b@
+    dup 0 = IF 2drop yes ng RET END
+    c>dec   IF acc 10 * + acc! inc ok RET END
+    drop no ng
+  ] while ( -- num? )
+  IF acc sign * yes ELSE no END
+;
+
 
 : s
   : copy ( src dst -- )
@@ -418,16 +492,31 @@ const: stderr 2
 
 : file
   val: path
-  : query 8 io ;
+  : query   8 io ;
   : open    0 query ; # path mode -- id ok | ng
   : close   1 query ; # id -- ?
   : read    2 query ; # buf len id -- ?
   : write   3 query ; # buf len id -- ?
   : seek    4 query ; # offset origin id -- ?
   : exists? 5 query ; # path -- ?
+  : getc    6 query ; # id -- c | 0
+  : peek    7 query ; # id -- c | 0
   ( --- defensive --- )
   : open!  over path! open IF RET END "Can't open " epr path eprn die ;
   : close! close drop ;
   : read!  read  IF RET END "Can't read" panic ;
   : write! write IF RET END "Can't write" panic ;
+;
+
+
+( ===== Stdio 2 ===== )
+
+: getline ( buf len -- success? )
+  swap ( len buf )
+  [ over 1 < [ ng STOP ] ;IF
+    getc ( len buf c )
+    0  [ 0 swap b! drop ok STOP ] ;CASE
+    10 [ 0 swap b! drop ok STOP ] ;CASE
+    over b! [ dec ] [ inc ] bi* GO
+  ] while
 ;
