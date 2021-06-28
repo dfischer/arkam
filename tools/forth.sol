@@ -481,7 +481,8 @@
       "include"  &include       core
       "include:" &include_colon core
 
-      "." [ ? drop ] core
+      "."  [ ? drop cr ] core
+      ".." [ ? drop    ] core
     ;
   ;
   : repl
