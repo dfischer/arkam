@@ -162,16 +162,15 @@
     ( input stack )
     val: source
     val: stream
-    : peek source yes stream call source! ;
     : take source no  stream call source! ;
     : in++ take drop ;
     ( parse a token )
     : space? ( c -- yes | c no ) 0 ;EQ 32 ;EQ 10 ;EQ no ;
-    : skip_spaces ( -- rest? )
-      [ peek
-        dup 0 = IF drop no STOP RET END
-        space?  IF in++      GO RET END
-        drop yes STOP
+    : skip_spaces ( -- c )
+      [ take
+        dup 0 = IF STOP RET END
+        space?  IF GO   RET END
+        STOP
       ] while
     ;
     ( string )
@@ -185,8 +184,8 @@
       110 [ 10                      ] ;CASE # n: newline
       ( as is )
     ;
-    : parse_str ( -- parsed? )
-      peek dquote != IF no RET END in++
+    : parse_str ( c -- yes | c no )
+      dup dquote != IF no RET END drop
 
       mode compile_mode = IF
         "JMP" compile, here 0 , # -- addr
@@ -207,8 +206,8 @@
       END
       yes
     ;
-    : parse_comment ( -- parsed? )
-      peek lparen != IF no RET END in++
+    : parse_comment ( c -- c no | yes )
+      dup lparen != IF no RET END drop
       [ take
         0      [ "Unclosed comment" panic ] ;CASE
         rparen [ STOP                     ] ;CASE
@@ -216,18 +215,17 @@
       ] while yes
     ;
     ( read a token to buf )
-    : read_token ( -- )
-      : loop ( n -- )
+    : read_token ( c -- )
+      buf swap 0 [ ( buf c n )
         dup max_token >= IF buf epr " ...Too long token" panic END
-        buf over +
-        take space? IF 0 swap b! drop RET END
-        swap b! inc AGAIN
-      ;
-      0 loop
+        >r ( buf c )
+        space? IF rdrop 0 swap b! STOP RET END
+        over b! inc take r> inc GO
+      ] while
     ;
     : read ( -- read? ) # for defining words
       stream not IF no RET END
-      skip_spaces not IF no RET END
+      skip_spaces dup not IF no RET END
       read_token yes
     ;
     : notfound ( name -- ) "'" epr epr "'" epr " ?" repl? IF eprn ELSE panic END ;
@@ -252,11 +250,10 @@
     ( main )
     : run ( source stream -- )
       stream >r source >r stream! source!
-      peek drop
-      [ stream not      IF ng RET END ( no input stream )
-        skip_spaces not IF ng RET END ( no more chars )
-        parse_str       IF ok RET END
-        parse_comment   IF ok RET END
+      [ stream not          IF      ng RET END ( no input stream )
+        skip_spaces dup not IF drop ng RET END ( -- c , no more chars )
+        parse_str           IF      ok RET END
+        parse_comment       IF      ok RET END
         read_token
         parse_amp       IF ok RET END
         buf eval_token  IF ok RET END
@@ -457,7 +454,6 @@
       ";"       &semicolon  immed
       "["       &open_quot  immed
       "]"       &close_quot immed
-      "in:peek" &eval:peek  core
       "in:take" &eval:take  core
       "eval"    &eval       core
       "bye"     [ 0 HALT ]  core
