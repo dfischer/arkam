@@ -162,7 +162,7 @@
     ( input stack )
     val: source
     val: stream
-    : take source no  stream call source! ;
+    : take source stream call source! ;
     : in++ take drop ;
     ( parse a token )
     : space? ( c -- yes | c no ) 0 ;EQ 32 ;EQ 10 ;EQ no ;
@@ -262,22 +262,12 @@
       ] while
       r> source! r> stream! ( restore ) ;
     : str ( src -- )
-      [ ( data peek? -- c data )
-        over b@
-        0 [ drop 0 swap ] ;CASE
-        swap IF ( data c -- )
-          swap
-        ELSE
-          swap inc
-        END
-      ] run
+      [ ( str -- c str ) dup b@ swap over IF inc END ] run
     ;
     : include ( fname -- )
       # TODO: detect circular deps
       "r" file:open! dup >r
-      [ ( id peek? -- c id )
-        [ dup file:peek ] [ dup file:getc ] if swap
-      ] run
+      [ ( id -- c id ) dup file:getc swap ] run
       r> file:close!
     ;
     str
