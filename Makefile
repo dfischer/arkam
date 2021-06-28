@@ -76,8 +76,9 @@ rand_fm_beat: bin sarkam bin/sol
 
 
 .PHONY: forth
-forth: bin arkam bin/forth.ark
-	./bin/arkam bin/forth.ark
+forth: LDFLAGS += -lm
+forth: bin arkam bin/forth
+	./bin/forth
 
 bin/forth.ark: bin/sol tools/forth.sol
 	./bin/sol tools/forth.sol bin/forth.ark
@@ -125,6 +126,11 @@ bin/arkam: bin $(ARKAM_DEPS)
 SARKAM_DEPS := $(call DEPS, src/sdl_main.c)
 bin/sarkam: bin $(SARKAM_DEPS)
 	$(CC) -o bin/sarkam $(SARKAM_DEPS) $(CFLAGS) $(LDFLAGS)
+
+
+FORTH_DEPS := $(call DEPS, src/forth_main.c)
+bin/forth: bin $(FORTH_DEPS) out/forth.ark.h
+	$(CC) -o bin/forth $(FORTH_DEPS) $(CFLAGS) $(LDFLAGS)
 
 
 TEST_DEPS := $(call DEPS, src/test.c)
