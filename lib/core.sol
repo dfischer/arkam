@@ -234,6 +234,7 @@ const: stderr 2
     : cell_size 6 query ;
     : max_int   7 query ;
     : min_int   8 query ;
+    : depth sp cell + ds ds_size cells + swap - cell / ;
     ;
   query
 ;

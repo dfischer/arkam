@@ -375,6 +375,7 @@
       "sys:cell_size" &sys:info:cell_size core
       "sys:max_int"   &sys:info:max_int   core
       "sys:min_int"   &sys:info:min_int   core
+      "sys:depth"     &sys:info:depth     core
       ( ----- exception ----- )
       "die"   &die   core
       "panic" &panic core
@@ -449,8 +450,7 @@
     const: len 256
     : buf buf [ len allot dup buf! ] ;INIT ;
     : read buf len getline ; ( -- ok? )
-    : depth sp cell + sys:info:ds sys:info:ds_size cells + swap - cell / ;
-    : prompt "|" epr depth ? drop "> " epr ;
+    : prompt "|" epr sys:info:depth ? drop "> " epr ;
     yes repl?!
     [ prompt
       read not IF "too long" eprn GO RET END
