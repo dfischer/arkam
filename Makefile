@@ -10,15 +10,16 @@ LDFLAGS =
 
 
 
+.PHONY: all
+all: bin out bin/arkam bin/forth
+
+
 .PHONY: arkam
-arkam: LDFLAGS += -lm
 arkam: bin/arkam
 
 
 
 .PHONY: sarkam
-sarkam: CFLAGS  += -g `sdl2-config --cflags`
-sarkam: LDFLAGS += `sdl2-config --libs` -lm
 sarkam: bin/sarkam
 
 
@@ -76,11 +77,14 @@ rand_fm_beat: bin sarkam bin/sol
 
 
 .PHONY: forth
-forth: bin arkam bin/forth.ark
-	./bin/arkam bin/forth.ark
+forth: arkam bin/forth
+	./bin/forth
 
 bin/forth.ark: bin/sol tools/forth.sol
 	./bin/sol tools/forth.sol bin/forth.ark
+
+out/forth.ark.h: bin/forth.ark bin/text2c
+	./bin/text2c -b forth bin/forth.ark out/forth.ark.h
 
 
 
@@ -102,39 +106,47 @@ out:
 	mkdir -p out
 
 
-out/%.o: src/%.c out
+out/%.o: src/%.c
 	$(CC) -c $< -o $@ $(CFLAGS) $(LDFLAGS)
 
 
-out/%.d: src/%.c out
+out/%.d: src/%.c
 	$(CC) -MM $< -MF $@
 
 
 DEPS = $(patsubst src/%.h, out/%.o, $(shell $(CC) -MM $(1) | sed 's/^.*: //;s/\\$$//' | tr '\n' ' '))
 
 
-
 ARKAM_DEPS := $(call DEPS, src/console_main.c)
-bin/arkam: bin $(ARKAM_DEPS)
+bin/arkam: LDFLAGS += -lm
+bin/arkam: $(ARKAM_DEPS)
 	$(CC) -o bin/arkam $(ARKAM_DEPS) $(CFLAGS) $(LDFLAGS)
 
 
 SARKAM_DEPS := $(call DEPS, src/sdl_main.c)
-bin/sarkam: bin $(SARKAM_DEPS)
+bin/sarkam: CFLAGS  += -g `sdl2-config --cflags`
+bin/sarkam: LDFLAGS += `sdl2-config --libs` -lm
+bin/sarkam: $(SARKAM_DEPS)
 	$(CC) -o bin/sarkam $(SARKAM_DEPS) $(CFLAGS) $(LDFLAGS)
 
 
+FORTH_DEPS := $(call DEPS, src/forth_main.c)
+bin/forth: LDFLAGS += -lm
+bin/forth: $(FORTH_DEPS) out/forth.ark.h
+	$(CC) -o bin/forth $(FORTH_DEPS) $(CFLAGS) $(LDFLAGS)
+
+
 TEST_DEPS := $(call DEPS, src/test.c)
-bin/test_arkam: bin $(TEST_DEPS)
+bin/test_arkam: $(TEST_DEPS)
 	$(CC) -o bin/test_arkam $(TEST_DEPS) $(CFLAGS) $(LDFLAGS)
 
 
 SOL_DEPS := $(call DEPS, src/sol.c)
-bin/sol: bin $(SOL_DEPS) out/core.sol.h
+bin/sol: $(SOL_DEPS) out/core.sol.h
 	$(CC) -o bin/sol $(SOL_DEPS) $(CFLAGS) $(LDFLAGS)
 
 
-bin/text2c: bin src/text2c.c
+bin/text2c: src/text2c.c
 	$(CC) -o bin/text2c src/text2c.c $(CFLAGS) $(LDFLAGS)
 
 

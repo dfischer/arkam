@@ -350,7 +350,7 @@ void read_image(VM* vm, char* fname) {
 }
 
 
-VM* setup_arkam_vm(char* image_name) {
+VM* create_default() {
   stdio_port = stdout;
   
   ArkamVMOptions opts;
@@ -362,8 +362,21 @@ VM* setup_arkam_vm(char* image_name) {
   vm->io_handlers[ARK_DEVICE_FILE]   = handleFILE;
   vm->io_handlers[ARK_DEVICE_RANDOM] = handleRANDOM;
 
+  return vm;
+}
+
+
+VM* setup_arkam_vm(char* image_name) {
+  VM* vm = create_default();
   read_image(vm, image_name);
 
   return vm;
 }
 
+
+VM* setup_arkam_with_image(Byte* image, Cell size) {
+  VM* vm = create_default();
+  memcpy(vm->mem, image, size);
+
+  return vm;
+}
