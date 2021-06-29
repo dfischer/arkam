@@ -14,6 +14,9 @@
 ;
 
 
+( --- shorthand/util --- )
+: as: const: ;
+
 
 ( --- Generic structure closer --- )
 : END <IMMED> ( q -- ) >r ;
@@ -89,11 +92,11 @@ MODULE
   
 ---EXPOSE---
   
-  : val: ( v -- )
+  : val: ( -- )
     in:read not IF "val name required" panic THEN
     max s:check [ epr " ...too long" panic ] unless
     buf s:copy
-    here:align! here swap , dup
+    here:align! here 0 , dup
     create_getter
     create_setter
   ;
@@ -139,5 +142,45 @@ MODULE
     "LIT" forth:compile, , "+" forth:compile, "RET" forth:compile,
     + r>
   ;
+  
+END
+
+
+
+( ----- loadfile ----- )
+
+# loadfile ( path -- addr )
+# loadfile: ( :path -- addr )
+# addr:
+#   0x00 size
+#   0x04 data...
+#        0000 ( null terminated, aligned )
+
+
+MODULE
+
+  val: id
+  val: addr
+  val: size
+
+---EXPOSE---
+
+  : loadfile ( path -- addr )
+    "rb" file:open! id!
+    id file:size size!
+    here addr!
+    size ,
+    here size id file:read!
+    here size + here!
+    0 b, here:align!
+    id file:close!
+    addr
+  ;
+  
+  : loadfile: ( :path -- addr )
+    in:read [ "file name required" ] unless loadfile ;
+
+  : filesize @ ;      # & -- n 
+  : filedata cell + ; # & -- &data
   
 END

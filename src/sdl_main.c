@@ -790,8 +790,8 @@ int main(int argc, char* argv[]) {
   int restc    = argc - argi;
   int image_i  = argi;
   if (restc < 1) usage();  
-  int app_argi = argi + 1;
-  int app_argc = restc - 1;
+  int app_argi = argi;
+  int app_argc = restc;
   char* image_name = argv[image_i];
 
   VM* vm = setup_arkam_vm(image_name);

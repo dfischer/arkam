@@ -496,6 +496,8 @@
       "file:exists?"  &file:exists? core
       "file:peek"     &file:peek    core
       "file:fullpath" &file:fullpath core
+      "file:size"     &file:size    core
+
       "file:open!"    &file:open!   core
       "file:close!"   &file:close!  core
       "file:read!"    &file:read!   core

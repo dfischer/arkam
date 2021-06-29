@@ -20,11 +20,11 @@ MODULE
 
   # bresenham's algorithm
   
-  0 val: x0  0 val: y0
-  0 val: x1  0 val: y1
-  0 val: dx  0 val: dy
-  0 val: sx  0 val: sy
-  0 val: e1  0 val: e2
+  val: x0  val: y0
+  val: x1  val: y1
+  val: dx  val: dy
+  val: sx  val: sy
+  val: e1  val: e2
   
   : CHECK
     x0 x1 != IF RET THEN
@@ -59,4 +59,46 @@ MODULE
     loop
   ;
   
+END
+
+
+
+( ===== draw loop ===== )
+
+MODULE
+  # ----- Usage -----
+  # draw_loop only:
+  #   30 [ foo:update foo:draw ] draw_loop:register!
+  # with other update routine:
+  #   30 [ foo:update foo:draw ] draw_loop:init
+  #   [ other_loop draw_loop:update HALT ] emu:timer_handler!
+
+  val: fps
+  val: frames
+  val: callback
+  val: i
+  
+  : init ( fps callback -- )
+    callback! fps!
+    emu:timer_rate_hz fps / dup frames! i!
+  ;
+
+  : draw
+    ppu:0clear
+    callback call
+    ppu:switch!
+  ;
+
+---EXPOSE---
+
+  : draw_loop:update
+    i 1 + dup frames >= IF drop draw 0 THEN i!
+  ;
+
+  : draw_loop:update_halt draw_loop:update HALT ;
+
+  : draw_loop:register! ( fps callback -- )
+    init &draw_loop:update_halt emu:timer_handler!
+  ;
+
 END

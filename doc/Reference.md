@@ -272,7 +272,7 @@ Registers
 
 3 write ( &buf size id -- ? )
 
-4 seek ( offset origin id -- ? )
+4 seek ( id offset origin -- ? )
   origin: 0 SEEK_SET, 1 SEEK_CUR, 2 SEEK_END
 
 5 access ( path -- ? )
@@ -282,6 +282,8 @@ Registers
 7 peek ( id -- c | 0 )
 
 8 full_path ( &path &buf size -- ? )
+
+9 size ( id -- n )
 ```
 
 

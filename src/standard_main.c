@@ -164,14 +164,10 @@ Code handleFILE(VM* vm, Cell op) {
       return ARK_OK;
     }
 
-  case 4: // seek ( offset origin id -- ? )
+  case 4: // seek ( id offset origin -- ? )
     // origin: 0 SEEK_SET, 1 SEEK_CUR, 2 SEEK_END
     {
       if (!ark_has_ds_items(vm, 3)) Raise(DS_UNDERFLOW);
-
-      Cell id = Pop();
-      FILE* file = fetch_file(id);
-      if (!file) die("invalid file id: %d", id);
 
       Cell origin = Pop();
       switch (origin) {
@@ -182,6 +178,10 @@ Code handleFILE(VM* vm, Cell op) {
       }
 
       Cell offset = Pop();
+
+      Cell id = Pop();
+      FILE* file = fetch_file(id);
+      if (!file) die("invalid file id: %d", id);
 
       int result = fseek(file, offset, origin);
       Push(result == 0 ? -1 : 0);
@@ -243,6 +243,21 @@ Code handleFILE(VM* vm, Cell op) {
       strcpy((char*)(vm->mem+buf), full);
       free(full);
       Push(-1);
+      return ARK_OK;
+    }
+
+  case 9: // size ( id -- n )
+    {
+      if (!ark_has_ds_items(vm, 1)) Raise(DS_UNDERFLOW);
+      Cell id = Pop();
+      FILE* file = fetch_file(id);
+      if (!file) die("invalid file id: %d", id);
+
+      int cur = ftell(file);
+      fseek(file, 0L, SEEK_END);
+      int size = ftell(file);
+      fseek(file, cur, SEEK_SET);
+      Push(size);
       return ARK_OK;
     }
   }
