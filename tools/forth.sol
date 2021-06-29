@@ -387,8 +387,8 @@
       "memcopy" &memcopy core
       ( ----- combinator ----- )
       "call"   &call  core
-      "DEFER"  &DEFER core
-      "defer"  &defer core
+      "DEFER"  &DEFER comp
+      "defer"  &defer comp
       "if"     &if    core
       "when"   &when  core
       "unless" &unless core
@@ -457,15 +457,15 @@
       "?here"  &?here  core
       ( ----- stack 2 ----- )
       "pick"  &pick  core
-      "rpick" &rpick core
-      "i"     &i     core
-      "j"     &j     core
+      "rpick" &rpick comp
+      "i"     &i     comp
+      "j"     &j     comp
       ( ----- return stack ----- )
-      "IFRET" &IFRET core
-      ";IF"   &;IF   core
-      ";CASE" &;CASE core
-      ";EQ"   &;EQ   core
-      ";INIT" &;INIT core
+      "IFRET" &IFRET comp
+      ";IF"   &;IF   comp
+      ";CASE" &;CASE comp
+      ";EQ"   &;EQ   comp
+      ";INIT" &;INIT comp
       "init!" &init! core
       ( ----- string ----- )
       "s="     &s=     core
