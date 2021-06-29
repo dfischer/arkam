@@ -315,6 +315,35 @@
     ; ( mode &quot &back -- )
     : include ( fname -- ) eval:include ;
     : include_colon eval:read not IF "file name required" panic END eval:buf include ;
+    ( ----- require ----- )
+    # | link ... |F| required flag
+    # | name ...   |
+    val: required ( link )
+    : require ( fname -- )
+      : doing ( header -- header ) 0x01 bit-or  ;
+      : done  ( header -- header ) -1 0x01 bit-xor bit-and ;
+      : done! ( header -- ) dup @ done swap ! ;
+      : circular? ( header -- ? ) @ 0x01 bit-and ;
+      : next ( header -- header | 0 ) @ done ;
+      : find ( fname -- fname no | fname header yes ) required
+        [ dup 0 = IF STOP RET END
+          2dup cell + s= IF yes STOP RET END
+          next GO
+        ] while ;
+      : CHECK ( fname no | fname header yes )
+        not IF RET END
+        circular? IF epr " circular deps detected" panic END
+        drop rdrop ( required. escape from require ) ;
+      find CHECK ( -- fname )
+      here:align! here ( -- fname header )
+      required doing , dup required! ( linked )
+      over s:put drop
+      >r include
+      r> done!
+    ;
+    : require_colon eval:read not IF "file name required" panic END eval:buf require ;
+
+    ( ----- setup ----- )
     : setup
       "ok" ok const
       "ng" ng const
@@ -482,6 +511,8 @@
       
       "include"  &include       core
       "include:" &include_colon core
+      "require"  &require       core
+      "require:" &require_colon core
 
       "."  [ ? drop cr ] core
       ".." [ ? drop    ] core
