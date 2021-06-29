@@ -502,6 +502,7 @@
       "]"       &close_quot immed
       "const:"  &defconst   core
       "in:take" &eval:take  core
+      "in:read" [ eval:read IF eval:buf yes ELSE no END ] core
       "eval"    &eval       core
       "bye"     [ 0 HALT ]  core
       "IF"   [ "ZJMP" compile, here 0 , ] comp
