@@ -280,6 +280,8 @@ Registers
 6 getc ( id -- c | 0 )
 
 7 peek ( id -- c | 0 )
+
+8 full_path ( &path &buf size -- ? )
 ```
 
 

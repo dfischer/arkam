@@ -221,6 +221,30 @@ Code handleFILE(VM* vm, Cell op) {
       Push(c == EOF ? 0 : c);
       return ARK_OK;      
     }
+
+  case 8: // full_path ( &path &buf size -- ? )
+    {
+      if (!ark_has_ds_items(vm, 3)) Raise(DS_UNDERFLOW);
+      Cell max = Pop();
+      Cell buf;  PopValid(&buf);
+      Cell path; PopValid(&path);
+      char* fname = (char*)(vm->mem + path);
+      
+#     ifdef __MINGW32__
+      char* full = _fullpath(NULL, fname, _MAX_PATH);
+#     else
+      char* full = realpath(fname, NULL);
+#     endif
+      int len = strlen(full);
+      if (len-1 > max) {
+        Push(0);
+        return ARK_OK;
+      }
+      strcpy((char*)(vm->mem+buf), full);
+      free(full);
+      Push(-1);
+      return ARK_OK;
+    }
   }
 
   Raise(IO_UNKNOWN_OP);

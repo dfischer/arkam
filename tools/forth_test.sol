@@ -279,6 +279,9 @@ include: "forth.sol"
   "quot/run"     [ "1 2 [ 1 + ] dip +" forth:eval 4 = ] CHECK
 
   "include" [ "include: ./test/forth/include.f" forth:eval ] CHECK
+
+  "require 1" [ "require: ./test/forth/include.f"  forth:eval ] CHECK
+  "require 2" [ "require: ./test/forth/require1.f" forth:eval ] CHECK
 ;
 
 

@@ -492,15 +492,16 @@ const: stderr 2
 
 : file
   val: path
-  : query   8 io ;
-  : open    0 query ; # path mode -- id ok | ng
-  : close   1 query ; # id -- ?
-  : read    2 query ; # buf len id -- ?
-  : write   3 query ; # buf len id -- ?
-  : seek    4 query ; # offset origin id -- ?
-  : exists? 5 query ; # path -- ?
-  : getc    6 query ; # id -- c | 0
-  : peek    7 query ; # id -- c | 0
+  : query    8 io ;
+  : open     0 query ; # path mode -- id ok | ng
+  : close    1 query ; # id -- ?
+  : read     2 query ; # buf len id -- ?
+  : write    3 query ; # buf len id -- ?
+  : seek     4 query ; # offset origin id -- ?
+  : exists?  5 query ; # path -- ?
+  : getc     6 query ; # id -- c | 0
+  : peek     7 query ; # id -- c | 0
+  : fullpath 8 query ; # path buf max -- ?
   ( --- defensive --- )
   : open!  over path! open IF RET END "Can't open " epr path eprn die ;
   : close! close drop ;
