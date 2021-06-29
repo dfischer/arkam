@@ -281,6 +281,11 @@
     unknown_mode
   ;
   : handle_compile ( xt state -- )
+    compile_mode [ ,                              ] ;CASE
+    run_mode     [ "Don't call in run mode" panic ] ;CASE
+    unknown_mode
+  ;
+  : handle_icompile ( xt state -- )
     compile_mode [ >r                             ] ;CASE
     run_mode     [ "Don't call in run mode" panic ] ;CASE
     unknown_mode
@@ -289,9 +294,10 @@
   ( setup core words )
   : corewords
     : core ( name xt -- ) swap dict:create dict:latest dict:xt! ;
-    : immed ( name xt -- ) core &handle_immed   dict:latest dict:handler! ;
-    : const ( name v -- )  core &handle_data    dict:latest dict:handler! ;
-    : comp  ( name xt -- ) core &handle_compile dict:latest dict:handler! ;
+    : immed ( name xt -- ) core &handle_immed    dict:latest dict:handler! ;
+    : const ( name v -- )  core &handle_data     dict:latest dict:handler! ;
+    : comp  ( name xt -- ) core &handle_compile  dict:latest dict:handler! ;
+    : icomp ( name xt -- ) core &handle_icompile dict:latest dict:handler! ;
     : colon
       eval:read not IF "word name required" panic END
       eval:buf dict:create dict:latest dict:hide! compile_mode! ;
@@ -505,10 +511,35 @@
       "in:read" [ eval:read IF eval:buf yes ELSE no END ] core
       "eval"    &eval       core
       "bye"     [ 0 HALT ]  core
-      "IF"   [ "ZJMP" compile, here 0 , ] comp
-      "ELSE" [ "JMP" compile, here 0 , swap here swap ! ] comp
-      "END"  [ here swap ! ] comp
-      "AGAIN" [ "JMP" compile, dict:latest dict:xt , ] comp
+      "IF"   [ "ZJMP" compile, here 0 , ] icomp
+      "ELSE" [ "JMP" compile, here 0 , swap here swap ! ] icomp
+      "THEN"  [ here swap ! ] icomp
+      "AGAIN" [ "JMP" compile, dict:latest dict:xt , ] icomp
+
+      "forth:create"   &dict:create   core
+      "forth:latest"   [ dict:latest  ] core
+      "forth:latest!"  [ dict:latest! ] core
+      "forth:next"     &dict:next     core
+      "forth:show!"    &dict:show!    core
+      "forth:hide!"    &dict:hide!    core
+      "forth:hidden?"  &dict:hidden?  core
+      "forth:handler"  &dict:handler  core
+      "forth:handler!" &dict:handler! core
+      "forth:xt"       &dict:xt       core
+      "forth:xt!"      &dict:xt!      core
+      "forth:name"     &dict:name     core
+      "forth:name!"    &dict:name!    core
+      
+      "forth:run_mode!"     &run_mode!     core
+      "forth:compile_mode!" &compile_mode! core
+      "forth:compile," &compile, core
+
+      "handle:normal"   &handle_normal  core
+      "handle:immed"    &handle_immed   core
+      "handle:prim"     &handle_prim    core
+      "handle:data"     &handle_data    core
+      "handle:compile"  &handle_compile core
+      "handle:icompile" &handle_icompile core
       
       "include"  &include       core
       "include:" &include_colon core
