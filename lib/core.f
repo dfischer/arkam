@@ -14,8 +14,25 @@
 ;
 
 
+( --- stack --- )
+
+: tuck ( a b -- b a b ) swap over ;
+: ?dup ( a -- a a | 0 ) dup IF dup THEN ;
+
+: pullup   ( a b c -- b c a ) >r swap r> swap ;
+: pushdown ( b c a -- a b c ) swap >r swap r> ;
+
+
 ( --- shorthand/util --- )
 : as: const: ;
+
+: forth:handle_mode ( xt state q_run q_compile -- .. )
+  # q: ( xt -- )
+  pullup
+  forth:run_mode     [ drop >r ] ;CASE
+  forth:compile_mode [ nip  >r ] ;CASE
+  ? drop "Unknown mode" panic
+;
 
 
 ( --- Generic structure closer --- )
@@ -83,9 +100,9 @@ MODULE
   # for referencing(&valname), VAL: uses their own handlers
 
   : handle_getter ( xt state -- )
-    forth:compile_mode [ "LIT" forth:compile, , "@" forth:compile, ] ;CASE
-    forth:run_mode     [ @                                         ] ;CASE
-    ? drop "unknown mode" panic
+    [ @                                         ]
+    [ "LIT" forth:compile, , "@" forth:compile, ]
+    forth:handle_mode
   ;
   
   : create_getter ( addr -- )
@@ -95,9 +112,9 @@ MODULE
   ;
 
   : handle_setter
-    forth:compile_mode [ "LIT" forth:compile, , "!" forth:compile, ] ;CASE
-    forth:run_mode     [ !                                         ] ;CASE
-    ? drop "unknown mode" panic
+    [ !                                         ]
+    [ "LIT" forth:compile, , "!" forth:compile, ]
+    forth:handle_mode
   ;
 
   : create_setter ( addr -- )
