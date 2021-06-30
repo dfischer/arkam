@@ -1,5 +1,6 @@
 require: lib/sarkam.f
 require: lib/basic_sprite.f
+require: lib/entity.f
 
 basic.spr:load
 

@@ -153,6 +153,17 @@ END
 ;
 
 
+( ----- char ----- )
+
+: CHAR: <IMMED>
+  in:read [ "a char required" panic ] unless
+  b@
+  forth:mode
+  forth:compile_mode [ "LIT" forth:compile, , ] ;CASE
+  forth:run_mode     [ ( noop )               ] ;CASE
+  ? "unknown mode" panic
+;
+
 
 ( ----- struct ----- )
 
