@@ -3,18 +3,25 @@ require: lib/basic_sprite.f
 
 basic.spr:load
 
-val: x
-val: y
 
-: move
-  x 1 + ppu:width mod y!
-  y 2 + ppu:height mod x!
+val: mx
+val: my
+&mx &my mouse:pos!
+
+val: x 10 x!
+val: y 10 y!
+val: w 20 w!
+val: h 20 h!
+
+: drawrect
+  mx my x y w h hover_rect?
+  [ x y w h fill_rect ] [ x y w h rect ] if
 ;
 
 30 [
-  move
   64 sprite:i!
-  x y sprite:plot
+  3 ppu:color!
+  drawrect
 ] draw_loop:register!
 
 [ ( wait ) GO ] while

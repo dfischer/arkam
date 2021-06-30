@@ -78,18 +78,35 @@ MODULE
   : check ( name -- name )
     dup s:len max > IF epr " too long" panic THEN
   ;
+
+  # xt is address of cell that contains a value.
+  # for referencing(&valname), VAL: uses their own handlers
+
+  : handle_getter ( xt state -- )
+    forth:compile_mode [ "LIT" forth:compile, , "@" forth:compile, ] ;CASE
+    forth:run_mode     [ @                                         ] ;CASE
+    ? drop "unknown mode" panic
+  ;
   
   : create_getter ( addr -- )
     buf forth:create
-    "LIT" forth:compile, , "@" forth:compile, "RET" forth:compile,
+    forth:latest forth:xt!
+    &handle_getter forth:latest forth:handler!
   ;
-  
+
+  : handle_setter
+    forth:compile_mode [ "LIT" forth:compile, , "!" forth:compile, ] ;CASE
+    forth:run_mode     [ !                                         ] ;CASE
+    ? drop "unknown mode" panic
+  ;
+
   : create_setter ( addr -- )
     buf "!" max s:append drop
     buf forth:create
-    "LIT" forth:compile, , "!" forth:compile, "RET" forth:compile,
+    forth:latest forth:xt!
+    &handle_setter forth:latest forth:handler!
   ;
-  
+
 ---EXPOSE---
   
   : val: ( -- )

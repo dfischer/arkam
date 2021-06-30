@@ -534,6 +534,8 @@
       
       "forth:run_mode!"     &run_mode!     core
       "forth:compile_mode!" &compile_mode! core
+      "forth:run_mode"     [ run_mode     ] core
+      "forth:compile_mode" [ compile_mode ] core
       "forth:compile," &compile, core
 
       "handle:normal"   &handle_normal  core

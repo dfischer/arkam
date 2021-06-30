@@ -63,6 +63,113 @@ END
 
 
 
+MODULE
+
+  val: x  val: y  val: w  val: h
+
+---EXPOSE---
+
+  : rect ( x y w h )
+    1 - h! 1 - w! y! x!
+    ( top    )  x     y      x w +  y     line
+    ( bottom )  x     y h +  x w +  y h + line
+    ( left   )  x     y      x      y h + line
+    ( right  )  x w + y      x w +  y h + line
+  ;
+
+END
+
+
+
+MODULE
+
+  val: x  val: y  val: w  val: h
+
+---EXPOSE---
+
+  : fill_rect ( x y w h )
+    h! w! y! x!
+    h [ y +
+      w [ ( y dx -- y )
+        x + over plot
+      ] for drop
+    ] for
+  ;
+
+END
+
+
+
+MODULE
+
+  # bresenham's algorithm
+  val: x   val: y   val: r
+  val: cx  val: cy  val: d  val: dh  val: dd
+
+  : loop
+    cx cy > IF RET THEN
+    d 0 < IF
+      d dh + d!
+      dh 2 + dh!
+      dd 2 + dd!
+    ELSE
+      d dd + d!
+      dh 2 + dh!
+      dd 4 + dd!
+      cy 1 - cy!
+    THEN
+    cy x +  cx y +  plot
+    cx x +  cy y +  plot
+    cx neg x +  cy y +  plot
+    cy neg x +  cx y +  plot
+    cy neg x +  cx neg y +  plot
+    cx neg x +  cy neg y +  plot
+    cx x +  cy neg y +  plot
+    cy x +  cx neg y +  plot
+    cx 1 + cx!
+    AGAIN ;
+
+---EXPOSE---
+
+  : circle ( r x y -- )
+    y! x! r!
+    1 r - d!
+    3 dh!
+    5 2 r * - dd!
+    r cy!
+    0 cx!
+    loop
+  ;
+
+END
+
+
+
+MODULE
+
+  val: dx  val: dy  val: w  val: h
+
+---EXPOSE---
+
+  : hover_rect? ( x1 y1 x0 y0 w h -- yes | no )
+    # mouse(x1 y1) on rect(x0 y0 w h) ?
+    # dx = x1 - x0
+    # dy = y1 - y0
+    # x1 < x0         => dx < 0
+    # x1 > x0 + w - 1 => w - dx < 1
+    # y1 < y0 + h     => dy - h < 0
+  
+    h! w! >r swap r> - dy! - dx!
+    dx     0 < IF no RET THEN
+    dy     0 < IF no RET THEN
+    w dx - 1 < IF no RET THEN
+    dy h - 0 <
+  ;
+
+END
+
+
+
 ( ===== draw loop ===== )
 
 MODULE
@@ -102,3 +209,4 @@ MODULE
   ;
 
 END
+
