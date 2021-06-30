@@ -7,8 +7,8 @@ val: x
 val: y
 
 : move
-  x 2 + ppu:width mod y!
-  y 3 + ppu:height mod x!
+  x 1 + ppu:width mod y!
+  y 2 + ppu:height mod x!
 ;
 
 30 [

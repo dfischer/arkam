@@ -33,13 +33,16 @@
 : sprite:load 21 ppu:query ; ( addr -- )
 : sprite:plot 22 ppu:query ; ( x y -- )
 
-: sprite:bulk_load ( addr n -- )
-  [ ( addr i -- addr )
-    dup sprite:i! sprite:size * over + sprite:load
+: sprite:bulk_load ( addr bytes -- )
+  sprite:size / [ ( addr i -- addr )
+    sprite:i!
+    [ sprite:size + ] [ sprite:load ] biq
   ] for drop ;
 
-: sprite:load_datafile ( addr -- )
-  dup [ 4 + ] [ @ sprite:size / ] biq sprite:bulk_load ;
+: sprite:load_blob ( addr -- )
+  # addr | size
+  #      | data...
+  [ cell + ] [ @ ] biq sprite:bulk_load ;
 
 
 
