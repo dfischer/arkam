@@ -97,7 +97,7 @@ MODULE
   [ ( q alives id )
     over b@ not IF drop RET THEN ( dead )
     swap inc >r swap dup >r call r> r>
-  ] for drop
+  ] for 2drop
 ;
 
 : ecs:new_cs ( es -- cs ) # new components
