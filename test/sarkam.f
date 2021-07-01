@@ -7,10 +7,10 @@ basic.spr:load
 
 
 val: sprbtnid
-"pressed" 10 10 64 [ pr sprbtnid btn:delete ] sprbtn:create ? sprbtnid!
+"pressed" 10 10 64 [ pr sprbtnid btn:delete ] sprbtn:create sprbtnid!
 
 val: txtbtnid
-"txt" 120 10 "foo" [ pr txtbtnid btn:delete ] txtbtn:create ? txtbtnid!
+"txt" 120 10 "foo" [ pr txtbtnid btn:delete ] txtbtn:create txtbtnid!
 
 val: n 2147483600 n!
 

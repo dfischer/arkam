@@ -169,7 +169,8 @@ MODULE
     THEN
   ;
   
-  : draw ( id -- ) id!
+  : draw ( id -- )
+    id! ( draw-callback can use id )
     id x dx! id y dy!
     handle_click
     id dcallback >r
