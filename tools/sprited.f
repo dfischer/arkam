@@ -145,66 +145,95 @@ END
 
 MODULE
 
-spr_w dup * as: width
-spr_h dup * as: height
+  spr_w dup * as: width
+  spr_h dup * as: height
+  
+  1 as: border
+  
+  padding 3 * as: leftpad
+  
+  padding                  border + as: top
+  showcase:right leftpad + border + as: left
+  left width +                      as: right
+  top height +                      as: bottom
 
-1 as: border
+  val: x  val: y
+  val: col val: row
+  val: adr
+  : dot  adr b@ ;
+  : dot! adr b! ;
+  
+  : row!  dup row!  spr_h * top + y!  ;
+  : col!
+    dup col!
+    dup spr_w * left + x!
+    row spr_w * + spraddr + adr!
+  ;
 
-padding 3 * as: leftpad
-
-padding                  border + as: top
-showcase:right leftpad + border + as: left
-left width +                      as: right
-top height +                      as: bottom
-
-val: x  val: y
-val: col val: row
-val: adr
-
-: row!  dup row!  spr_h * top + y!  ;
-: col!
-  dup col!
-  dup spr_w * left + x!
-  row spr_w * + spraddr + adr!
-;
-
-top  border - as: bt
-left border - as: bl
-width  border 2 * + as: bw
-height border 2 * + as: bh
-
-: draw_border
-  1 ppu:color!
-  bl bt bw bh rect
-;
-
-: draw_canvas
-  1 ppu:color!
-  spr_h [ row!
-    spr_w [ col!
-      adr b@ sprite:i!
-      x y ppu:plot
-      x y sprite:plot
+  top  border - as: bt
+  left border - as: bl
+  width  border 2 * + as: bw
+  height border 2 * + as: bh
+  
+  : draw_border
+    1 ppu:color!
+    bl bt bw bh rect
+  ;
+  
+  : draw_canvas
+    1 ppu:color!
+    spr_h [ row!
+      spr_w [ col!
+        dot sprite:i!
+        x y ppu:plot
+        x y sprite:plot
+      ] for
     ] for
-  ] for
-;
+  ;
+  
+  bl as: prv_x
+  bt bh + 4 + as: prv_y
+  
+  : draw_preview
+    selected sprite:i!
+    prv_x prv_y sprite:plot
+  ;
 
-bl as: prv_x
-bt bh + 4 + as: prv_y
+  ( ----- handle mouse ----- )
 
-: draw_preview
-  selected sprite:i!
-  prv_x prv_y sprite:plot
-;
+  val: pressed
+  val: color  ( 0-3 ) 3 color!
+  val: curcol ( current color )
 
+  : hover? mouse:x mouse:y left top width height hover_rect? ;
+
+  : where
+    mouse:y top  - spr_h / row!
+    mouse:x left - spr_w / col!
+  ;
+
+  : press
+    pressed IF RET THEN yes pressed!
+    dot IF 0 ELSE color THEN curcol!
+  ;
+
+  : paint curcol dot! ;
+
+  : handle_mouse
+    mouse:lp not IF no pressed! RET THEN
+    hover? not IF RET THEN
+    where press paint
+  ;
+  
 ---EXPOSE---
 
-: editor:draw
-  draw_border
-  draw_canvas
-  draw_preview
-;
-
+  : editor:draw
+    handle_mouse
+    draw_border
+    draw_canvas
+    draw_preview
+  ;
+  
 END
 
 
