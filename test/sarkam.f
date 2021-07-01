@@ -11,6 +11,7 @@ basic.spr:load
 
 30 [
   sprbtn:draw
+  20 20 "hello" put_text
 ] draw_loop:register!
 
 

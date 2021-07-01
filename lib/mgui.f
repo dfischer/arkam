@@ -1,5 +1,6 @@
 require: lib/core.f
 require: lib/sarkam.f
+require: lib/basic_sprite.f
 require: lib/entity.f
 
 
@@ -96,4 +97,42 @@ MODULE
     ] entity:each
   ;
   
+END
+
+
+
+( ===== put text/num ===== )
+
+# basic_sprite.f should load character sprite
+# at same ascii code
+
+MODULE
+
+  val: x   val: y
+  val: ox  val: s
+
+  7 as: w
+  9 as: h
+
+  : right x w + x! ;
+
+  : next s 1 + s! ;
+
+  : newline ox x!  y h + y! ;
+
+  : draw ( spr -- ) sprite:i! x y sprite:plot ;
+
+  : loop
+    [ s b@
+      0  [ STOP            ] ;CASE
+      10 [ newline next GO ] ;CASE
+      32 [ right   next GO ] ;CASE
+      draw right next GO
+    ] while
+  ;
+
+---EXPOSE---
+
+  : put_text ( x y s ) s! y! dup x! ox! loop ;
+
 END
