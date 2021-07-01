@@ -152,7 +152,7 @@ MODULE
 ---EXPOSE---
 
   : hover_rect? ( x1 y1 x0 y0 w h -- yes | no )
-    # mouse(x1 y1) on rect(x0 y0 w h) ?
+    # point(x1 y1) on rect(x0 y0 w h) ?
     # dx = x1 - x0
     # dy = y1 - y0
     # x1 < x0         => dx < 0

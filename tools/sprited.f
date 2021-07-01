@@ -19,6 +19,7 @@ MODULE
   8 as: w  8 as: h
   8 as: spr/line
   8 as: lines
+  spr/line lines * as: spr/screen
   max lines / as: max_lines
   1 as: border
 
@@ -46,7 +47,9 @@ MODULE
   val: spr
 
   : basealign ( i -- i ) spr/line / spr/line * ;
-  : basespr! ( i -- ) ? max + max mod basealign ? cr basespr! ;
+  : basespr! ( i -- ) max + max mod basealign basespr! ;
+  : basespr+! ( n -- ) basespr swap + basespr! ;
+  : basespr-! ( n -- ) basespr swap - basespr! ;
 
   : row! ( row -- )
     dup row!
@@ -60,18 +63,27 @@ MODULE
     w * left + x!
   ;
 
-  ( buttons )
+  ( scroll buttons )
 
   bl bw + padding + as: btn_left
   padding           as: btn_top
+  padding bh +      as: btn_bottom
 
-  0 btn_left btn_top      64 [ drop basespr spr/line - basespr! ] sprbtn:create drop
-  0 btn_left btn_top 16 + 64 [ drop basespr spr/line + basespr! ] sprbtn:create drop
+  : scrollbtn ( y spr q -- )
+    >r >r >r 0 btn_left r> r> r> sprbtn:create drop
+  ;
 
+  : current! selected spr/line 3 * - basespr! ;
+
+  btn_top         0x8A [ drop spr/screen basespr-! ] scrollbtn
+  btn_top    9  + 0x8E [ drop spr/line   basespr-! ] scrollbtn
+  btn_top    25 + 0x90 [ drop current!             ] scrollbtn
+  btn_bottom 17 - 0x8F [ drop spr/line   basespr+! ] scrollbtn
+  btn_bottom 8  - 0x8B [ drop spr/screen basespr+! ] scrollbtn
 
   ( draw )
 
-  : draw_selected
+  : draw_cursor
     3 ppu:color!
     x border - y border - 
     w border + h border +
@@ -83,7 +95,7 @@ MODULE
       8 [ col!
         spr sprite:i!
         x y sprite:plot
-        spr selected = IF draw_selected THEN
+        spr selected = IF draw_cursor THEN
       ] for
     ] for
   ;
@@ -92,9 +104,19 @@ MODULE
 
   : draw_id selected idx idy put_ff ;
 
+  ( select )
+
+  : handle_select
+    mouse:lp not IF RET THEN
+    mouse:x mouse:y left top width height hover_rect? not IF RET THEN
+    mouse:x left - w /   mouse:y top - h /   ( col row )
+    spr/line * + basespr + max mod selected!
+  ;
+
 ---EXPOSE---
 
   : showcase:draw ( -- )
+    handle_select
     draw_border
     draw_showcase
     draw_id
