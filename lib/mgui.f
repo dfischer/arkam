@@ -133,6 +133,8 @@ MODULE
 
 ---EXPOSE---
 
+  w as: put_text:w
+
   : put_text ( x y s ) s! y! dup x! ox! loop ;
 
 END
@@ -197,3 +199,92 @@ MODULE
   ;
 
 END
+
+
+
+( ===== txtbtn : text button ===== )
+
+MODULE
+
+  128 as: max
+  8 as: height
+
+  max ENTITY btn
+    COMPONENT text
+    COMPONENT param
+    COMPONENT show
+    COMPONENT callback
+    COMPONENT width
+    COMPONENT pressed
+    COMPONENT x
+    COMPONENT y
+  END
+
+  ( current ) val: id
+  ( draw origin ) val: dx  val: dy
+  ( mouse ) val: mx  val: my  val: mp
+
+  : hover? mx my id x id y id width height hover_rect? ;
+  
+  : clicked? mp IF no ELSE id pressed THEN ;
+  
+  : click
+    no id >pressed
+    id param id callback >r
+  ;
+  
+  : handle_click
+    hover? not IF no id >pressed RET THEN
+    clicked? IF click THEN
+    mp IF
+      yes id >pressed
+      dy 1 + dy!
+    ELSE
+      dy 1 - dy!
+    THEN
+  ;
+  
+  : draw ( id -- ) id!
+    id x dx! id y dy!
+    handle_click
+    dx dy id text put_text
+    3 ppu:color!
+    dx  dy 9 +  dx id width + 1 -  dy 9 + line
+  ;
+
+---EXPOSE---
+
+  : txtbtn:create ( param x y text q -- )
+    # q: ( param -- )
+    btn entity:new! id!
+    id >callback
+    dup id >text
+    s:len put_text:w * id >width
+    id >y
+    id >x
+    id >param
+    yes id >show
+    no  id >pressed
+  ;
+  
+  : txtbtn:delete ( id -- ) btn entity:kill ;
+  
+  : txtbtn:draw ( -- )
+    mouse:x  mx!
+    mouse:y  my!
+    mouse:lp mp!
+    btn [
+      dup show IF draw ELSE drop THEN
+    ] entity:each
+  ;
+
+END
+
+
+
+: mgui:update
+  mouse:listen
+  sprbtn:draw
+  txtbtn:draw
+;
+  

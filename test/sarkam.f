@@ -8,10 +8,12 @@ basic.spr:load
 
 "pressed" 10 10 64 [ pr ?stack ] sprbtn:create
 
+"txt" 120 10 "foo" [ pr ] txtbtn:create
+
 val: n 2147483600 n!
 
 30 [
-  sprbtn:draw
+  mgui:update
   20 20 "hello" put_text
   n 1 + dup n!
   dup 20 30 put_dec
