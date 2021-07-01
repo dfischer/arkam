@@ -15,9 +15,11 @@ val: selected  0 selected!
 
 MODULE
 
+  256 as: max
   8 as: w  8 as: h
   8 as: spr/line
   8 as: lines
+  max lines / as: max_lines
   1 as: border
 
   w spr/line * as: width
@@ -36,38 +38,65 @@ MODULE
   bl                as: idx
   bt bh + padding + as: idy
 
+  val: row  val: col
   val: x  val: y
-  val: baseline
+
+  val: basespr  ( start sprite on showcase )
+  val: rowspr   ( start sprite on row )
+  val: spr
+
+  : basealign ( i -- i ) spr/line / spr/line * ;
+  : basespr! ( i -- ) ? max + max mod basealign ? cr basespr! ;
+
+  : row! ( row -- )
+    dup row!
+    dup spr/line * basespr + max mod rowspr!
+    h * top + y!
+  ;
+
+  : col! ( col -- )
+    dup col!
+    dup rowspr + spr!
+    w * left + x!
+  ;
+
+  ( buttons )
+
+  bl bw + padding + as: btn_left
+  padding           as: btn_top
+
+  0 btn_left btn_top      64 [ drop basespr spr/line - basespr! ] sprbtn:create drop
+  0 btn_left btn_top 16 + 64 [ drop basespr spr/line + basespr! ] sprbtn:create drop
+
 
   ( draw )
 
+  : draw_selected
+    3 ppu:color!
+    x border - y border - 
+    w border + h border +
+    rect
+  ;
+
   : draw_showcase
-    8 [ ( y -- ) dup h * top + y!
-      8 [ ( y x -- )
-        dup w * left + x!
-        over spr/line * + sprite:i!
+    8 [ row!
+      8 [ col!
+        spr sprite:i!
         x y sprite:plot
-      ] for drop
+        spr selected = IF draw_selected THEN
+      ] for
     ] for
   ;
 
   : draw_border 1 ppu:color! bl bt bw bh rect ;
-
-  : draw_selected
-    3 ppu:color!
-    selected spr/line mod w * left + border - ( x )
-    selected spr/line /   h * top  + border - ( x y )
-    w border + h border + rect
-  ;
 
   : draw_id selected idx idy put_ff ;
 
 ---EXPOSE---
 
   : showcase:draw ( -- )
-    draw_showcase
     draw_border
-    draw_selected
+    draw_showcase
     draw_id
   ;
 
