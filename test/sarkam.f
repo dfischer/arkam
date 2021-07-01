@@ -3,8 +3,6 @@ require: lib/basic_sprite.f
 require: lib/entity.f
 require: lib/mgui.f
 
-basic.spr:load
-
 
 val: sprbtnid
 "pressed" 10 10 64 [ pr sprbtnid btn:delete ] sprbtn:create sprbtnid!
