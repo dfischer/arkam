@@ -136,3 +136,45 @@ MODULE
   : put_text ( x y s ) s! y! dup x! ox! loop ;
 
 END
+
+
+MODULE
+
+  11 as: max ( i32: max "-2147483648" )
+  max 1 + allot as: buf
+  val: n  val: p  val: nega  val: q  val: r  val: x  val: y  val: base
+
+  : init buf max + p! ;
+  : check buf p > IF "too big num" panic THEN ;
+  : put ( n -- ) p 1 - p! p b! ;
+  : put_sign nega IF 45 put THEN ;
+  : read ( -- )
+    check
+    n base /mod r! q!
+    r >hex put
+    q 0 = IF RET THEN q n! AGAIN
+  ;
+  : check_sign n 0 < IF n neg n! yes ELSE no THEN nega! ;
+  : check_min ( n -- )
+    # minimum number
+    n 0 = IF x y "0" put_text rdrop RET THEN
+    n dup neg != IF RET THEN ( 0x80000000 * -1 = 0x80000000 )
+    10 base = IF x y "-2147483648" put_text rdrop RET THEN
+    16 base = IF x y "-80000000"   put_text rdrop RET THEN
+    "?: invalid base" panic
+  ;
+  : run ( n x y -- ) y! x! n!
+    check_min
+    check_sign
+    init
+    read
+    put_sign
+    x y p put_text
+  ;
+  
+---EXPOSE---
+
+  : put_dec ( n x y -- ) 10 base! run ;
+  : put_hex ( n x y -- ) 16 base! run ;
+
+END
