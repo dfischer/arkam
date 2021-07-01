@@ -224,7 +224,25 @@ MODULE
     hover? not IF RET THEN
     where press paint
   ;
-  
+
+  ( ----- color selector ----- )
+
+  bottom 4 + as: sel_y
+
+  : selector ( color x -- ) over sel_y swap [ color! ] sprbtn:create drop ;
+  : sel_x ( color -- x ) 9 * 1 - right swap - ;
+
+  3 dup sel_x selector
+  2 dup sel_x selector
+  1 dup sel_x selector
+
+  sel_y 9 + as: under_y
+
+  : draw_selcolor # underline
+    3 ppu:color!
+    color sel_x dup 7 + under_y swap over line
+  ;
+
 ---EXPOSE---
 
   : editor:draw
@@ -232,6 +250,7 @@ MODULE
     draw_border
     draw_canvas
     draw_preview
+    draw_selcolor
   ;
   
 END
