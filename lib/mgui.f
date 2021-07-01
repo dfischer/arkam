@@ -178,3 +178,22 @@ MODULE
   : put_hex ( n x y -- ) 16 base! run ;
 
 END
+
+
+MODULE
+
+  16 as: base
+  3 allot as: buf
+  val: x  val: y
+
+---EXPOSE---
+
+  : put_ff ( n x y -- )
+    y! x!
+    255 and base /mod ( q r )
+    >hex buf 1 + b!
+    >hex buf     b!
+    x y buf put_text
+  ;
+
+END
