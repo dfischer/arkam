@@ -192,7 +192,7 @@ MODULE
 
   : put_ff ( n x y -- )
     y! x!
-    255 and base /mod ( q r )
+    0xFF and base /mod ( q r )
     >hex buf 1 + b!
     >hex buf     b!
     x y buf put_text

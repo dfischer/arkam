@@ -237,6 +237,28 @@
       run_mode     [ ( remain on TOS ) ] ;CASE
       unknown_mode
     ;
+    ( hex )
+    : parse_hex ( -- n yes | no )
+      : >n ( c -- n yes | no )
+        dup 48 < IF drop no RET END
+        dup 58 < IF 48 - yes RET END
+        dup 65 < IF drop no RET END
+        dup 71 < IF 55 - yes RET END
+        dup 97 < IF drop no RET END
+        87 - dup 16 > IF drop no RET END yes
+      ;
+      val: acc
+      # 0xFF
+      buf
+      dup b@ 48  != IF drop no RET END inc
+      dup b@ 120 != IF drop no RET END inc
+      0 acc!
+      ( buf ) [ dup b@
+        0 [ drop acc yes STOP ] ;CASE
+        >n IF acc 16 * + acc! inc GO RET END
+        drop no STOP
+      ] while
+    ;
     ( reference )
     : parse_amp ( -- parsed? )
       buf b@ amp != IF no RET END
@@ -259,6 +281,7 @@
         parse_amp       IF ok RET END
         buf eval_token  IF ok RET END
         parse_num       IF eval_num ok RET END
+        parse_hex       IF eval_num ok RET END
         buf notfound ng
       ] while
       r> source! r> stream! ( restore ) ;
