@@ -6,9 +6,11 @@ require: lib/mgui.f
 basic.spr:load
 
 
-"pressed" 10 10 64 [ pr ?stack ] sprbtn:create
+val: sprbtnid
+"pressed" 10 10 64 [ pr sprbtnid btn:delete ] sprbtn:create ? sprbtnid!
 
-"txt" 120 10 "foo" [ pr ] txtbtn:create
+val: txtbtnid
+"txt" 120 10 "foo" [ pr txtbtnid btn:delete ] txtbtn:create ? txtbtnid!
 
 val: n 2147483600 n!
 

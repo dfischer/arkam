@@ -94,9 +94,9 @@ MODULE
   # iterate over alive entities
   # q: ( id -- )
   swap [ alives ] [ size @ ] biq ( q alives n )
-  [ ( q alives id )
-    over b@ not IF drop RET THEN ( dead )
-    swap inc >r swap dup >r call r> r>
+  [ ( q alives id -- q alives )
+    2dup + b@ not IF drop RET THEN ( dead )
+    swap >r swap dup >r call r> r>
   ] for 2drop
 ;
 
