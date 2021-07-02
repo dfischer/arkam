@@ -5,14 +5,6 @@ MODULE
   : query 4 io ;
   : param! 4 query ;  
 
-  : p, ( n -- n+ ) dup , ? 10590 * 5320 + 10000 / ;
-  here as: pitch_table
-  110  p, p, p, p, p, p, p, p, p, p, p, p, drop cr
-  220  p, p, p, p, p, p, p, p, p, p, p, p, drop cr
-  440  p, p, p, p, p, p, p, p, p, p, p, p, drop cr
-  880  p, p, p, p, p, p, p, p, p, p, p, p, drop cr
-  1760 p, p, p, p, p, p, p, p, p, p, p, p, drop cr
-
 ---EXPOSE---
 
   : fm:voice!     0 query ; # i --
