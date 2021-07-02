@@ -5,24 +5,58 @@ require: lib/mgui.f
 
 ( ===== global ===== )
 
-256 as: spr_max
-8 as: spr_w
-8 as: spr_h
+256           as: spr_max
+8             as: spr_w
+8             as: spr_h
 spr_w spr_h * as: spr_size
 
-8 as: padding
+8 as: spr/line
+8 as: lines
+spr/line lines * as: spr/screen
 
+
+( buf )
+spr_max spr_size * as: spr_bytes
+spr_bytes allot as: spr_buf
+basic.spr filedata spr_buf spr_bytes memcopy
+
+
+( view area )
+spr_max dec spr/screen - as: spr_start
+
+: load_area ( base -- )
+  spr/screen [ ( base i -- base )
+    dup spr_start + sprite:i!
+    over + spr_max mod spr_size * spr_buf + sprite:load
+  ] for drop
+;
+
+
+( base )
+val: spr_base  ( start sprite on showcase )
+: basealign ( i -- i ) spr/line / spr/line * ;
+: spr_base! ( i -- ) spr_max + spr_max mod basealign dup spr_base! load_area ;
+0 spr_base!
+
+
+( select )
+spr_start dec as: spr_target
 val: selected
-val: spraddr
-
-val: sprbase
-basic.spr filedata sprbase!
+val: spr_adr ( target )
 
 : selected!
   dup selected!
-  spr_size * sprbase + spraddr! ;
+  spr_size * spr_buf +
+  dup spr_adr!
+  spr_target sprite:i! sprite:load
+;
 
 0 selected!
+
+
+( view )
+
+8 as: padding
 
 
 
@@ -30,9 +64,6 @@ basic.spr filedata sprbase!
 
 MODULE
 
-  8 as: spr/line
-  8 as: lines
-  spr/line lines * as: spr/screen
   spr_max lines / as: max_lines
   1 as: border
 
@@ -55,24 +86,23 @@ MODULE
   val: row  val: col
   val: x  val: y
 
-  val: basespr  ( start sprite on showcase )
-  val: rowspr   ( start sprite on row )
   val: spr
+  val: rowspr
+  val: actual
 
-  : basealign ( i -- i ) spr/line / spr/line * ;
-  : basespr! ( i -- ) spr_max + spr_max mod basealign basespr! ;
-  : basespr+! ( n -- ) basespr swap + basespr! ;
-  : basespr-! ( n -- ) basespr swap - basespr! ;
+  : basespr+! ( n -- ) spr_base swap + spr_base! ;
+  : basespr-! ( n -- ) spr_base swap - spr_base! ;
 
   : row! ( row -- )
     dup row!
-    dup spr/line * basespr + spr_max mod rowspr!
+    dup spr/line * rowspr!
     spr_h * top + y!
   ;
 
   : col! ( col -- )
     dup col!
-    dup rowspr + spr!
+    dup rowspr + spr_start + spr!
+    dup rowspr + spr_base + spr_max mod actual!
     spr_w * left + x!
   ;
 
@@ -86,7 +116,7 @@ MODULE
     >r >r >r 0 btn_left r> r> r> sprbtn:create drop
   ;
 
-  : current! selected spr/line 3 * - basespr! ;
+  : current! selected spr/line 3 * - spr_base! ;
 
   btn_top         0x8A [ drop spr/screen basespr-! ] scrollbtn
   btn_top    9  + 0x8E [ drop spr/line   basespr-! ] scrollbtn
@@ -108,7 +138,7 @@ MODULE
       8 [ col!
         spr sprite:i!
         x y sprite:plot
-        spr selected = IF draw_cursor THEN
+        actual selected = IF draw_cursor THEN
       ] for
     ] for
   ;
@@ -123,7 +153,7 @@ MODULE
     mouse:lp not IF RET THEN
     mouse:x mouse:y left top width height hover_rect? not IF RET THEN
     mouse:x left - spr_w /   mouse:y top - spr_h /   ( col row )
-    spr/line * + basespr + spr_max mod selected!
+    spr/line * + spr_base + spr_max mod selected!
   ;
 
 ---EXPOSE---
@@ -167,7 +197,7 @@ MODULE
   : col!
     dup col!
     dup spr_w * left + x!
-    row spr_w * + spraddr + adr!
+    row spr_w * + spr_adr + adr!
   ;
 
   top  border - as: bt
@@ -195,7 +225,7 @@ MODULE
   bt bh + 4 + as: prv_y
   
   : draw_preview
-    selected sprite:i!
+    spr_target sprite:i!
     prv_x prv_y sprite:plot
   ;
 
