@@ -116,8 +116,8 @@ MODULE
   width  border 2 * + as: bw
   height border 2 * + as: bh
 
-  bl                as: idx
-  bt bh + padding + as: idy
+  bl          as: idx
+  bt bh + 4 + as: idy
 
   val: row  val: col
   val: x  val: y
