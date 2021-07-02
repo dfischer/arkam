@@ -280,7 +280,10 @@ MODULE
 
   : press
     pressed IF RET THEN yes pressed!
-    dot IF 0 ELSE color THEN curcol!
+    dot
+    0     [ color curcol! ] ;CASE
+    color [ 0     curcol! ] ;CASE
+    drop color curcol!
   ;
 
   : paint curcol dot! ;
