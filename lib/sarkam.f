@@ -173,22 +173,11 @@ END
 ( ===== draw loop ===== )
 
 MODULE
-  # ----- Usage -----
-  # draw_loop only:
-  #   30 [ foo:update foo:draw ] draw_loop:register!
-  # with other update routine:
-  #   30 [ foo:update foo:draw ] draw_loop:init
-  #   [ other_loop draw_loop:update HALT ] emu:timer_handler!
+  # usage:
+  #   [ some_draw ] draw_loop:register!
+  #   draw_loop
 
-  val: fps
-  val: frames
   val: callback
-  val: i
-  
-  : init ( fps callback -- )
-    callback! fps!
-    emu:timer_rate_hz fps / dup frames! i!
-  ;
 
   : draw
     ppu:0clear
@@ -198,15 +187,9 @@ MODULE
 
 ---EXPOSE---
 
-  : draw_loop:update
-    i 1 + dup frames >= IF drop draw 0 THEN i!
-  ;
+  : draw_loop:register ( q -- ) callback! ;
 
-  : draw_loop:update_halt draw_loop:update HALT ;
-
-  : draw_loop:register! ( fps callback -- )
-    init &draw_loop:update_halt emu:timer_handler!
-  ;
+  : draw_loop draw AGAIN ;
 
 END
 
