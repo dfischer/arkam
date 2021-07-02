@@ -18,22 +18,7 @@ Cell zoom = 2;
 
 Cell poll_step      = 5000;
 Cell req_poll       = 1;
-
-
-
-/* Hardware Timer Emulation 
-   Check timer per (virtual_cpu_hz/timer_rate_hz/timer_accuracy_ratio) steps.
-   If (elapsed counter > frame/rate) and timer_handler != 0 then
-   run code from timer_handler until it returns ARK_HALT
-*/
-Cell virtual_cpu_hz        = 4190000; /* 4.19MHz (Gameboy) */
-Cell timer_rate_hz         = 4096;    /* Hz */
-Cell timer_accuracy_ratio  = 4;       /* ratio */
-Cell timer_check_steps     = 0;       /* steps, should be inited */
-Cell timer_min_check_steps = 30;
-Cell timer_handler         = 0;       /* Handler address in ArkamVM */
-Cell frame_per_timer       = 0;       /* should be inited */
-
+const double FPS_MS = 1000.0f / 60.0f;
 
 
 /* ===== Graceful Shutdown ===== */
@@ -546,15 +531,6 @@ void setup_pad(VM* vm) {
 
 /* ===== EMU ===== */
 
-void calc_timer() {
-  timer_check_steps = virtual_cpu_hz / (timer_rate_hz * timer_accuracy_ratio);
-  if (timer_check_steps < timer_min_check_steps) timer_check_steps = timer_min_check_steps;
-
-  Uint64 freq = SDL_GetPerformanceFrequency();
-  frame_per_timer = freq / timer_rate_hz;
-}
-
-
 Code handleEMU(VM* vm, Cell op) {
   switch (op) {
   case 0: /* set title ( s -- ) */
@@ -588,30 +564,6 @@ Code handleEMU(VM* vm, Cell op) {
   case 3: /* poll ( -- ) */
     {
       req_poll = 1;
-      return ARK_OK;
-    }
-  case 4: /* timer_rate_hz ( -- n) */
-    {
-      if (!ark_has_ds_spaces(vm, 1)) Raise(DS_OVERFLOW);
-      Push(timer_rate_hz);
-      return ARK_OK;
-    }
-  case 5: /* timer_rate_hz! ( n -- ) */
-    {
-      if (!ark_has_ds_items(vm, 1)) Raise(DS_UNDERFLOW);
-      Cell n = Pop();
-      if (n < 0) die("Invalid timer rate: %d", n);
-      timer_rate_hz = n;
-      calc_timer();
-      return ARK_OK;
-    }
-  case 6: /* timer_handler ( addr -- ) */
-    {
-      if (!ark_has_ds_items(vm, 1)) Raise(DS_UNDERFLOW);
-      Cell addr = Pop();
-      if (addr != 0 && !ark_valid_addr(vm, addr))
-        die("Invalid timer handler address: %d", addr);
-      timer_handler = addr;
       return ARK_OK;
     }
   default: Raise(IO_UNKNOWN_OP);
@@ -685,62 +637,33 @@ void poll_sdl_event(VM* vm, PPU* ppu) {
 
 Code run(VM* vm) {
   Code code = ARK_OK;
-  assert(timer_check_steps > 0);
 
   Uint64 previous = SDL_GetPerformanceCounter();
   Uint64 current;
-  int timer_counter = 0;
-
-  /* ---- debug timer performance -----
-  Cell dbgcount = 0;
-  Uint64 dbgprev = previous;
-  */
+  double elapsed;
+  int poll_counter = 0;
 
   while (1) {
-    if (ppu->req_redraw) {
-      // dbg_draw_envs(ppu);
-      render_ppu(ppu);
-      ppu->req_redraw = 0;
-    }
-    
-    poll_sdl_event(vm, ppu);
-    req_poll = 0;
-    
-    int poll_counter  = 0;
-    while (!ppu->req_redraw && !req_poll && poll_counter < poll_step) {
-      code = ark_step(vm);
-      if (code != ARK_OK) return code;
-      poll_counter++;
-      
-      /* timer */
-      timer_counter++;
-      if (timer_counter > timer_check_steps) {
-        timer_counter = 0;
-        current = SDL_GetPerformanceCounter();        
-        if (current - previous > frame_per_timer) {
-          /* ----- debug timer performance -----
-          dbgcount++;
-          if (dbgcount % timer_rate_hz == 0) {
-            dbgcount = 0;
-            Uint64 freq = SDL_GetPerformanceFrequency();
-            double elapsed = (current - dbgprev) / (double)freq;
-            printf("elapsed:%lf diff:%lld %lf\n", elapsed, current - previous, (current - previous) / (double)freq);
-            fflush(stdout);
-            dbgprev = current;
-          }
-          */
-          previous = current;          
-          if (timer_handler != 0) {
-            Cell ip = vm->ip;
-            vm->ip = timer_handler;
-            Cell timer_code = ARK_OK;
-            while(timer_code == ARK_OK) { timer_code = ark_step(vm); }
-            if (timer_code != ARK_HALT) return timer_code;
-            vm->ip = ip; // restore
-          }
-        }
+    render_ppu(ppu);
+    ppu->req_redraw = 0;
+
+    while (!ppu->req_redraw) {
+      poll_sdl_event(vm, ppu);
+      req_poll = 0;
+      poll_counter = 0;
+
+      while (!req_poll && poll_counter < poll_step) {
+        code = ark_step(vm);
+        if (code != ARK_OK) return code;
+        poll_counter++;
       }
     }
+
+    // adjust frame rate
+    current = SDL_GetPerformanceCounter();
+    elapsed = (double)(current - previous) / (double)SDL_GetPerformanceFrequency() * 1000.0f;
+    previous = current;
+    SDL_Delay(clamp(FPS_MS - elapsed, 0, FPS_MS));
   }
  
   return code;
@@ -804,7 +727,6 @@ int main(int argc, char* argv[]) {
   setup_emu(vm);
   setup_app(vm, app_argc, argv + app_argi);
 
-  calc_timer();
   Code code = ark_get(vm, ARK_ADDR_START);
   guard_err(vm, code);
   vm->ip = vm->result;

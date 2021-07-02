@@ -348,11 +348,11 @@ END
 
 
 
-30 [
+[
   mgui:update
   showcase:draw
   editor:draw
   fname:draw
-]  draw_loop:register!
+]  draw_loop:register
 
-[ ( wait ) GO ] while
+draw_loop
