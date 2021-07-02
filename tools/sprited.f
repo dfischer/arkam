@@ -17,8 +17,14 @@ spr/line lines * as: spr/screen
 
 ( buf )
 spr_max spr_size * as: spr_bytes
+
 spr_bytes allot as: spr_buf
-basic.spr filedata spr_buf spr_bytes memcopy
+spr_bytes allot as: spr_back
+
+basic.spr filedata spr_buf  spr_bytes memcopy
+basic.spr filedata spr_back spr_bytes memcopy
+
+: reset_all ( -- ) spr_back spr_buf spr_bytes memcopy ;
 
 
 ( view area )
@@ -49,6 +55,11 @@ val: spr_adr ( target )
   spr_size * spr_buf +
   dup spr_adr!
   spr_target sprite:i! sprite:load
+;
+
+: reset ( -- )
+  selected spr_size * ( offset )
+  [ spr_back + ] [ spr_buf + ] biq spr_size memcopy
 ;
 
 0 selected!
@@ -273,6 +284,11 @@ MODULE
     color sel_x dup 7 + under_y swap over line
   ;
 
+  ( ----- tools ----- )
+  right padding + as: tool_x
+  top as: tool_y
+  0 tool_x tool_y "reset" [ drop reset ] txtbtn:create drop
+
 ---EXPOSE---
 
   : editor:draw
@@ -283,6 +299,22 @@ MODULE
     draw_selcolor
   ;
   
+END
+
+
+
+( ===== Toolbar ===== )
+
+MODULE
+
+  padding as: left
+  ppu:height padding - as: bottom
+  bottom 8 - as: top
+
+---EXPOSE---
+
+  0 left top "reset all" [ drop reset_all ] txtbtn:create drop
+
 END
 
 
