@@ -49,9 +49,8 @@ hello_sarkam: bin sarkam bin/sol
 
 
 .PHONY: sarkam-scratch
-sarkam-scratch: bin sarkam bin/sol
-	./bin/sol test/sarkam-scratch.sol out/tmp.img
-	./bin/sarkam out/tmp.img
+sarkam-scratch: bin sarkam bin/forth.ark
+	./bin/sarkam bin/forth.ark test/sarkam-scratch.f
 
 
 
