@@ -2,9 +2,6 @@ require: lib/core.f
 require: lib/mgui.f
 
 
-
-( ===== global ===== )
-
 256           as: spr_max
 8             as: spr_w
 8             as: spr_h
@@ -15,16 +12,43 @@ spr_w spr_h * as: spr_size
 spr/line lines * as: spr/screen
 
 
-( buf )
+
+( ===== buf and file ===== )
+
 spr_max spr_size * as: spr_bytes
 
-spr_bytes allot as: spr_buf
-spr_bytes allot as: spr_back
+MODULE
 
-basic.spr filedata spr_buf  spr_bytes memcopy
-basic.spr filedata spr_back spr_bytes memcopy
+  256     as: len
+  len dec as: max
+  val: id
 
-: reset_all ( -- ) spr_back spr_buf spr_bytes memcopy ;
+---EXPOSE---
+
+  app:argc 2 != [ "filename required" panic ] unless
+
+  len allot as: fname
+  fname 2 max app:get_arg [ "Too long filename" panic ] unless
+
+  fname loadfile
+    dup filesize spr_bytes != [ "Invalid sprite file" panic ] when
+    filedata as: spr_buf
+  
+  spr_bytes allot as: spr_back
+  spr_buf spr_back spr_bytes memcopy
+
+  : reset_all ( -- ) spr_back spr_buf spr_bytes memcopy ;
+
+  : save
+    fname "wb" file:open! id!
+    spr_buf spr_bytes id file:write!
+    id file:close!
+  ;
+
+  : fname:draw 8 8 fname put_text ;
+
+END
+
 
 
 ( view area )
@@ -69,6 +93,7 @@ val: spr_adr ( target )
 
 8 as: padding
 
+padding 3 * as: gui_top
 
 
 ( ===== showcase ===== )
@@ -83,7 +108,7 @@ MODULE
 
   padding border + as: left
   left width +     as: right
-  padding border + as: top
+  gui_top border + as: top
   top height +     as: bottom
 
   left   border -     as: bl
@@ -120,8 +145,8 @@ MODULE
   ( scroll buttons )
 
   bl bw + 4 +  as: btn_left
-  padding      as: btn_top
-  padding bh + as: btn_bottom
+  top          as: btn_top
+  btn_top bh + as: btn_bottom
 
   : scrollbtn ( y spr q -- )
     >r >r >r 0 btn_left r> r> r> sprbtn:create drop
@@ -193,7 +218,7 @@ MODULE
   
   padding 3 * as: leftpad
   
-  padding                  border + as: top
+  gui_top                  border + as: top
   showcase:right leftpad + border + as: left
   left width +                      as: right
   top height +                      as: bottom
@@ -313,7 +338,8 @@ MODULE
 
 ---EXPOSE---
 
-  0 left top "reset all" [ drop reset_all ] txtbtn:create drop
+  0 left top "save" [ drop save ] txtbtn:create drop
+  0 left 36 + top "reset all" [ drop reset_all ] txtbtn:create drop
 
 END
 
@@ -323,6 +349,7 @@ END
   mgui:update
   showcase:draw
   editor:draw
+  fname:draw
 ]  draw_loop:register!
 
 [ ( wait ) GO ] while
