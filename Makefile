@@ -56,9 +56,10 @@ sarkam-scratch: bin sarkam bin/sol
 
 
 .PHONY: sprited
-sprited: bin sarkam bin/sol
-	./bin/sol tools/sprited.sol bin/sprited.ark
-	./bin/sarkam bin/sprited.ark lib/basic.spr
+out/tmp.spr: lib/basic.spr
+	cp lib/basic.spr out/tmp.spr
+sprited: bin sarkam bin/forth.ark out/tmp.spr
+	./bin/sarkam bin/forth.ark tools/sprited.f out/tmp.spr
 
 
 
