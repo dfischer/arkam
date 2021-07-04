@@ -25,7 +25,7 @@ sarkam: bin/sarkam
 
 
 .PHONY: test
-test: arkam bin/test_arkam bin/sol
+test: arkam bin/test_arkam bin/sol bin/forth_test.ark
 	./test/run.sh
 
 
@@ -64,15 +64,6 @@ bin/forth.ark: bin/sol tools/forth.sol
 
 out/forth.ark.h: bin/forth.ark bin/text2c
 	./bin/text2c -b forth bin/forth.ark out/forth.ark.h
-
-
-
-.PHONY: test-forth
-test-forth: bin/forth_test.ark
-	./bin/arkam bin/forth_test.ark
-
-bin/forth_test.ark: bin/forth.ark tools/forth_test.sol
-	./bin/sol tools/forth_test.sol bin/forth_test.ark
 
 
 
@@ -131,6 +122,10 @@ bin/text2c: src/text2c.c
 
 out/core.sol.h: lib/core.sol bin/text2c
 	./bin/text2c core_lib lib/core.sol out/core.sol.h
+
+
+bin/forth_test.ark: bin/forth.ark tools/forth_test.sol
+	./bin/sol tools/forth_test.sol bin/forth_test.ark
 
 
 

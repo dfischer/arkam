@@ -74,9 +74,16 @@ do
 done
 
 
+
 echo "===== sol core library ====="
 
 for src in test/sol_corelib/*.sol
 do
   check_sol "" 0 "$TESTER $src"
 done
+
+
+
+echo "===== forth.sol ====="
+
+./bin/arkam bin/forth_test.ark || exit 1
