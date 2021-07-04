@@ -26,12 +26,21 @@
 ( --- shorthand/util --- )
 : as: const: ;
 
+: compile, forth:compile, ;
+
 : forth:handle_mode ( xt state q_run q_compile -- .. )
   # q: ( xt -- )
   pullup
   forth:run_mode     [ drop >r ] ;CASE
   forth:compile_mode [ nip  >r ] ;CASE
   ? drop "Unknown mode" panic
+;
+
+
+: clamp ( n min max -- min<=n<max )
+  >r 2dup < IF rdrop nip RET THEN # -- min
+  drop r> 2dup < IF drop RET THEN # -- n
+  nip dec # -- max-1
 ;
 
 
@@ -190,6 +199,17 @@ MODULE
   
 END
 
+
+( ----- marker ----- )
+
+: MARKER ( name: -- )
+  forth:latest here
+  in:read [ "marker name required" panic ] unless
+  forth:create
+  "LIT" compile, , "here!" compile,
+  "LIT" compile, , "forth:latest!" compile,
+  "RET" compile,
+;
 
 
 ( ----- loadfile ----- )

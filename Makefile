@@ -35,19 +35,6 @@ clean:
 	$(RM) -f bin/* out/*
 
 
-.PHONY: hello
-hello: out arkam bin/sol test/hello.sol
-	./bin/sol test/hello.sol out/tmp.img
-	./bin/arkam out/tmp.img
-
-
-.PHONY: hello_sarkam
-hello_sarkam: bin sarkam bin/sol
-	./bin/sol example/hello_sarkam.sol out/hello_sarkam.ark
-	./bin/sarkam out/hello_sarkam.ark
-
-
-
 .PHONY: sarkam-scratch
 sarkam-scratch: bin sarkam bin/forth.ark
 	./bin/sarkam bin/forth.ark test/sarkam-scratch.f
@@ -62,17 +49,9 @@ sprited: bin sarkam bin/forth.ark out/tmp.spr
 
 
 
-.PHONY: genepalette
-genepalette: bin sarkam bin/sol
-	./bin/sol tools/genepalette.sol bin/genepalette.ark
-	./bin/sarkam bin/genepalette.ark
-
-
-
-.PHONY: rand_fm_beat
-rand_fm_beat: bin sarkam bin/sol
-	./bin/sol example/rand_fm_beat.sol out/rand_fm_beat.ark
-	./bin/sarkam out/rand_fm_beat.ark
+.PHONY: fmparams
+fmparams: bin sarkam bin/forth.ark
+	./bin/sarkam bin/forth.ark example/fmparams.f
 
 
 
