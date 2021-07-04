@@ -151,6 +151,69 @@ END
 
 
 
+MODULE
+
+  16 as: steps
+  steps allot as: seq
+  steps allot as: lifes
+  val: idx ( current playing )
+  val: playing
+  val: dur ( frames per step )
+
+  10 dur!
+
+  : at  ( i -- v ) seq + b@ ;
+  : at! ( v i -- ) seq + b! ;
+  : idx+! ( n -- ) idx + steps mod idx! ;
+  : next ( -- ) 1 idx+! ;
+
+  : life  ( -- v ) lifes idx + b@ ;
+  : life! ( v -- ) lifes idx + b! ;
+
+  ( ----- update ----- )
+
+  : update ;
+
+  ( ----- draw ----- )
+
+  100 as: ox  10 as: oy
+  4 as: rows  4 as: cols  4 as: pad
+  8 as: w  8 as: h
+  val: dx  val: dy  val: row  val: col
+  val: cur ( current drawing idx )
+
+  : row_y! h pad + * oy + dy! ;
+  : col_x! w pad + * ox + dx! ;
+  : col! row cols * + cur! ;
+
+  : draw_cursor
+    playing not IF RET THEN
+    cur idx != IF RET THEN
+    2 sprite:i!
+    dx dy inc sprite:plot
+  ;
+
+  : draw_all
+    rows [ dup row! row_y!
+      cols [ dup col! col_x!
+        draw_cursor
+        cur at IF 1 ELSE 3 THEN sprite:i!
+        dx dy sprite:plot
+      ] for
+    ] for
+  ;
+
+---EXPOSE---
+
+  : seq:draw ( x y -- ) update draw_all ;
+
+  : seq:play ;
+  : seq:stop ;
+
+END
+
+
+
 0 fm:voice!
 
 val: freq
@@ -184,6 +247,7 @@ slider:new
   slider:draw
   label-freq
   label-op
+  seq:draw
 ] draw_loop:register
 
 draw_loop
