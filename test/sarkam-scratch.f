@@ -166,9 +166,9 @@ MODULE
   val: idx ( current playing )
   val: playing
   val: dur ( frames per step )
-  20 dur!
+  15 dur!
   val: swing ( frames to delay )
-  5 swing!
+  3 swing!
   val: freq 440 freq!
 
   : at  ( i -- v ) seq + b@ ;
@@ -270,8 +270,6 @@ MODULE
 
 ---EXPOSE---
 
-  200 ox! 10 oy!
-
   : seq:pos! ( x y -- ) oy! ox! ;
   : seq:draw ( -- ) update draw_all ;
 
@@ -287,7 +285,7 @@ END
 ( ===== params ===== )
 
 MODULE
-  16 as: max
+  32 as: max
 
   max ENTITY sliders
     COMPONENT callback
@@ -297,6 +295,7 @@ MODULE
     COMPONENT label
     COMPONENT lx
     COMPONENT ly
+    COMPONENT op
   END
 
   val: id
@@ -305,16 +304,16 @@ MODULE
   8  as: sheight
   4  as: pad
   val: ox val: oy
-  7 4 * as: lwidth
+  7 3 * as: lwidth
 
-  : run ( v id -- ) 2dup >val callback >r ;
+  : run ( v id -- ) 2dup >val dup callback >r ;
 
   : val_pos!   ( ox oy ) id >vy lwidth + swidth + pad + pad + id >vx ;
   : label_pos! ( ox oy ) id >ly id >lx ;
   : slider_pos ( ox oy -- sx sy ) [ lwidth + pad + ] dip ;
 
-  : new_slider ( x y min max label callback -- )
-    sliders entity:new [ "Too many sliders" panic ] unless id!
+  : new_slider ( x y min max label callback -- id )
+    sliders entity:new [ "Too many params" panic ] unless id!
     id >callback
     id >label
 
@@ -331,7 +330,7 @@ MODULE
       r> pushdown ( sid sx sy )
       slider:pos!
       slider:validate!
-    drop
+    ( -- sid )
   ;
 
   : draw_label id lx id ly id label put_text ;
@@ -342,16 +341,27 @@ MODULE
     sliders [ id! draw_label draw_num ] entity:each
   ;
 
-  : all_op ( v q -- ) 4 [ fm:operator! 2dup call ] for 2drop ;
+  10  10 440 880 "FRQ" [ drop seq:freq! ] new_slider drop
+  110 10 0   7   "ALG" [ drop fm:algo!  ] new_slider drop
 
-  val: freq
-  10 10 440 880 "freq" [ dup freq! seq:freq! ] new_slider
-  10 20 0   7   "algo" [ fm:algo! ] new_slider
-  10 30 0   255 " atk" [ [ fm:attack!  ] all_op ] new_slider
-  10 40 0   255 " dcy" [ [ fm:decay!   ] all_op ] new_slider
-  10 50 0   255 " sus" [ [ fm:sustain! ] all_op ] new_slider
-  10 60 0   255 " rel" [ [ fm:release! ] all_op ] new_slider
-  10 70 0   3   "wave" [ [ fm:wave!    ] all_op ] new_slider
+  val: p
+  : op! op fm:operator! ;
+  : --- ( x y -- x y+ x y ) dup 12 + swap >r over r> ;
+  : oparams ( x y op -- ) p!
+    --- 0   3   "WAV" [ op! fm:wave!      ] new_slider p swap >op
+    --- 0   255 "ATK" [ op! fm:attack!    ] new_slider p swap >op
+    --- 0   255 "DCY" [ op! fm:decay!     ] new_slider p swap >op
+    --- 0   255 "SUS" [ op! fm:sustain!   ] new_slider p swap >op
+    --- 0   255 "REL" [ op! fm:release!   ] new_slider p swap >op
+    --- 0   17  "MOD" [ op! fm:mod_ratio! ] new_slider p swap >op
+    --- 0   255 " FB" [ op! fm:fb_ratio!  ] new_slider p swap >op
+    --- 0   255 "AFQ" [ op! fm:amp_freq!  ] new_slider p swap >op
+    --- 0   255 " FM" [ op! fm:fm_level!  ] new_slider p swap >op
+    2drop
+  ;
+
+  10  26 0 oparams
+  110 26 1 oparams
 
 ---EXPOSE---
 
@@ -360,8 +370,10 @@ MODULE
 END
 
 
-0 10 100 "play" [ seq:play ] txtbtn:create drop
-0 10 110 "stop" [ seq:stop ] txtbtn:create drop
+  10 140 seq:pos!
+0 60 140 "play" [ seq:play ] txtbtn:create drop
+0 60 150 "stop" [ seq:stop ] txtbtn:create drop
+
 
 [
   mgui:update

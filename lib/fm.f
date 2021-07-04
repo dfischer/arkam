@@ -22,7 +22,7 @@ MODULE
   : fm:mod_ratio! 4 param! ; # v --
   : fm:fb_ratio!  5 param! ; # v --
   : fm:wave!      6 param! ; # v --
-  : fm:ampfreq!   7 param! ; # v --
+  : fm:amp_freq!  7 param! ; # v --
   : fm:fm_level!  8 param! ; # v --
   : fm:pan!       9 param! ; # v --
 
