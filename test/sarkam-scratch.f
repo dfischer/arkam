@@ -167,6 +167,8 @@ MODULE
   val: playing
   val: dur ( frames per step )
   20 dur!
+  val: swing ( frames to delay )
+  5 swing!
   val: freq 440 freq!
 
   : at  ( i -- v ) seq + b@ ;
@@ -180,6 +182,8 @@ MODULE
   ( ----- sequencer ----- )
 
   val: elapsed
+
+  : swinged idx 2 mod IF 0 ELSE swing THEN dur + ;
 
   : trigger
     idx at ?dup 0 = IF RET THEN
@@ -196,7 +200,7 @@ MODULE
     playing not IF RET THEN
     elapsed dup inc elapsed! not [ trigger ] ;IF
     detrigger
-    elapsed dur >= IF 0 elapsed! next THEN
+    elapsed swinged >= IF 0 elapsed! next THEN
   ;
 
   : clear 0 idx! 0 elapsed! ;
