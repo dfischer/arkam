@@ -87,3 +87,14 @@ done
 echo "===== forth.sol ====="
 
 ./bin/arkam bin/forth_test.ark || exit 1
+
+
+
+echo "===== forth ====="
+
+for src in test/forth/*.f
+do
+    echo -n "$src .."
+    ./bin/forth $src || exit 1
+    echo "ok"
+done

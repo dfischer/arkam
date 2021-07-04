@@ -14,8 +14,7 @@ END
 foo [ 42 swap >bar ] entity:each
 
 foo [
-  dup .. dup bar .
   bar 42 = [ "failed" panic ] unless
 ] entity:each
 
-
+0 bye
