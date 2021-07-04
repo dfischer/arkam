@@ -51,7 +51,7 @@ MODULE
 
   : handle_get ( cs state -- )
     ( run )    [ ( id cs -- v ) get ]
-    ( compile )[ ( xt -- ) "LIT" forth:compile, , &get , ]
+    ( compile )[ ( xt -- ) LIT, &get , ]
     forth:handle_mode
   ;
 
@@ -64,7 +64,7 @@ MODULE
 
   : handle_set ( cs state -- )
     ( run )    [ ( v id cs -- ) set ]
-    ( compile )[ ( cs -- ) "LIT" forth:compile, , &set , ]
+    ( compile )[ ( cs -- ) LIT, &set , ]
     forth:handle_mode
   ;
 

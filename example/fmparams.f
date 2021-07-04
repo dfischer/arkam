@@ -115,7 +115,7 @@ MODULE
   ;
 
   ( init )
-  MARKER <init>
+  MARKER: <init>
     rand:init
     steps [ 2 rand IF 0 ELSE dur 2 - THEN swap at! ] for
   <init>

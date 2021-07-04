@@ -1,7 +1,7 @@
 : <IMMED> &handle:immed forth:latest forth:handler! ; <IMMED>
 
-
 : ?h <IMMED> "HERE" prn ; ( debug )
+
 
 
 : # <IMMED>
@@ -14,6 +14,7 @@
 ;
 
 
+
 ( --- stack --- )
 
 : tuck ( a b -- b a b ) swap over ;
@@ -23,10 +24,15 @@
 : pushdown ( b c a -- a b c ) swap >r swap r> ;
 
 
+
 ( --- shorthand/util --- )
+
 : as: const: ;
 
 : compile, forth:compile, ;
+
+: LIT, &LIT @ , , ; # v --
+: RET, &RET @ , ;
 
 : forth:handle_mode ( xt state q_run q_compile -- .. )
   # q: ( xt -- )
@@ -44,7 +50,45 @@
 ;
 
 
+
+( ----- marker ----- )
+
+: marker ( name -- )
+  forth:create
+  LIT, "here!" compile,
+  LIT, "forth:latest!" compile,
+  RET,
+;
+
+: MARKER: ( name: -- )
+  forth:latest here
+  in:read [ "marker name required" panic ] unless
+  marker
+;
+
+
+
+( ----- test ----- )
+
+: ASSERT ( v s )
+  swap IF drop ELSE "Assertion failed: " epr panic THEN
+;
+
+: CHECK ( s q -- ) # q: -- ok?
+  # Call q then check TOS is true and sp is balanced
+  # or die with printing s.
+  # Quotation q should not remain values on rstack
+  swap >r >r sp r> swap >r ( r: s sp )
+  call
+  not IF rdrop "Failed: " epr r> panic THEN
+  sp r> = not IF "Stack imbalance: " epr r> panic THEN
+  rdrop
+;
+
+
+
 ( --- Generic structure closer --- )
+
 : END <IMMED> ( q -- ) >r ;
 
 
@@ -109,8 +153,8 @@ MODULE
   # for referencing(&valname), VAL: uses their own handlers
 
   : handle_getter ( xt state -- )
-    [ @                                         ]
-    [ "LIT" forth:compile, , "@" forth:compile, ]
+    [ @                 ]
+    [ LIT, "@" compile, ]
     forth:handle_mode
   ;
   
@@ -121,8 +165,8 @@ MODULE
   ;
 
   : handle_setter
-    [ !                                         ]
-    [ "LIT" forth:compile, , "!" forth:compile, ]
+    [ !                 ]
+    [ LIT, "!" compile, ]
     forth:handle_mode
   ;
 
@@ -168,10 +212,11 @@ END
   in:read [ "a char required" panic ] unless
   b@
   forth:mode
-  forth:compile_mode [ "LIT" forth:compile, , ] ;CASE
-  forth:run_mode     [ ( noop )               ] ;CASE
+  forth:compile_mode [ LIT,     ] ;CASE
+  forth:run_mode     [ ( noop ) ] ;CASE
   ? "unknown mode" panic
 ;
+
 
 
 ( ----- struct ----- )
@@ -193,23 +238,12 @@ MODULE
     in:read [ "field name required" panic ] unless
     forth:create
     swap >r over
-    "LIT" forth:compile, , "+" forth:compile, "RET" forth:compile,
+    LIT, "+" compile, RET,
     + r>
   ;
   
 END
 
-
-( ----- marker ----- )
-
-: MARKER ( name: -- )
-  forth:latest here
-  in:read [ "marker name required" panic ] unless
-  forth:create
-  "LIT" compile, , "here!" compile,
-  "LIT" compile, , "forth:latest!" compile,
-  "RET" compile,
-;
 
 
 ( ----- loadfile ----- )
