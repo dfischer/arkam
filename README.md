@@ -1,4 +1,4 @@
-# Arkam - Stack Machine VM
+# Arkam - Stack VM
 
 ![Arkam](misc/logo.png)
 
@@ -8,8 +8,10 @@ Purposes
 - Sound/Graphic tinkering environment
 
 
+
 # Status
 
+- 2021-07-04 switched to forth from sol
 - 2021-05-06 start
 
 
@@ -19,7 +21,7 @@ Purposes
 - [uxn](https://wiki.xxiivv.com/site/uxn.html)
 - [Mako](https://github.com/JohnEarnest/Mako)
 - [Retro](http://www.retroforth.org/)
-- Nested word from [Reforth](https://github.com/seanpringle/reforth)
+- (SOL) Nested word from [Reforth](https://github.com/seanpringle/reforth)
 
 
 
