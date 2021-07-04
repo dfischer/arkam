@@ -6,6 +6,9 @@ require: lib/fm.f
 
 fm:deluxe_color 4 [ ppu:palette_color! ] for
 
+0 fm:voice!
+0 fm:operator!
+
 
 ( ===== slider ===== )
 
@@ -27,7 +30,8 @@ MODULE
     COMPONENT y
     COMPONENT right
     COMPONENT v
-    COMPONENT callback
+    COMPONENT callback ( v param -- )
+    COMPONENT param
     COMPONENT barpos ( x )
   END
 
@@ -45,7 +49,7 @@ MODULE
 
   : v! ( v id -- )
     dup >r update! r> id!
-    id callback ?dup IF id v swap call THEN
+    id callback ?dup IF id v swap id param swap call THEN
   ;
 
   : draw_border
@@ -88,10 +92,11 @@ MODULE
   # example:
   #  val: freq
   #  slider:new
-  #    [ freq! ] slider:callback!
+  #    [ drop freq! ] slider:callback!
   #    200 8   slider:size!
   #    10  10  slider:pos!
   #    400 880 slider:range!
+  #    0       slider:param!
   #    slider:validate!
   #    as: freq_slider
 
@@ -117,6 +122,8 @@ MODULE
   ;
 
   : slider:callback! ( id q -- id ) over >callback ;
+
+  : slider:param! ( id p -- id ) over >param ;
 
   : slider:v ( id -- v ) v ;
   : slider:v! ( v id -- ) v! ;
@@ -159,8 +166,8 @@ MODULE
   val: idx ( current playing )
   val: playing
   val: dur ( frames per step )
-
-  10 dur!
+  20 dur!
+  val: freq 440 freq!
 
   : at  ( i -- v ) seq + b@ ;
   : at! ( v i -- ) seq + b! ;
@@ -170,13 +177,37 @@ MODULE
   : life  ( -- v ) lifes idx + b@ ;
   : life! ( v -- ) lifes idx + b! ;
 
-  ( ----- update ----- )
+  ( ----- sequencer ----- )
 
-  : update ;
+  val: elapsed
+
+  : trigger
+    idx at ?dup 0 = IF RET THEN
+    life!
+    freq fm:play
+  ;
+
+  : detrigger
+    life dec dup life!
+    1 < IF fm:stop THEN
+  ;
+
+  : update
+    playing not IF RET THEN
+    elapsed dup inc elapsed! not [ trigger ] ;IF
+    detrigger
+    elapsed dur >= IF 0 elapsed! next THEN
+  ;
+
+  : clear 0 idx! 0 elapsed! ;
+
+  : play_all clear yes playing! ;
+
+  : stop_all clear fm:stop no playing! ;
 
   ( ----- draw ----- )
 
-  100 as: ox  10 as: oy
+  val: ox  val: oy
   4 as: rows  4 as: cols  4 as: pad
   8 as: w  8 as: h
   val: dx  val: dy  val: row  val: col
@@ -203,50 +234,111 @@ MODULE
     ] for
   ;
 
+  ( init )
+  MARKER <init>
+    rand:init
+    steps [ 2 rand IF 0 ELSE 5 THEN swap at! ] for
+  <init>
+
 ---EXPOSE---
 
-  : seq:draw ( x y -- ) update draw_all ;
+  200 ox! 10 oy!
 
-  : seq:play ;
-  : seq:stop ;
+  : seq:pos! ( x y -- ) oy! ox! ;
+  : seq:draw ( -- ) update draw_all ;
+
+  : seq:play play_all ;
+  : seq:stop stop_all ;
+
+  : seq:freq! freq! ;
 
 END
 
 
 
-0 fm:voice!
+( ===== params ===== )
 
-val: freq
-slider:new
-  [ freq! ] slider:callback!
-  40 8    slider:size!
-  10 10   slider:pos!
-  440 880 slider:range!
-  slider:validate!
-  drop
+MODULE
+  16 as: max
 
-: label-freq freq 52 10 put_dec ;
+  max ENTITY sliders
+    COMPONENT callback
+    COMPONENT val
+    COMPONENT vx
+    COMPONENT vy
+    COMPONENT label
+    COMPONENT lx
+    COMPONENT ly
+  END
+
+  val: id
+  
+  40 as: swidth
+  8  as: sheight
+  4  as: pad
+  val: ox val: oy
+  7 4 * as: lwidth
+
+  : run ( v id -- ) 2dup >val callback >r ;
+
+  : val_pos!   ( ox oy ) id >vy lwidth + swidth + pad + pad + id >vx ;
+  : label_pos! ( ox oy ) id >ly id >lx ;
+  : slider_pos ( ox oy -- sx sy ) [ lwidth + pad + ] dip ;
+
+  : new_slider ( x y min max label callback -- )
+    sliders entity:new [ "Too many sliders" panic ] unless id!
+    id >callback
+    id >label
+
+    slider:new
+      id   slider:param!
+      &run slider:callback!
+      swidth sheight slider:size!
+      pushdown slider:range!
+      ( ox oy sid )
+      >r
+        2dup val_pos!
+        2dup label_pos!
+        slider_pos
+      r> pushdown ( sid sx sy )
+      slider:pos!
+      slider:validate!
+    drop
+  ;
+
+  : draw_label id lx id ly id label put_text ;
+
+  : draw_num id val id vx id vy put_dec ;
+
+  : draw_all
+    sliders [ id! draw_label draw_num ] entity:each
+  ;
+
+  : all_op ( v q -- ) 4 [ fm:operator! 2dup call ] for 2drop ;
+
+  val: freq
+  10 10 440 880 "freq" [ dup freq! seq:freq! ] new_slider
+  10 20 0   7   "algo" [ fm:algo! ] new_slider
+  10 30 0   255 " atk" [ [ fm:attack!  ] all_op ] new_slider
+  10 40 0   255 " dcy" [ [ fm:decay!   ] all_op ] new_slider
+  10 50 0   255 " sus" [ [ fm:sustain! ] all_op ] new_slider
+  10 60 0   255 " rel" [ [ fm:release! ] all_op ] new_slider
+  10 70 0   3   "wave" [ [ fm:wave!    ] all_op ] new_slider
+
+---EXPOSE---
+
+  : params:draw draw_all ;
+
+END
 
 
-val: op
-slider:new
-  [ op! ] slider:callback!
-  40 8  slider:size!
-  10 20 slider:pos!
-  0  3  slider:range!
-  slider:validate!
-  drop
-
-: label-op op 52 20 put_dec ;
-
-
-0 10 100 "play" [ freq fm:play ] txtbtn:create drop
+0 10 100 "play" [ seq:play ] txtbtn:create drop
+0 10 110 "stop" [ seq:stop ] txtbtn:create drop
 
 [
   mgui:update
   slider:draw
-  label-freq
-  label-op
+  params:draw
   seq:draw
 ] draw_loop:register
 

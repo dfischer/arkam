@@ -26,6 +26,8 @@
 ( --- shorthand/util --- )
 : as: const: ;
 
+: compile, forth:compile, ;
+
 : forth:handle_mode ( xt state q_run q_compile -- .. )
   # q: ( xt -- )
   pullup
@@ -197,6 +199,17 @@ MODULE
   
 END
 
+
+( ----- marker ----- )
+
+: MARKER ( name: -- )
+  forth:latest here
+  in:read [ "marker name required" panic ] unless
+  forth:create
+  "LIT" compile, , "here!" compile,
+  "LIT" compile, , "forth:latest!" compile,
+  "RET" compile,
+;
 
 
 ( ----- loadfile ----- )
