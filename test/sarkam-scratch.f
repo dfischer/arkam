@@ -217,6 +217,29 @@ MODULE
   val: dx  val: dy  val: row  val: col
   val: cur ( current drawing idx )
 
+  val: pressed  val: mval  val: mx  val: my  val: mi
+  : width  w cols * pad cols * + ;
+  : height h rows * pad rows * + ;
+  : hover? mouse:x mouse:y ox oy width height hover_rect? ;
+  : where
+    mouse:x ox - w pad + / mx!
+    mouse:y oy - h pad + / my!
+    my rows * mx + mi!
+  ;
+  : place mval mi at! ;
+  : paint hover? not IF RET THEN where place ;
+  : press
+    yes pressed!
+    where mi at IF 0 ELSE dur 2 - THEN mval!
+    place
+  ;
+  : handle_mouse
+    mouse:lp not IF no pressed! RET THEN
+    pressed IF paint RET THEN
+    hover? not IF RET THEN
+    press
+  ;
+
   : row_y! h pad + * oy + dy! ;
   : col_x! w pad + * ox + dx! ;
   : col! row cols * + cur! ;
@@ -229,6 +252,7 @@ MODULE
   ;
 
   : draw_all
+    handle_mouse
     rows [ dup row! row_y!
       cols [ dup col! col_x!
         draw_cursor
@@ -241,7 +265,7 @@ MODULE
   ( init )
   MARKER <init>
     rand:init
-    steps [ 2 rand IF 0 ELSE 5 THEN swap at! ] for
+    steps [ 2 rand IF 0 ELSE dur 2 - THEN swap at! ] for
   <init>
 
 ---EXPOSE---
