@@ -84,6 +84,16 @@ MODULE
 ---EXPOSE---
 
   # range: 0 <= v <= max
+  #
+  # example:
+  #  val: freq
+  #  slider:new
+  #    [ freq! ] slider:callback!
+  #    200 8   slider:size!
+  #    10  10  slider:pos!
+  #    400 880 slider:range!
+  #    slider:validate!
+  #    as: freq_slider
 
   : slider:new ( -- id )
     slider entity:new [ "Too many sliders" panic ] unless ;
@@ -102,6 +112,7 @@ MODULE
     pullup id!
     2dup swap - id >vrange
     inc id >vmax id >vmin
+    id vmin id v!
     id
   ;
 
@@ -110,6 +121,17 @@ MODULE
   : slider:v ( id -- v ) v ;
   : slider:v! ( v id -- ) v! ;
   : slider:update! ( v id -- ) update! ;
+
+  : slider:validate ( id -- err ng | id ok ) id!
+    id v id vmin <  [ "Out of range" ng ] ;IF
+    id v id vmax >= [ "Out of range" ng ] ;IF
+    id width  0 <=  [ "No width"     ng ] ;IF
+    id height 0 <=  [ "No height"    ng ] ;IF
+    id ok
+  ;
+
+  : slider:validate! ( id -- id )
+    slider:validate [ panic ] unless ;
 
   : ?slider ( id -- id )
     "v " epr dup v .
@@ -133,22 +155,24 @@ END
 
 val: freq
 slider:new
-  40 8   slider:size!
-  10 10  slider:pos!
-  440 880 slider:range!
   [ freq! ] slider:callback!
-  440 swap slider:v!
+  40 8    slider:size!
+  10 10   slider:pos!
+  440 880 slider:range!
+  slider:validate!
+  drop
 
 : label-freq freq 52 10 put_dec ;
 
 
 val: op
 slider:new
+  [ op! ] slider:callback!
   40 8  slider:size!
   10 20 slider:pos!
   0  3  slider:range!
-  [ op! ] slider:callback!
-  0 swap slider:v!
+  slider:validate!
+  drop
 
 : label-op op 52 20 put_dec ;
 
