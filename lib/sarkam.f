@@ -214,8 +214,6 @@ val: mouse:rp
 &mouse:lx &mouse:ly &mouse:lp mouse:left!
 &mouse:rx &mouse:ry &mouse:rp mouse:right!
 
-: mouse:listen emu:poll ;
-
 
 
 ( ===== put text/num ===== )

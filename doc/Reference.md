@@ -309,12 +309,6 @@ Emulator Operation.
 1 cursor_show ( ? -- )
    0: hide
   -1: show
-
-2 poll_steps ( n -- )
-  steps to poll device events
-
-3 poll ( -- )
-  force polling
 ```
 
 

@@ -641,22 +641,15 @@ Code run(VM* vm) {
   Uint64 previous = SDL_GetPerformanceCounter();
   Uint64 current;
   double elapsed;
-  int poll_counter = 0;
 
   while (1) {
     render_ppu(ppu);
     ppu->req_redraw = 0;
+    poll_sdl_event(vm, ppu);
 
     while (!ppu->req_redraw) {
-      poll_sdl_event(vm, ppu);
-      req_poll = 0;
-      poll_counter = 0;
-
-      while (!req_poll && poll_counter < poll_step) {
         code = ark_step(vm);
         if (code != ARK_OK) return code;
-        poll_counter++;
-      }
     }
 
     // adjust frame rate

@@ -18,9 +18,9 @@ MODULE
   val: idx ( current playing )
   val: playing
   val: dur ( frames per step )
-  15 dur!
+  10 dur!
   val: swing ( frames to delay )
-  3 swing!
+  1 swing!
   val: freq 440 freq!
 
   : at  ( i -- v ) seq + b@ ;
@@ -123,7 +123,9 @@ MODULE
 ---EXPOSE---
 
   : seq:pos! ( x y -- ) oy! ox! ;
-  : seq:draw ( -- ) update draw_all ;
+
+  : seq:update ( -- ) update ;
+  : seq:draw ( -- ) draw_all ;
 
   : seq:play play_all ;
   : seq:stop stop_all ;
@@ -228,6 +230,7 @@ END
 
 
 [
+  seq:update
   mgui:update
   params:draw
   seq:draw

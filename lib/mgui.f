@@ -263,7 +263,6 @@ END
 
 
 : mgui:update
-  mouse:listen
   btn:draw_all
   slider:draw_all
 ;
