@@ -52,23 +52,6 @@
 
 
 
-( ----- marker ----- )
-
-: marker ( name -- )
-  forth:create
-  LIT, "here!" compile,
-  LIT, "forth:latest!" compile,
-  RET,
-;
-
-: MARKER: ( name: -- )
-  forth:latest here
-  in:read [ "marker name required" panic ] unless
-  marker
-;
-
-
-
 ( ----- test ----- )
 
 : ASSERT ( v s )
@@ -125,6 +108,8 @@
 ( ----- string ----- )
 
 
+: memclear ( adr len -- ) [ 0 over b! inc ] times drop ;
+
 : s:append! ( dst what -- )
   ( no check )
   >r [ dup b@ IF inc GO ELSE STOP THEN ] while r> ( dst what )
@@ -147,6 +132,33 @@
   # max includes null termination
   over s:len 1 + >=
 ;
+
+
+
+( ----- marker ----- )
+
+MODULE
+
+: sweep ( here latest -- )
+  forth:latest! here over here! ( start end )
+  over - memclear
+  rdrop ( return through cleared marker )
+;
+
+---EXPOSE---
+
+: marker ( name -- )
+  >r forth:latest here
+  r> forth:create
+  LIT, LIT, &sweep , ( returned from sweep )
+;
+
+: MARKER: ( name: -- )
+  in:read [ "marker name required" panic ] unless
+  marker
+;
+
+END
 
 
 

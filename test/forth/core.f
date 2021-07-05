@@ -98,3 +98,30 @@ x 123 = "out of module - no exposed" ASSERT
 MODULE END
 
 <MODULE>
+
+
+
+MARKER: <STRING>
+
+256 as: len
+len allot as: buf
+len dec as: max
+
+: clear buf len  memclear ;
+
+"memclear" [
+  1 buf max + b!
+  clear
+  buf max + b@ 0 = "after memclear" ASSERT
+  ok
+] CHECK
+
+"s:append! 0+foo" [
+  buf "foo" s:append!
+  buf "foo" s= "0+foo" ASSERT
+  clear
+  ok
+] CHECK
+
+
+<STRING>
