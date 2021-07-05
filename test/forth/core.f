@@ -43,6 +43,27 @@ MARKER: <STACK>
 
 
 
+MARKER: <CONTROLFLOW>
+
+: test;when   [ yes ] ;when   no ;
+: test;unless [ yes ] ;unless no ;
+
+";when" [
+  yes test;when     ";when yes" ASSERT
+  no  test;when not ";when no"  ASSERT
+  ok
+] CHECK
+
+";unless" [
+  yes test;unless not ";unless yes" ASSERT
+  no  test;unless     ";unless no"  ASSERT
+  ok
+] CHECK
+
+<CONTROLFLOW>
+
+
+
 MARKER: <FORTH>
 
 : foo [do 3 LIT, RET, ] ;
