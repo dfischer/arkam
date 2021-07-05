@@ -51,3 +51,50 @@ MARKER: <FORTH>
 "LIT, and RET," [ foo 3 = ] CHECK
 
 <FORTH>
+
+
+
+MARKER: <NUM>
+
+"clamp" [
+  0 1 4 clamp 1 = "clamp under"  ASSERT
+  1 1 4 clamp 1 = "clamp min"    ASSERT
+  2 1 4 clamp 2 = "clamp middle" ASSERT
+  3 1 4 clamp 3 = "clamp max"    ASSERT
+  4 1 4 clamp 3 = "clamp over"   ASSERT
+  ok
+] CHECK
+
+<NUM>
+
+
+
+MARKER: <MODULE>
+
+123 as: x
+
+MODULE
+  234 as: x
+---EXPOSE---
+  123 as: y
+  x 234 = "in module" ASSERT
+END
+
+x 123 = "out of module" ASSERT
+y 123 = "module exposed" ASSERT
+
+
+( ----- no exposed ----- )
+
+MODULE
+  234 as: x
+  x 234 = "in module - no exposed" ASSERT
+END
+
+x 123 = "out of module - no exposed" ASSERT
+
+
+( ----- no content ----- )
+MODULE END
+
+<MODULE>

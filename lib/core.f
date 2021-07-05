@@ -79,10 +79,18 @@
   # Call q then check TOS is true and sp is balanced
   # or die with printing s.
   # Quotation q should not remain values on rstack
+
   swap >r >r sp r> swap >r ( r: s sp )
   call
+
+  # check stack balacne first to avoid invalid result
+  sp cell + ( sp + result )
+  r> != IF "Stack imbalance: " epr r> panic THEN
+
+  # check result
   not IF rdrop "Failed: " epr r> panic THEN
-  sp r> = not IF "Stack imbalance: " epr r> panic THEN
+
+  # drop description
   rdrop
 ;
 
@@ -96,17 +104,21 @@
 
 ( ----- Module ----- )
 
-: MODULE ( -- start start closer )
-  forth:latest dup
-  [ ( start end -- )
-    [ 2dup = [ 2drop STOP ] ;IF
-      dup forth:hide! forth:next GO
-    ] while
-  ]
+: forth:hide_range ( start end -- )
+  # hide  start < word <= end
+  [ 2dup = [ 2drop STOP ] ;IF
+    dup forth:hide! forth:next GO
+  ] while
 ;
 
-: ---EXPOSE--- ( start start closer -- start latest closer )
-  nip forth:latest swap ;
+: MODULE ( -- start closer )
+  forth:latest 
+  [ forth:latest forth:hide_range ]
+;
+
+: ---EXPOSE--- ( start closer -- start end closer )
+  drop forth:latest &forth:hide_range
+;
 
 
 
