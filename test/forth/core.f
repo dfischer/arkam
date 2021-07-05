@@ -174,3 +174,24 @@ len dec as: max
 
 
 <STRING>
+
+
+
+MARKER: <VAL>
+
+val: x
+
+"val" [
+  yes x!
+  x "val set/get" ASSERT
+
+  123 x!
+  &x @ 123 = "val addr" ASSERT
+
+  234 &x! call
+  x 234 = "val setter reference" ASSERT
+
+  ok
+] CHECK
+
+<VAL>

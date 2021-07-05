@@ -189,16 +189,19 @@ MODULE
   ;
 
   : handle_setter
-    [ !                 ]
-    [ LIT, "!" compile, ]
+    # xt: LIT addr ! RET
+    [ >r                         ] ( just call )
+    [ cell + @ LIT, "!" compile, ] ( inline )
     forth:handle_mode
   ;
 
   : create_setter ( addr -- )
+    # LIT addr ! RET
+    # this design for &foo! to work correctly
     buf "!" max s:append drop
     buf forth:create
-    forth:latest forth:xt!
     &handle_setter forth:latest forth:handler!
+    LIT, "!" compile, RET,
   ;
 
 ---EXPOSE---
