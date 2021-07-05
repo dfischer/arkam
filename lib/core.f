@@ -2,6 +2,7 @@
 
 : ?h <IMMED> "HERE" prn ; ( debug )
 
+: [do <IMMED> forth:mode forth:run_mode! [ forth:mode! ] ;
 
 
 : # <IMMED>

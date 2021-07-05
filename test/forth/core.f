@@ -41,3 +41,13 @@ MARKER: <STACK>
 ] CHECK
 
 <STACK>
+
+
+
+MARKER: <FORTH>
+
+: foo [do 3 LIT, RET, ] ;
+
+"LIT, and RET," [ foo 3 = ] CHECK
+
+<FORTH>

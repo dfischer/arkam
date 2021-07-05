@@ -316,6 +316,8 @@
 
   ( setup core words )
   : corewords
+    : LIT, "LIT" compile, , ;
+    : RET, "RET" compile, ;
     : core ( name xt -- ) swap dict:create dict:latest dict:xt! ;
     : immed ( name xt -- ) core &handle_immed    dict:latest dict:handler! ;
     : const ( name v -- )  core &handle_data     dict:latest dict:handler! ;
@@ -329,19 +331,14 @@
       eval:read not IF "const name required" panic END
       eval:buf swap const
     ;
-    : open_quot ( -- compile: &quot &back mode | run: &quot mode )
+    : open_quot ( -- compile: &quot &back q | run: &quot q )
       here:align!
       mode
-      compile_mode [ "JMP" compile, here 0 , here swap mode compile_mode! ] ;CASE
-      run_mode     [ here                              mode compile_mode! ] ;CASE
+      compile_mode [ "JMP" compile, here 0 , here swap [ RET, here swap ! LIT, ] ] ;CASE
+      run_mode     [ here:align! here compile_mode! [ RET, run_mode! ] ] ;CASE
       unknown_mode
     ; 
-    : close_quot ( &quot &back compile_mode | &quot run_mode -- )
-      "RET" compile, dup mode! ( restore mode )
-      compile_mode [ here swap ! "LIT" compile, ,     ] ;CASE
-      run_mode     [ ( remain quotation addr on TOS ) ] ;CASE
-      unknown_mode
-    ; ( mode &quot &back -- )
+    : close_quot ( &quot &back q | &quot q -- ) >r ;
     : include ( fname -- ) eval:include ;
     : include_colon eval:read not IF "file name required" panic END eval:buf include ;
     ( ----- require ----- )
@@ -556,6 +553,7 @@
       "forth:name!"    &dict:name!    core
 
       "forth:mode"          [ mode ] core
+      "forth:mode!"         [ mode! ] core
       "forth:run_mode!"     &run_mode!     core
       "forth:compile_mode!" &compile_mode! core
       "forth:run_mode"      [ run_mode     ] core
