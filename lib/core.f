@@ -26,6 +26,13 @@
 
 
 
+( --- controll flow --- )
+
+: ;when   ( v q -- ) swap IF rdrop >r ELSE drop THEN ;
+: ;unless ( v q -- ) swap IF drop ELSE rdrop >r THEN ;
+
+
+
 ( --- shorthand/util --- )
 
 : as: const: ;
@@ -133,6 +140,32 @@
 ;
 
 
+MODULE # ----- s:each_line! -----
+
+  # destructive!
+  # Every newline in s will be replaced by 0
+
+  : getline ( src -- src+ line yes | no )
+    dup b@ [ drop no ] ;unless
+    dup ( line src )
+    [ dup b@
+      0  [ yes STOP ] ;CASE
+      10 [ [ inc ] [ 0 swap b! ] biq yes STOP ] ;CASE
+      drop inc GO
+    ] while
+  ;
+  
+---EXPOSE---
+
+  : s:each_line! ( s q -- )
+    [ >r getline not IF rdrop STOP RET THEN
+      i swap >r call r> r>  GO
+    ] while
+  ;
+  
+END
+
+
 
 ( ----- marker ----- )
 
@@ -214,7 +247,11 @@ MODULE
     create_getter
     create_setter
   ;
-  
+
+  : inc! ( addr -- ) dup @ inc swap ! ;
+  : dec! ( addr -- ) dup @ dec swap ! ;
+  : update! ( addr q -- ) swap dup >r @ swap call r> ! ;
+
 END
 
 
@@ -312,4 +349,3 @@ MODULE
   : filedata cell + ; # & -- &data
   
 END
-
