@@ -195,3 +195,18 @@ val: x
 ] CHECK
 
 <VAL>
+
+
+
+MARKER: <CHAR>
+
+64 as: atmark
+
+"char:" [
+  CHAR: @ atmark = "char: in compile mode" ASSERT
+  ok
+] CHECK
+
+CHAR: @ atmark = "char: in run mode" ASSERT
+
+<CHAR>
