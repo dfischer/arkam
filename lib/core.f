@@ -26,6 +26,14 @@
 
 
 
+( --- memory --- )
+
+: inc! ( addr -- ) dup @ inc swap ! ;
+: dec! ( addr -- ) dup @ dec swap ! ;
+: update! ( addr q -- ) swap dup >r @ swap call r> ! ;
+
+
+
 ( --- controll flow --- )
 
 : ;when   ( v q -- ) swap IF rdrop >r ELSE drop THEN ;
@@ -247,10 +255,6 @@ MODULE
     create_getter
     create_setter
   ;
-
-  : inc! ( addr -- ) dup @ inc swap ! ;
-  : dec! ( addr -- ) dup @ dec swap ! ;
-  : update! ( addr q -- ) swap dup >r @ swap call r> ! ;
 
 END
 

@@ -210,6 +210,21 @@ val: x
   ok
 ] CHECK
 
+"val update" [
+  123 x!
+
+  &x inc!
+  x 124 = "&val inc!" ASSERT
+
+  &x dec!
+  x 123 = "&val dec!" ASSERT
+
+  &x [ inc ] update!
+  x 124 = "&val update!" ASSERT
+
+  ok
+] CHECK
+
 <VAL>
 
 
