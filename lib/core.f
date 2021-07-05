@@ -71,7 +71,7 @@
   r> != IF "Stack imbalance: " epr r> panic THEN
 
   # check result
-  not IF rdrop "Failed: " epr r> panic THEN
+  not IF "Failed: " epr r> panic THEN
 
   # drop description
   rdrop
@@ -108,6 +108,12 @@
 ( ----- string ----- )
 
 
+: s:check ( str max -- str ok? )
+  # check length
+  # max includes null termination
+  over s:len 1 + >=
+;
+
 : memclear ( adr len -- ) [ 0 over b! inc ] times drop ;
 
 : s:append! ( dst what -- )
@@ -124,13 +130,6 @@
   >r 2dup &s:len bia + inc r>
   > [ 2drop ng ] ;IF
   s:append! ok
-;
-
-
-: s:check ( str max -- str ok? )
-  # check length
-  # max includes null termination
-  over s:len 1 + >=
 ;
 
 

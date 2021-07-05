@@ -1,7 +1,6 @@
 require: lib/core.f
 
 
-
 MARKER: <TEST-TOOLS>
 
 ok "ASSERT" ASSERT
@@ -103,11 +102,31 @@ MODULE END
 
 MARKER: <STRING>
 
+"s:len" [
+  ok
+] CHECK
+
+
+: scheck s:check nip ; # str max -- ?
+"s:check" [
+  "foo" 3 scheck not "s:check exclude null" ASSERT
+  "foo" 4 scheck     "s:check include null" ASSERT
+
+  "" 0 scheck not "s:check 0 exc.null" ASSERT
+  "" 1 scheck     "s:check 0 inc.null" ASSERT
+
+  ok
+] CHECK
+
+
+( ----- with buffer ----- )
+
 256 as: len
 len allot as: buf
 len dec as: max
 
-: clear buf len  memclear ;
+: clear buf len memclear ;
+
 
 "memclear" [
   1 buf max + b!
@@ -116,10 +135,40 @@ len dec as: max
   ok
 ] CHECK
 
-"s:append! 0+foo" [
+: >buf clear buf swap s:append! ;
+
+"s:append!" [
+  clear
   buf "foo" s:append!
   buf "foo" s= "0+foo" ASSERT
+
+  "foo" >buf
+  buf "bar" s:append!
+  buf "foobar" s= "foo+bar" ASSERT
+
+  "foo" >buf
+  buf "" s:append!
+  buf "foo" s= "foo+0" ASSERT
+
   clear
+  buf s:len 0 = "0+0" ASSERT
+
+  ok
+] CHECK
+
+
+"s:append" [
+  "foo" >buf
+  buf "" max s:append "s:append foo+0 len" ASSERT
+  buf "foo" s= "s:append foo+0" ASSERT
+
+  clear
+  buf "" max s:append "s:append 0+0" ASSERT
+
+  "foo" >buf
+  buf "bar" 6 s:append not "s:append exclude null" ASSERT
+  buf "bar" 7 s:append     "s:append include null" ASSERT
+
   ok
 ] CHECK
 
