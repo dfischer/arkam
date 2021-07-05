@@ -268,6 +268,8 @@ MODULE
     LIT, "+" compile, RET,
     + r>
   ;
+
+  : cell: ( offset q -- offset+n q ) cell field: ;
   
 END
 
@@ -310,3 +312,4 @@ MODULE
   : filedata cell + ; # & -- &data
   
 END
+

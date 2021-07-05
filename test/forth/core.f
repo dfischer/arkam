@@ -210,3 +210,26 @@ MARKER: <CHAR>
 CHAR: @ atmark = "char: in run mode" ASSERT
 
 <CHAR>
+
+
+
+MARKER: <STRUCT>
+
+STRUCT foo
+  3 field: a
+  cell field: b
+  cell: c
+END
+
+"struct" [
+  foo 11 = "struct size" ASSERT
+
+  foo a  foo       = "struct 1st field" ASSERT
+  foo b  foo 3 +   = "struct 2nd field" ASSERT
+  foo c  foo b 4 + = "struct 3rd field" ASSERT
+
+  ok
+] CHECK
+
+<STRUCT>
+
