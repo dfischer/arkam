@@ -144,9 +144,10 @@
   ;
 
   ( ----- eval ----- )
+  : eval_header ( header -- ) [ dict:xt ] [ dict:handler ] biq mode swap call ;
   : eval_token_from ( name link -- found? )
     dict:find_from not IF no RET END # -- header
-    [ dict:xt ] [ dict:handler ] biq mode swap call ok ;
+    eval_header ok ;
   ( testing from latest )
   : eval_token ( name -- found? ) dict:latest eval_token_from ;
   : eval_token_in ( name mode -- found? )
@@ -541,6 +542,7 @@
       "forth:create"   &dict:create   core
       "forth:latest"   [ dict:latest  ] core
       "forth:latest!"  [ dict:latest! ] core
+      "forth:find"     &dict:find     core
       "forth:next"     &dict:next     core
       "forth:show!"    &dict:show!    core
       "forth:hide!"    &dict:hide!    core
@@ -559,6 +561,7 @@
       "forth:run_mode"      [ run_mode     ] core
       "forth:compile_mode"  [ compile_mode ] core
       "forth:compile," &compile, core
+      "forth:handle"   &eval_header core ( header -- .. )
 
       "handle:normal"   &handle_normal  core
       "handle:immed"    &handle_immed   core

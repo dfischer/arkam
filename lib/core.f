@@ -50,6 +50,12 @@
 : LIT, &LIT @ , , ; # v --
 : RET, &RET @ , ;
 
+: POSTPONE: ( name: -- ) <IMMED>
+  in:read [ "word name required" panic ] unless
+  dup forth:find [ epr " ?" panic ] unless nip
+  LIT, &forth:handle ,
+;
+
 : forth:handle_mode ( xt state q_run q_compile -- .. )
   # q: ( xt -- )
   pullup
