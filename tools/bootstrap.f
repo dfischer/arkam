@@ -1,7 +1,7 @@
 require: lib/core.f
 
 
-val: verbose  yes verbose!
+val: verbose  no verbose!
 
 : [verbose <IMMED>
   verbose IF [ ( noop ) ] RET THEN
@@ -16,8 +16,8 @@ val: verbose  yes verbose!
 ( ===== Image area and There pointer ===== )
 
 : kilo 1000 * ;
-256 kilo         as: image_size
-image_size allot as: image_area
+256 kilo        as: image_max
+image_max allot as: there
 
 
 ( memory layout )
@@ -27,42 +27,60 @@ image_size allot as: image_area
 0x10 as: addr_begin
 
 
-( pointer )
+( relative pointer )
 
-val: there   image_area there!
 val: mhere
 
-: mhere! dup mhere! there addr_here + ! ; # save mhere at image
+: m>t there + ; # &meta -- &there
+: t>m there - ; # &there -- &meta
 
-: there! ( adr -- )
-  dup image_area              <  IF .. "invalid there" panic THEN
-  dup image_size - image_area >= IF .. "invalid there" panic THEN
-  dup image_area - mhere!
-  there!
+: m@  m>t @ ;
+: m!  m>t ! ;
+: bm@ m>t b@ ;
+: bm! m>t b! ;
+
+: mhere! ( adr -- )
+  dup 0             <  IF .. "invalid mhere" panic THEN
+  dup image_max - 0 >= IF .. "invalid mhere" panic THEN
+  dup mhere!
+  addr_here m!
 ;
 
-: mhere! ( adr -- ) image_area + there! ;
 
-: there:align! there align there! ;
-: t,  there !  there cell + there! ;
-: bt, there b! there inc    there! ;
+: mhere:align! mhere align mhere! ;
 
-: mhere:align! there:align! ;
-: m,  t,  ;
-: bm, bt, ;
+: m,  mhere m!  mhere cell + mhere! ;
+: bm, mhere bm! mhere inc    mhere! ;
 
 : m0pad 0 bm, mhere:align! ;
 
-: m>r image_area + ; # &meta -- &real
-: r>m image_area - ; # &real -- &meta
+: entrypoint! ( madr -- ) addr_start m! ;
 
-
-: entrypoint! ( adr -- ) addr_start there + ! ;
-
+: image_size mhere m>t there - ;
 
 ( initialize )
 addr_begin mhere!
 
+
+( ----- save ----- )
+
+MODULE
+
+  val: id
+
+---EXPOSE---
+
+  : save ( fname -- )
+    "wb" file:open! id!
+    there image_size id file:write!
+    id file:close!
+  ;
+
+  : save: ( fname: -- )
+    in:read [ "out name required" panic ] unless
+    save
+  ;
+END
 
 
 ( ===== Meta Dictionary ===== )
@@ -72,9 +90,26 @@ val: mlatest  mhere mlatest!
 
 ( ===== debug ===== )
 
-: mdump ( madr len -- ) [ image_area + ] dip dump ;
+: mdump ( madr len -- ) [ m>t ] dip dump ;
+: minfo
+  "there 0x" pr there ?hex drop cr
+  "here  0x" pr mhere ?hex drop cr
+  "start 0x" pr addr_start m@ ?hex drop cr
+;
+
+( ===== prim ===== )
+
+: prim ( n -- code ) 1 << 1 or ;
+: prim, ( n -- ) prim m, ;
 
 
+mhere entrypoint!
+2 prim, 42 m, 1 prim,
+
+minfo
+0 64 mdump
+save: out/tmp.ark
+bye
 
 MODULE
 
