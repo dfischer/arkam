@@ -25,13 +25,11 @@ typedef uint8_t  Byte;
   | return stack
 
   Heap Layout
-  0x00 | Start Address
-  0x04 | Data Stack Address
-  0x08 | Return Stack Address
-  0x0C | Memory Size
-  0x10 | Here (Image End)
-  0x14 - 0x1C reserved
-  0x20 | Code ...
+  0x00 | DO NOT TOUCH HERE (error detection)
+  0x04 | Start
+  0x08 | Here
+  0x0C | ( reserved )
+  0x10 | Code Begin
 */
 
 #define ARK_ADDR_START 0x04

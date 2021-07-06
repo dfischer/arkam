@@ -482,6 +482,7 @@
       "?ff"    &?ff    core
       "?stack" &?stack core
       "?here"  &?here  core
+      "dump"   &dump   core
       ( ----- stack 2 ----- )
       "pick"  &pick  core
       "rpick" &rpick comp
