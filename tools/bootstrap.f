@@ -1,18 +1,6 @@
 require: lib/core.f
 
 
-val: verbose  no verbose!
-
-: [verbose <IMMED>
-  verbose IF [ ( noop ) ] RET THEN
-  [ in:read [ "close quot required" panic ] unless
-    "]" s= IF STOP RET THEN
-    GO
-  ] while
-;
-
-
-
 ( ===== Image area and There pointer ===== )
 
 : kilo 1000 * ;
@@ -83,9 +71,49 @@ MODULE
 END
 
 
+( ----- string ----- )
+
+: m:sput ( s -- )
+  dup s:len inc >r mhere m>t s:copy r> mhere + mhere! mhere:align!
+;
+
+
 ( ===== Meta Dictionary ===== )
 
-val: mlatest  mhere mlatest!
+# Structure
+#  | name ...
+#  | ( 0alined )
+#  | next
+#  | &name
+#  | flags
+#  | handler
+#  | xt
+#  |-----
+#  | code ...
+
+MODULE
+
+---EXPOSE---
+
+  ( latest )
+  mhere as: adr_mlatest
+  0 m,
+
+  : mlatest  adr_mlatest m@ ;
+  : mlatest! adr_mlatest m! ;
+
+  : mcreate ( name -- )
+    # create meta-dict entry
+    mhere:align!
+    mhere swap m:sput mhere:align! # -- &name
+    mhere mlatest m, mlatest! # -- &name
+    ( &name   ) m,
+    ( flags   ) 0 m,
+    ( handler ) 0 m,
+    ( xt      ) mhere cell + m,
+  ;
+
+END
 
 
 ( ===== debug ===== )
@@ -103,6 +131,7 @@ val: mlatest  mhere mlatest!
 : prim, ( n -- ) prim m, ;
 
 
+"main" mcreate
 mhere entrypoint!
 2 prim, 42 m, 1 prim,
 
@@ -110,71 +139,3 @@ minfo
 0 64 mdump
 save: out/tmp.ark
 bye
-
-MODULE
-
-8 as: left
-
-: pad ( s -- s )
-  dup s:len left swap - [ " " epr ] times
-;
-
-: prim: ( n -- n+ ) dup as:
-  [verbose forth:latest forth:name pad epr " " epr forth:latest forth:xt . ]
-  inc
-;
-
----EXPOSE---
-
-[verbose "PRIMITIVES" eprn ]
-
-0
-prim: NOOP
-prim: HALT
-prim: LIT
-prim: RET
-
-prim: DUP
-prim: DROP
-prim: SWAP
-prim: OVER
-
-prim: ADD
-prim: SUB
-prim: MUL
-prim: DMOD
-
-prim: EQ
-prim: NEQ
-prim: GT
-prim: LT
-
-prim: JMP
-prim: ZJMP
-
-prim: GET
-prim: SET
-prim: BGET
-prim: BSET
-
-prim: AND
-prim: OR
-prim: NOT
-prim: XOR
-prim: LSHIFT
-prim: ASHIFT
-
-prim: IO
-
-prim: RPUSH
-prim: RPOP
-prim: RDROP
-
-prim: GETSP
-prim: SETSP
-prim: GETRP
-prim: GETSP
-
-drop
-
-END
