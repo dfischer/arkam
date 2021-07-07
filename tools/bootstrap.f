@@ -184,10 +184,13 @@ END
   forth:run_mode     [ 2 prim, x, ] ;CASE
 ;
 
+: amp_handler ( buf mode -- ) drop "TODO amp handler " epr panic ;
+
 ( testing )
 
 : meta:start
   &num_handler forth:num_handler!
+  &amp_handler forth:amp_handler!
 ;
 
 : meta:finish

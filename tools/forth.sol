@@ -263,16 +263,17 @@
       ] while
     ;
     ( reference )
-    : parse_amp ( -- parsed? )
-      buf b@ amp != IF no RET END
-      buf inc dup >r # -- actual
-      dict:find not IF r> notfound no RET END rdrop # -- header
-      dict:xt
-      mode
-      compile_mode [ "LIT" compile, ,  yes ] ;CASE
-      run_mode     [ ( remain on TOS ) yes ] ;CASE
+    val: amp_handler
+    : amp_parser ( buf mode -- )
+      swap dup dict:find not IF notfound drop no RET END nip # -- mode header
+      dict:xt swap ( xt mode -- )
+      compile_mode [ "LIT" compile, ,  ] ;CASE
+      run_mode     [ ( remain on TOS ) ] ;CASE
       unknown_mode
     ;
+    : parse_amp ( buf mode -- parsed? ) amp_handler call ;
+    : amp? ( -- ? ) buf b@ amp = ;
+    : amp>word buf inc ;
     ( main )
     : run ( source stream -- )
       stream >r source >r stream! source!
@@ -281,8 +282,8 @@
         parse_str           IF      ok RET END
         parse_comment       IF      ok RET END
         read_token
-        parse_amp       IF ok RET END
         buf eval_token  IF ok RET END
+        amp?            IF amp>word mode parse_amp ok RET END
         parse_num       IF mode eval_num ok RET END
         parse_hex       IF mode eval_num ok RET END
         buf notfound ng
@@ -299,6 +300,7 @@
     ;
     : setup
       &num_evaler num_handler!
+      &amp_parser amp_handler!
     ;
     str
   ;
@@ -570,6 +572,8 @@
       "forth:handle"   &eval_header core ( header -- .. )
       "forth:num_handler"  [ eval:num_handler  ] core
       "forth:num_handler!" [ eval:num_handler! ] core
+      "forth:amp_handler"  [ eval:amp_handler  ] core
+      "forth:amp_handler!" [ eval:amp_handler! ] core
 
       "handle:normal"   &handle_normal  core
       "handle:immed"    &handle_immed   core
