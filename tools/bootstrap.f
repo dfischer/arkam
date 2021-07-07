@@ -179,7 +179,28 @@ END
 : prim ( n -- code ) 1 << 1 or ;
 : prim, ( n -- ) prim x, ;
 
+: num_handler ( n mode -- )
+  forth:compile_mode [ 2 prim, x, ] ;CASE
+  forth:run_mode     [ 2 prim, x, ] ;CASE
+;
+
 ( testing )
+
+: meta:start
+  &num_handler forth:num_handler!
+;
+
+: meta:finish
+  xinfo
+  0 128 xdump
+  "out/tmp.ark" save
+  bye
+;
+
+: HALT <IMMED> 1 prim, ;
+
+
+
 : :
   in:read [ "word name required" panic ] unless
   dup xcreate xlatest xxt x@ swap mcreate
@@ -189,12 +210,12 @@ END
   3 prim,
 ;
 
-: foo 2 prim, 42 x, 1 prim, ;
+
+meta:start
+
+: foo 42 HALT ;
 : main foo ;
 &main entrypoint!
 
 
-xinfo
-0 128 xdump
-save: out/tmp.ark
-bye
+meta:finish

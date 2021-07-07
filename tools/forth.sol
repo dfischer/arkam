@@ -233,11 +233,13 @@
     : notfound ( name -- ) "'" epr epr "'" epr " ?" repl? IF eprn ELSE panic END ;
     ( num )
     : parse_num ( -- n yes | no ) buf s>dec ;
-    : eval_num ( n -- ) mode
+    val: num_handler
+    : num_evaler ( n mode -- )
       compile_mode [ "LIT" compile, ,  ] ;CASE
       run_mode     [ ( remain on TOS ) ] ;CASE
       unknown_mode
     ;
+    : eval_num num_handler call ;
     ( hex )
     : parse_hex ( -- n yes | no )
       : >n ( c -- n yes | no )
@@ -281,8 +283,8 @@
         read_token
         parse_amp       IF ok RET END
         buf eval_token  IF ok RET END
-        parse_num       IF eval_num ok RET END
-        parse_hex       IF eval_num ok RET END
+        parse_num       IF mode eval_num ok RET END
+        parse_hex       IF mode eval_num ok RET END
         buf notfound ng
       ] while
       r> source! r> stream! ( restore ) ;
@@ -294,6 +296,9 @@
       "r" file:open! dup >r
       [ ( id -- c id ) dup file:getc swap ] run
       r> file:close!
+    ;
+    : setup
+      &num_evaler num_handler!
     ;
     str
   ;
@@ -563,6 +568,8 @@
       "forth:compile_mode"  [ compile_mode ] core
       "forth:compile," &compile, core
       "forth:handle"   &eval_header core ( header -- .. )
+      "forth:num_handler"  [ eval:num_handler  ] core
+      "forth:num_handler!" [ eval:num_handler! ] core
 
       "handle:normal"   &handle_normal  core
       "handle:immed"    &handle_immed   core
@@ -593,6 +600,7 @@
     ] while
   ;
   : setup
+    eval:setup
     primitives:setup
     corewords:setup
   ;
