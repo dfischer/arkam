@@ -179,11 +179,18 @@ END
 : prim ( n -- code ) 1 << 1 or ;
 : prim, ( n -- ) prim x, ;
 
-"foo" dup xcreate xlatest xxt x@ swap mcreate
-2 prim, 42 x, 1 prim,
+( testing )
+: :
+  in:read [ "word name required" panic ] unless
+  dup xcreate xlatest xxt x@ swap mcreate
+;
 
-"main" xcreate xlatest xxt x@ "main" mcreate
-foo
+: ;
+  3 prim,
+;
+
+: foo 2 prim, 42 x, 1 prim, ;
+: main foo ;
 &main entrypoint!
 
 
