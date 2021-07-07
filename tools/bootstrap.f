@@ -99,6 +99,13 @@ END
 
 MODULE
 
+  : mhandle_normal ( xxt state -- )
+    # called in compiling core.f on target image
+    # xxt is xt address on target image
+    forth:compile_mode [ x, ] ;CASE
+    forth:run_mode     [ x, ] ;CASE
+  ;
+
 ---EXPOSE---
 
   ( latest )
@@ -107,6 +114,14 @@ MODULE
 
   : xlatest  adr_xlatest x@ ;
   : xlatest! adr_xlatest x! ;
+
+  STRUCT xheader
+    cell: xnext
+    cell: xname
+    cell: xflags
+    cell: xhandler
+    cell: xxt
+  END
 
   : xcreate ( name -- )
     # create xdict entry
@@ -119,12 +134,40 @@ MODULE
     ( xt      ) xhere cell + x,
   ;
 
+  : mcreate ( xxt name -- )
+    # create meta-entry
+    forth:create
+    &mhandle_normal forth:latest forth:handler!
+    forth:latest forth:xt!
+  ;
+
 END
 
 
 ( ===== debug ===== )
 
-: xdump ( madr len -- ) [ x>t ] dip dump ;
+MODULE
+  16 as: bpl ( bytes per line )
+  : space " " epr ;
+  : cr "" eprn ;
+  : ?addr ( a -- ) t>x dup 8 >> ?ff ?ff space ;
+  : line ( addr len q -- ) swap [ 2dup [ b@ ] dip call &inc dip ] times 2drop ;
+  : rest ( len q -- ) swap bpl swap - swap times ;
+  : ascii? ( c -- ? ) dup 0x20 < IF drop no RET THEN 0x7E <= ;
+  : pchar ( c -- ) dup ascii? IF [ putc ] >stderr ELSE drop "." epr THEN ;
+  : ?bytes ( addr len -- ) swap over [ ?ff space ] line [ space space space ] rest ;
+  : ?ascii ( addr len -- ) [ pchar ] line ;
+  : ?line ( addr len -- ) over ?addr 2dup ?bytes ?ascii cr ;
+  : loop ( addr len -- ) dup bpl > IF over bpl ?line [ bpl + ] [ bpl - ] bi* AGAIN THEN ?line ;
+
+---EXPOSE---
+
+  : xdump ( xadr len -- )
+    [ x>t ] dip loop
+  ;
+
+END
+
 : xinfo
   "there 0x" pr there ?hex drop cr
   "here  0x" pr xhere ?hex drop cr
@@ -136,12 +179,15 @@ END
 : prim ( n -- code ) 1 << 1 or ;
 : prim, ( n -- ) prim x, ;
 
-
-"main" xcreate
-xhere entrypoint!
+"foo" dup xcreate xlatest xxt x@ swap mcreate
 2 prim, 42 x, 1 prim,
 
+"main" xcreate xlatest xxt x@ "main" mcreate
+foo
+&main entrypoint!
+
+
 xinfo
-0 64 xdump
+0 128 xdump
 save: out/tmp.ark
 bye
