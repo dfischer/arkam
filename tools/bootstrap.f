@@ -1,6 +1,11 @@
 require: lib/core.f
 
 
+# Naming and Abbrev
+# x -- cross, works on target image
+# m -- meta, works on metacompiler (this code)
+
+
 ( ===== Image area and There pointer ===== )
 
 : kilo 1000 * ;
@@ -17,37 +22,37 @@ image_max allot as: there
 
 ( relative pointer )
 
-val: mhere
+val: xhere
 
-: m>t there + ; # &meta -- &there
-: t>m there - ; # &there -- &meta
+: x>t there + ; # &x -- &there
+: t>x there - ; # &there -- &x
 
-: m@  m>t @ ;
-: m!  m>t ! ;
-: bm@ m>t b@ ;
-: bm! m>t b! ;
+: x@  x>t @ ;
+: x!  x>t ! ;
+: bx@ x>t b@ ;
+: bx! x>t b! ;
 
-: mhere! ( adr -- )
-  dup 0             <  IF .. "invalid mhere" panic THEN
-  dup image_max - 0 >= IF .. "invalid mhere" panic THEN
-  dup mhere!
-  addr_here m!
+: xhere! ( xadr -- )
+  dup 0             <  IF .. "invalid xhere" panic THEN
+  dup image_max - 0 >= IF .. "invalid xhere" panic THEN
+  dup xhere!
+  addr_here x!
 ;
 
 
-: mhere:align! mhere align mhere! ;
+: xhere:align! xhere align xhere! ;
 
-: m,  mhere m!  mhere cell + mhere! ;
-: bm, mhere bm! mhere inc    mhere! ;
+: x,  xhere x!  xhere cell + xhere! ;
+: bx, xhere bx! xhere inc    xhere! ;
 
-: m0pad 0 bm, mhere:align! ;
+: x0pad 0 bx, xhere:align! ;
 
-: entrypoint! ( madr -- ) addr_start m! ;
+: entrypoint! ( xadr -- ) addr_start x! ;
 
-: image_size mhere m>t there - ;
+: image_size xhere x>t there - ;
 
 ( initialize )
-addr_begin mhere!
+addr_begin xhere!
 
 
 ( ----- save ----- )
@@ -68,19 +73,20 @@ MODULE
     in:read [ "out name required" panic ] unless
     save
   ;
+
 END
 
 
 ( ----- string ----- )
 
-: m:sput ( s -- )
-  dup s:len inc >r mhere m>t s:copy r> mhere + mhere! mhere:align!
+: x:sput ( s -- )
+  dup s:len inc >r xhere x>t s:copy r> xhere + xhere! xhere:align!
 ;
 
 
-( ===== Meta Dictionary ===== )
+( ===== Cross&Meta Dictionary ===== )
 
-# Structure
+# Cross Dictionary
 #  | name ...
 #  | ( 0alined )
 #  | next
@@ -96,21 +102,21 @@ MODULE
 ---EXPOSE---
 
   ( latest )
-  mhere as: adr_mlatest
-  0 m,
+  xhere as: adr_xlatest
+  0 x,
 
-  : mlatest  adr_mlatest m@ ;
-  : mlatest! adr_mlatest m! ;
+  : xlatest  adr_xlatest x@ ;
+  : xlatest! adr_xlatest x! ;
 
-  : mcreate ( name -- )
-    # create meta-dict entry
-    mhere:align!
-    mhere swap m:sput mhere:align! # -- &name
-    mhere mlatest m, mlatest! # -- &name
-    ( &name   ) m,
-    ( flags   ) 0 m,
-    ( handler ) 0 m,
-    ( xt      ) mhere cell + m,
+  : xcreate ( name -- )
+    # create xdict entry
+    xhere:align!
+    xhere swap x:sput xhere:align! # -- &name
+    xhere xlatest x, xlatest!      # -- &name
+    ( &name   ) x,
+    ( flags   ) 0 x,
+    ( handler ) 0 x,
+    ( xt      ) xhere cell + x,
   ;
 
 END
@@ -118,24 +124,24 @@ END
 
 ( ===== debug ===== )
 
-: mdump ( madr len -- ) [ m>t ] dip dump ;
-: minfo
+: xdump ( madr len -- ) [ x>t ] dip dump ;
+: xinfo
   "there 0x" pr there ?hex drop cr
-  "here  0x" pr mhere ?hex drop cr
-  "start 0x" pr addr_start m@ ?hex drop cr
+  "here  0x" pr xhere ?hex drop cr
+  "start 0x" pr addr_start x@ ?hex drop cr
 ;
 
 ( ===== prim ===== )
 
 : prim ( n -- code ) 1 << 1 or ;
-: prim, ( n -- ) prim m, ;
+: prim, ( n -- ) prim x, ;
 
 
-"main" mcreate
-mhere entrypoint!
-2 prim, 42 m, 1 prim,
+"main" xcreate
+xhere entrypoint!
+2 prim, 42 x, 1 prim,
 
-minfo
-0 64 mdump
+xinfo
+0 64 xdump
 save: out/tmp.ark
 bye
