@@ -15,9 +15,9 @@ image_max allot as: there
 
 ( memory layout )
 
-0x04 as: addr_start
-0x08 as: addr_here
-0x10 as: addr_begin
+0x04 as: adr_start
+0x08 as: adr_here
+0x10 as: adr_begin
 
 
 ( relative pointer )
@@ -36,7 +36,7 @@ val: xhere
   dup 0             <  IF .. "invalid xhere" panic THEN
   dup image_max - 0 >= IF .. "invalid xhere" panic THEN
   dup xhere!
-  addr_here x!
+  adr_here x!
 ;
 
 
@@ -47,12 +47,12 @@ val: xhere
 
 : x0pad 0 bx, xhere:align! ;
 
-: entrypoint! ( xadr -- ) addr_start x! ;
+: entrypoint! ( xadr -- ) adr_start x! ;
 
 : image_size xhere x>t there - ;
 
 ( initialize )
-addr_begin xhere!
+adr_begin xhere!
 
 
 ( ----- save ----- )
@@ -103,7 +103,7 @@ MODULE
     # called in compiling core.f on target image
     # xxt is xt address on target image
     forth:compile_mode [ x, ] ;CASE
-    forth:run_mode     [ x, ] ;CASE
+    forth:run_mode     [ "called in meta" panic ] ;CASE
   ;
 
 ---EXPOSE---
@@ -171,26 +171,51 @@ END
 : xinfo
   "there 0x" pr there ?hex drop cr
   "here  0x" pr xhere ?hex drop cr
-  "start 0x" pr addr_start x@ ?hex drop cr
+  "start 0x" pr adr_start x@ ?hex drop cr
 ;
+
+
 
 ( ===== prim ===== )
 
 : prim ( n -- code ) 1 << 1 or ;
 : prim, ( n -- ) prim x, ;
+: xLIT, ( n -- ) 2 prim, x, ;
+
+
+
+( ===== metacompiler ===== )
 
 : num_handler ( n mode -- )
-  forth:compile_mode [ 2 prim, x, ] ;CASE
-  forth:run_mode     [ 2 prim, x, ] ;CASE
+  forth:compile_mode [ xLIT, ] ;CASE
+  forth:run_mode     [ drop  ] ;CASE
 ;
 
-: amp_handler ( buf mode -- ) drop "TODO amp handler " epr panic ;
+: amp_handler ( name mode -- )
+  swap dup forth:find [ drop epr " ?" panic ] unless nip ( mode header -- )
+  forth:xt swap
+  forth:compile_mode [ xLIT,     ] ;CASE
+  forth:run_mode     [ ( -- xt ) ] ;CASE
+  ? " unknown mode" panic
+;
 
-( testing )
+
+"M-" as: mprefix
+
+: meta:reveal
+  forth:latest [
+    0 [ STOP ] ;CASE
+    dup forth:name mprefix s:start? [
+      dup forth:name 2 + over forth:name!
+    ] when
+    forth:next GO
+  ] while
+;
 
 : meta:start
   &num_handler forth:num_handler!
   &amp_handler forth:amp_handler!
+  meta:reveal
 ;
 
 : meta:finish
@@ -204,21 +229,29 @@ END
 
 
 
-: :
+( ===== meta words ===== )
+
+: M-:
   in:read [ "word name required" panic ] unless
   dup xcreate xlatest xxt x@ swap mcreate
+  forth:latest forth:hide!
+  forth:compile_mode!
 ;
 
-: ;
+: M-; <IMMED>
   3 prim,
+  forth:latest forth:show!
+  forth:run_mode!
 ;
 
+
+
+( ===== start metacompile ===== )
 
 meta:start
 
 : foo 42 HALT ;
-: main foo ;
-&main entrypoint!
-
+: boot foo ;
+&boot entrypoint!
 
 meta:finish

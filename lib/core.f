@@ -153,6 +153,15 @@
   s:append! ok
 ;
 
+: s:start? ( src what -- ? )
+  # src starts with what?
+  [ 2dup [ b@ ] bia
+    0      [ 3drop yes STOP ] ;CASE
+    swap 0 [ 3drop no  STOP ] ;CASE
+    =      [ &inc bia GO    ] ;IF
+    2drop no STOP
+  ] while
+;
 
 MODULE # ----- s:each_line! -----
 

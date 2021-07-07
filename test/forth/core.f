@@ -140,6 +140,17 @@ MARKER: <STRING>
 ] CHECK
 
 
+"s:start?" [
+  "foo" "foo"  s:start?     "s:start foo/foo"  ASSERT
+  "foo" "f"    s:start?     "s:start foo/f"    ASSERT
+  "foo" ""     s:start?     "s:start foo/0"    ASSERT
+  ""    ""     s:start?     "s:start 0/0"      ASSERT
+  "foo" "fooo" s:start? not "s:start foo/fooo" ASSERT
+  ""    "foo"  s:start? not "s:start 0/foo"    ASSERT
+  ok
+] CHECK
+
+
 ( ----- with buffer ----- )
 
 256 as: len
