@@ -79,20 +79,6 @@ ng as: STOP
 : call ( q -- ) >r ;
 
 
-: DEFER ( -- ) r> r> swap >r >r ;
-  # defers caller's rest process until caller's caller return
-  # example:
-  #   : bar "bar1" pr sp DEFER "bar2" pr ;
-  #   : foo bar "foo" pr sp ;
-  # foo => bar1 foo bar2
-
-
-: defer ( q -- ) r> swap r> swap >r >r >r ;
-  # example:
-  #   : foo "foo" pr [ "baz" pr ] defer "bar" pr ;
-  # foo => foobarbaz
-
-
 : if ( ? q1 q2 -- ) >r swap IF rdrop >r ELSE drop THEN ;
   # example:
   #   yes [ "hello" ] [ "world" ] if pr
@@ -152,6 +138,9 @@ ng as: STOP
 
 
 : putc 0 1 io ;
-: foo 64 putc 10 putc ;
+: atmark 64 putc ;
+: foo 64 10 [ putc ] bia ;
+: bar 38 10 [ putc ] bia ;
+: baz [ foo ] [ bar ] if ;
 : bye 0 HALT ;
-: main foo bye ;
+: main no baz bye ;

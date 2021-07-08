@@ -2,7 +2,7 @@ require: lib/core.f
 
 
 ( for debug )
-val: verbose  yes verbose!
+val: verbose  no verbose!
 
 
 # Naming and Abbrev
@@ -314,9 +314,11 @@ PUBLIC
     "<dump>" prn 0 128 xdump
     "<words>" prn x:words
     "out/tmp.ark" save
+    "DONE" eprn
     bye
   ;
 
+  : xLIT, xLIT, ;
   : xRET, xRET, ;
 
 END
@@ -357,7 +359,7 @@ PRIMITIVES
   [ and    ] PRIM: and
   [ or     ] PRIM: or
   [ invert ] PRIM: inv
-  [ xor    ] PRIM: xor
+  [ xor    ] PRIM: xoro
   [ lshift ] PRIM: lsft
   [ ashift ] PRIM: asft
 
@@ -373,6 +375,8 @@ PRIMITIVES
   [ rp! ] PRIM: rp!
 END
 
+: xJMP,  &M-JMP  @ x, ;
+: xZJMP, &M-ZJMP @ x, ;
 
 
 : M-:
@@ -397,12 +401,12 @@ END
 
 
 : M-IF <IMMED> ( -- &back )
-  &M-ZJMP x, xhere 0 x,
+  xZJMP, xhere 0 x,
 ;
 
 
 : M-ELSE <IMMED> ( &back -- &back2 )
-  &M-JMP x, xhere 0 x, swap ( &back2 &back )
+  xJMP, xhere 0 x, swap ( &back2 &back )
   xhere swap x!
 ;
 
@@ -417,25 +421,30 @@ END
 ;
 
 
-: M-[ <IMMED>
-  "[" STUB
+: M-[ <IMMED> ( -- &quot &back )
+  xJMP, xhere 0 x, xhere swap
 ;
 
-: M-] <IMMED>
-  "]" STUB
+
+: M-] <IMMED> ( &quot &back -- )
+  xRET, xhere swap x! xLIT,
 ;
 
-: M-PRIVATE <IMMED>
+
+: M-PRIVATE
   "PRIVATE" STUB
 ;
 
-: M-PUBLIC <IMMED>
+
+: M-PUBLIC
   "PUBLIC" STUB
 ;
+
 
 : M-END <IMMED>
   "END" STUB
 ;
+
 
 : M-<IMMED> <IMMED>
   "<IMMED>" STUB
