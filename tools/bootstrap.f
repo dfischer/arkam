@@ -1,6 +1,10 @@
 require: lib/core.f
 
 
+( for debug )
+val: verbose  yes verbose!
+
+
 # Naming and Abbrev
 # x -- cross, works on target image
 # m -- meta, works on metacompiler (this code)
@@ -259,6 +263,7 @@ MODULE
   ;
 
   : meta:create ( name -- )
+    verbose [ dup epr " " epr ] when
     [ xcreate ] [ mcreate ] biq
     xlatest xxt x@ forth:latest forth:xt!
   ;
@@ -368,6 +373,7 @@ PRIMITIVES
 END
 
 
+
 : M-:
   in:read [ "word name required" panic ] unless
   meta:create
@@ -375,11 +381,13 @@ END
   forth:compile_mode!
 ;
 
+
 : M-; <IMMED>
   xRET,
   forth:latest forth:show!
   forth:run_mode!
 ;
+
 
 : M-as: ( n name: -- )
   in:read [ "word name required" panic ] unless
@@ -387,9 +395,59 @@ END
 ;
 
 
+: M-IF <IMMED> ( -- &back )
+  &M-ZJMP x, xhere 0 x,
+;
+
+
+: M-ELSE <IMMED> ( &back -- &back2 )
+  &M-JMP x, xhere 0 x, swap ( &back2 &back )
+  xhere swap x!
+;
+
+
+: M-THEN <IMMED> ( &back -- )
+  xhere swap x!
+;
+
+
+: M-AGAIN <IMMED>
+  xlatest xxt x@ x,
+;
+
+
+: M-[ <IMMED>
+  "[" STUB
+;
+
+: M-] <IMMED>
+  "]" STUB
+;
+
+: M-CLOSED <IMMED>
+  "CLOSED" STUB
+;
+
+: M-OPEN <IMMED>
+  "OPEN" STUB
+;
+
+: M-END <IMMED>
+  "END" STUB
+;
+
+: M-<IMMED> <IMMED>
+  "<IMMED>" STUB
+;
+
+
 ( ===== metacompile ===== )
 
 #TODO patch x-handlers
+#TODO comment (tail of core.f)
+#TODO quotation
+#TODO OPEN/CLOSED/END
+#TODO <IMMED>
 
 meta:start
 include: forth/core.f
