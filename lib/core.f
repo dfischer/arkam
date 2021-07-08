@@ -122,12 +122,12 @@
   ] while
 ;
 
-: MODULE ( -- start closer )
+: PRIVATE ( -- start closer )
   forth:latest 
   [ forth:latest forth:hide_range ]
 ;
 
-: ---EXPOSE--- ( start closer -- start end closer )
+: PUBLIC ( start closer -- start end closer )
   drop forth:latest &forth:hide_range
 ;
 
@@ -170,7 +170,7 @@
   ] while
 ;
 
-MODULE # ----- s:each_line! -----
+PRIVATE # ----- s:each_line! -----
 
   # destructive!
   # Every newline in s will be replaced by 0
@@ -185,7 +185,7 @@ MODULE # ----- s:each_line! -----
     ] while
   ;
   
----EXPOSE---
+PUBLIC
 
   : s:each_line! ( s q -- )
     [ >r getline not IF rdrop STOP RET THEN
@@ -199,7 +199,7 @@ END
 
 ( ----- marker ----- )
 
-MODULE
+PRIVATE
 
 : sweep ( here latest -- )
   forth:latest! here over here! ( start end )
@@ -207,7 +207,7 @@ MODULE
   rdrop ( return through cleared marker )
 ;
 
----EXPOSE---
+PUBLIC
 
 : marker ( name -- )
   >r forth:latest here
@@ -226,7 +226,7 @@ END
 
 ( ----- val ----- )
 
-MODULE 
+PRIVATE 
 
   32 const: len
   len allot const: buf
@@ -267,7 +267,7 @@ MODULE
     LIT, "!" compile, RET,
   ;
 
----EXPOSE---
+PUBLIC
   
   : val: ( -- )
     in:read not IF "val name required" panic THEN
@@ -318,11 +318,11 @@ END
 
 ( ----- struct ----- )
 
-MODULE
+PRIVATE
 
   : close ( -- word offset ) swap forth:xt! ;
 
----EXPOSE---
+PUBLIC
 
   : STRUCT ( -- word offset q )
     in:read [ "struct name required" panic ] unless
@@ -371,13 +371,13 @@ END
 #        0000 ( null terminated, aligned )
 
 
-MODULE
+PRIVATE
 
   val: id
   val: addr
   val: size
 
----EXPOSE---
+PUBLIC
 
   : loadfile ( path -- addr )
     "rb" file:open! id!

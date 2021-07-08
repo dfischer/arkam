@@ -1,11 +1,11 @@
 require: lib/core.f
 
-MODULE
+PRIVATE
 
   : query 4 io ;
   : param! 4 query ;  
 
----EXPOSE---
+PUBLIC
 
   : fm:voice!     0 query ; # i --
   : fm:operator!  1 query ; # i --

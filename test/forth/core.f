@@ -89,13 +89,13 @@ MARKER: <NUM>
 
 
 
-MARKER: <MODULE>
+MARKER: <PRIVATE>
 
 123 as: x
 
-MODULE
+PRIVATE
   234 as: x
----EXPOSE---
+PUBLIC
   123 as: y
   x 234 = "in module" ASSERT
 END
@@ -106,7 +106,7 @@ y 123 = "module exposed" ASSERT
 
 ( ----- no exposed ----- )
 
-MODULE
+PRIVATE
   234 as: x
   x 234 = "in module - no exposed" ASSERT
 END
@@ -115,9 +115,9 @@ x 123 = "out of module - no exposed" ASSERT
 
 
 ( ----- no content ----- )
-MODULE END
+PRIVATE END
 
-<MODULE>
+<PRIVATE>
 
 
 

@@ -17,13 +17,13 @@ spr/line lines * as: spr/screen
 
 spr_max spr_size * as: spr_bytes
 
-MODULE
+PRIVATE
 
   256     as: len
   len dec as: max
   val: id
 
----EXPOSE---
+PUBLIC
 
   app:argc 2 != [ "filename required" panic ] unless
 
@@ -98,7 +98,7 @@ padding 3 * as: gui_top
 
 ( ===== showcase ===== )
 
-MODULE
+PRIVATE
 
   spr_max lines / as: max_lines
   1 as: border
@@ -192,7 +192,7 @@ MODULE
     spr/line * + spr_base + spr_max mod selected!
   ;
 
----EXPOSE---
+PUBLIC
 
   : showcase:draw ( -- )
     handle_select
@@ -209,7 +209,7 @@ END
 
 ( ===== editor ===== )
 
-MODULE
+PRIVATE
 
   spr_w dup * as: width
   spr_h dup * as: height
@@ -317,7 +317,7 @@ MODULE
   top as: tool_y
   0 tool_x tool_y "reset" [ drop reset ] txtbtn:create drop
 
----EXPOSE---
+PUBLIC
 
   : editor:draw
     handle_mouse
@@ -333,13 +333,13 @@ END
 
 ( ===== Toolbar ===== )
 
-MODULE
+PRIVATE
 
   padding as: left
   ppu:height padding - as: bottom
   bottom 8 - as: top
 
----EXPOSE---
+PUBLIC
 
   0 left top "save" [ drop save ] txtbtn:create drop
   0 left 36 + top "reset all" [ drop reset_all ] txtbtn:create drop

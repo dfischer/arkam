@@ -61,11 +61,11 @@ adr_begin xhere!
 
 ( ----- save ----- )
 
-MODULE
+PRIVATE
 
   val: id
 
----EXPOSE---
+PUBLIC
 
   : save ( fname -- )
     "wb" file:open! id!
@@ -92,7 +92,8 @@ END
 
 ( ===== debug ===== )
 
-MODULE
+PRIVATE
+
   16 as: bpl ( bytes per line )
   : space " " epr ;
   : cr "" eprn ;
@@ -106,7 +107,7 @@ MODULE
   : ?line ( addr len -- ) over ?addr 2dup ?bytes ?ascii cr ;
   : loop ( addr len -- ) dup bpl > IF over bpl ?line [ bpl + ] [ bpl - ] bi* AGAIN THEN ?line ;
 
----EXPOSE---
+PUBLIC
 
   : xdump ( xadr len -- )
     [ x>t ] dip loop
@@ -135,7 +136,7 @@ END
 #  |-----
 #  | code ...
 
-MODULE
+PRIVATE
 
   "M-" as: mprefix
 
@@ -213,7 +214,7 @@ MODULE
     ] forth:each_word
   ;
 
----EXPOSE---
+PUBLIC
 
   0 as: stub_handle_normal
   1 as: stub_handle_const
@@ -424,12 +425,12 @@ END
   "]" STUB
 ;
 
-: M-CLOSED <IMMED>
-  "CLOSED" STUB
+: M-PRIVATE <IMMED>
+  "PRIVATE" STUB
 ;
 
-: M-OPEN <IMMED>
-  "OPEN" STUB
+: M-PUBLIC <IMMED>
+  "PUBLIC" STUB
 ;
 
 : M-END <IMMED>
@@ -446,7 +447,7 @@ END
 #TODO patch x-handlers
 #TODO comment (tail of core.f)
 #TODO quotation
-#TODO OPEN/CLOSED/END
+#TODO PUBLIC/PRIVATE/END
 #TODO <IMMED>
 
 meta:start
