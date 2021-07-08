@@ -10,6 +10,12 @@ LDFLAGS =
 
 
 
+.PHONY: bootstarp
+bootstrap: bin/forth
+	./bin/forth tools/bootstrap.f && ./bin/arkam out/tmp.ark
+
+
+
 .PHONY: all
 all: bin out bin/arkam bin/forth
 
