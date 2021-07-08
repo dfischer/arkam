@@ -136,6 +136,70 @@ ng as: STOP
 
 
 
+( ===== Stdio ===== )
+
+# port 1:stdout 2:stderr
+: stdio:ready? -1 1 io ; # -- ?
+: putc          0 1 io ; # c --
+: getc          1 1 io ; # -- c
+: stdio:port    2 1 io ; # -- p
+: stdio:port!   3 1 io ; # p --
+
+
+1 as: stdout
+2 as: stderr
+
+
+: cr    10 putc ;
+: space 32 putc ;
+
+
+: pr ( s -- )
+  dup b@ dup 0 = [ 2drop ] ;IF
+  putc 1 + AGAIN ;
+
+: prn ( s -- ) pr cr ;
+
+
+: call/port ( q p -- ) stdio:port >r stdio:port! call r> stdio:port! ;
+  # call-with-port
+  # call q with port p then restore previous port
+
+: >stdout ( q -- ) stdout call/port ;
+: >stderr ( q -- ) stderr call/port ;
+
+
+: epr  ( s -- ) [ pr  ] >stderr ;
+: eprn ( s -- ) [ prn ] >stderr ;
+
+
+: die 1 HALT ;
+: panic eprn die ;
+
+
+( ===== File ===== )
+
+PRIVATE
+  : query    8 io ;
+PUBLIC
+  : file:ready?  -1 query ; # -- ?
+  : file:open     0 query ; # path mode -- id ok | ng
+  : file:close    1 query ; # id -- ?
+  : file:read     2 query ; # buf len id -- ?
+  : file:write    3 query ; # buf len id -- ?
+  : file:seek     4 query ; # id offset origin -- ?
+  : file:exists?  5 query ; # path -- ?
+  : file:getc     6 query ; # id -- c | 0
+  : file:peek     7 query ; # id -- c | 0
+  : file:fullpath 8 query ; # path buf max -- ?
+  : file:size     9 query ; # id -- n
+  ( --- defensive --- )
+  : file:open!  dup file:open [ "Can't open " epr eprn die ] nip ; # path mode -- id
+  : file:close! file:close drop ; # id --
+  : file:read!  file:read  IF RET THEN "Can't read" panic ;
+  : file:write! file:write IF RET THEN "Can't write" panic ;
+END
+
 
 : putc 0 1 io ;
 : atmark 64 putc ;
