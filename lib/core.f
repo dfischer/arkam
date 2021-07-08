@@ -277,16 +277,23 @@ END
 
 ( ----- words ----- )
 
-: words
+: forth:each_word ( q -- )
   forth:latest [
-    0 [ STOP ] ;CASE
-    dup forth:hidden? not IF
-      dup forth:name pr space
-    THEN
-    forth:next GO
+    0 [ drop STOP ] ;CASE
+    2dup forth:next >r >r ( q header -- )
+    swap call r> r> GO
   ] while
+;
+
+
+: words
+  [ ( header -- )
+    dup forth:hidden? [ forth:name pr space ] ;unless
+    drop
+  ] forth:each_word
   cr
 ;
+
 
 
 ( ----- char ----- )

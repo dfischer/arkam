@@ -117,14 +117,6 @@ END
 ;
 
 
-: forth:each_word ( q -- )
-  forth:latest [
-    0 [ drop STOP ] ;CASE
-    2dup forth:next >r >r ( q header -- )
-    swap call r> r> GO
-  ] while
-;
-
 
 ( ===== Cross&Meta Dictionary ===== )
 
@@ -193,13 +185,12 @@ MODULE
   ;
   
   : meta:reveal
-    forth:latest [
-      0 [ STOP ] ;CASE
+    [ ( header -- )
       dup forth:name mprefix s:start? [
-        dup forth:name 2 + over forth:name!
-      ] when
-      forth:next GO
-    ] while
+        dup forth:name 2 + swap forth:name!
+      ] ;when
+      drop
+    ] forth:each_word
   ;
 
   : meta:handle_nonmeta ( xt state -- )
@@ -275,7 +266,7 @@ MODULE
   ;
 
   : set_entrypoint ( name -- )
-    dup forth:find [ epr " ?(entrypoint)" panic ] unless
+    dup forth:find [ epr " ?(entrypoint)" panic ] unless nip
     forth:xt entrypoint!
   ;
 
@@ -288,6 +279,7 @@ MODULE
   ;
 
   : xRET, xRET, ;
+
 END
 
 
@@ -368,4 +360,3 @@ meta:start
 : main foo bye ;
 
 meta:finish
-
