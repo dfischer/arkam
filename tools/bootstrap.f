@@ -211,6 +211,10 @@ MODULE
 
 ---EXPOSE---
 
+  0 as: stub_handle_normal
+  1 as: stub_handle_const
+  2 as: stub_handle_immed
+
   ( latest )
   xhere as: adr_xlatest
   0 x,
@@ -226,6 +230,17 @@ MODULE
     cell: xxt
   END
 
+  : x:each_word ( q -- ) # q: ( xheader -- )
+    xlatest [ ( q xheader )
+      0 [ STOP ] ;CASE
+      2dup xnext x@ >r >r
+      swap call
+      r> r> GO
+    ] while
+  ;
+
+  : x:words [ xname x@ x>t pr " " pr ] x:each_word cr ;
+
   : xcreate ( name -- )
     # create xdict entry
     xhere:align!
@@ -233,15 +248,32 @@ MODULE
     xhere xlatest x, xlatest!      # -- &name
     ( &name   ) x,
     ( flags   ) 0 x,
-    ( handler ) 0 x,
+    ( handler ) stub_handle_normal x,
     ( xt      ) xhere cell + x,
   ;
 
-  : meta:create ( xxt name -- )
+  : mcreate ( name -- )
     # create meta-entry
     forth:create
     &mhandle_normal forth:latest forth:handler!
-    forth:latest forth:xt!
+  ;
+
+  : meta:create ( name -- )
+    [ xcreate ] [ mcreate ] biq
+    xlatest xxt x@ forth:latest forth:xt!
+  ;
+
+  : meta:handle_const ( v mode -- )
+    forth:compile_mode [ xLIT, ] ;CASE
+    forth:run_mode     [       ] ;CASE
+    unknown_mode
+  ;
+
+  : meta:create_const ( n name -- )
+    meta:create
+    stub_handle_const xlatest xhandler x!
+    &meta:handle_const forth:latest forth:handler!
+    [ xlatest xxt x! ] [ forth:latest forth:xt! ] biq
   ;
 
   ( ----- primitives ----- )
@@ -272,8 +304,9 @@ MODULE
 
   : meta:finish
     "main" set_entrypoint
-    xinfo
-    0 128 xdump
+    "<info>" prn xinfo
+    "<dump>" prn 0 128 xdump
+    "<words>" prn x:words
     "out/tmp.ark" save
     bye
   ;
@@ -337,7 +370,7 @@ END
 
 : M-:
   in:read [ "word name required" panic ] unless
-  dup xcreate xlatest xxt x@ swap meta:create
+  meta:create
   forth:latest forth:hide!
   forth:compile_mode!
 ;
@@ -348,16 +381,17 @@ END
   forth:run_mode!
 ;
 
-: M-as:
-  "implement M-as: and const handler" STUB
+: M-as: ( n name: -- )
+  in:read [ "word name required" panic ] unless
+  meta:create_const
 ;
 
 
 ( ===== metacompile ===== )
 
-#TODO implement M-as:
-#TODO see x-dictionary
+#TODO patch x-handlers
 
 meta:start
 include: forth/core.f
 meta:finish
+
