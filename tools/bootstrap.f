@@ -250,6 +250,14 @@ PUBLIC
 
   : x:words [ xname x@ x>t pr " " pr ] x:each_word cr ;
 
+  : x:find ( name -- xheader yes | no )
+    xlatest [ ( s xheader )
+      0 [ no STOP ] ;CASE
+      2dup xname x@ x>t s= [ nip yes STOP ] ;when
+      xnext x@ GO
+    ] while
+  ;
+
   : xcreate ( name -- )
     # create xdict entry
     xhere:align!
@@ -464,13 +472,20 @@ END
 ;
 
 
-: M-defer:
-  "defer:" STUB
+: M-defer: ( name: -- )
+  # JMP actual
+  in:read [ "word name required" panic ] unless
+  meta:create
+  xJMP, 0 x,
 ;
 
 
-: M-is:
-  "is:" STUB
+: M-is: ( &actual &defered -- )
+  in:read [ "word name required" panic ] unless
+  dup x:find [ epr " ?" panic ] unless nip
+  xxt x@
+  # replace actual at `JMP (here)`
+  cell + x!
 ;
 
 

@@ -204,8 +204,23 @@ END
 
 : putc 0 1 io ;
 : atmark 64 putc ;
+
+
+defer: FOO
+defer: BAR
+
 : foo 64 10 [ putc ] bia ;
 : bar 38 10 [ putc ] bia ;
-: baz [ foo ] [ bar ] if ;
+
+&foo is: FOO
+&bar is: BAR
+
+: baz [ FOO ] [ BAR ] if ;
+
 : bye 0 HALT ;
-: main no baz bye ;
+
+: main
+  yes baz
+  no  baz
+  bye
+;
