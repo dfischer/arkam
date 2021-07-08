@@ -45,10 +45,17 @@
 
 : as: const: ;
 
-: compile, forth:compile, ;
 
 : LIT, &LIT @ , , ; # v --
 : RET, &RET @ , ;
+
+: compile, forth:compile, ;
+
+: compile: ( name: -- )
+  in:read [ "word name required" panic ] unless
+  dup forth:find [ epr " ?" panic ] unless nip
+  forth:xt LIT,
+;
 
 : POSTPONE: ( name: -- ) <IMMED>
   in:read [ "word name required" panic ] unless
@@ -335,6 +342,22 @@ MODULE
   : cell: ( offset q -- offset+n q ) cell field: ;
   
 END
+
+
+
+( ----- issues ----- )
+
+: .# <IMMED> ( print following comment )
+  [ [ in:take
+      0  [ STOP         ] ;CASE
+      10 [ 10 putc STOP ] ;CASE
+      putc GO
+    ] while
+  ] >stderr
+;
+
+: #TODO <IMMED> "TODO " epr POSTPONE: .# ;
+: STUB "STUB " epr panic ;
 
 
 

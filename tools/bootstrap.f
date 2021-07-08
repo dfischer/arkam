@@ -183,7 +183,7 @@ MODULE
     forth:run_mode     [ ( -- xt ) ] ;CASE
     ? " unknown mode" panic
   ;
-  
+
   : meta:reveal
     [ ( header -- )
       dup forth:name mprefix s:start? [
@@ -348,9 +348,15 @@ END
   forth:run_mode!
 ;
 
+: M-as:
+  "implement M-as: and const handler" STUB
+;
 
 
 ( ===== metacompile ===== )
+
+#TODO implement M-as:
+#TODO see x-dictionary
 
 meta:start
 include: forth/core.f
