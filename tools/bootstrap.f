@@ -464,13 +464,23 @@ END
 ;
 
 
+: M-defer:
+  "defer:" STUB
+;
+
+
+: M-is:
+  "is:" STUB
+;
+
+
+
 ( ===== metacompile ===== )
 
 #TODO patch x-handlers
 #TODO comment (tail of core.f)
 #TODO quotation
 #TODO PUBLIC/PRIVATE/END
-#TODO <IMMED>
 
 meta:start
 include: forth/core.f
