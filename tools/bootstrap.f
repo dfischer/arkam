@@ -235,6 +235,10 @@ PUBLIC
     cell: xxt
   END
 
+  : x:hide! dup xflags x@ 0x01 or  swap xflags x! ;
+  : x:show! dup xflags x@ 0x01 xor swap xflags x! ;
+  : x:hidden? xflags x@ 0x01 and ;
+
   : x:each_word ( q -- ) # q: ( xheader -- )
     xlatest [ ( q xheader )
       0 [ STOP ] ;CASE
@@ -328,6 +332,7 @@ END
 ( ===== meta words ===== )
 
 PRIMITIVES
+
   [      ]     PRIM: NOOP
   [ HALT ]     PRIM: HALT
   compile_only PRIM: LIT
@@ -373,7 +378,9 @@ PRIMITIVES
   [ sp! ] PRIM: sp!
   [ rp  ] PRIM: rp
   [ rp! ] PRIM: rp!
+
 END
+
 
 : xJMP,  &M-JMP  @ x, ;
 : xZJMP, &M-ZJMP @ x, ;
@@ -431,23 +438,29 @@ END
 ;
 
 
-: M-PRIVATE
-  "PRIVATE" STUB
+: x:hide_range ( start -- end )
+  # hide start < word <= end
+  [ 2dup = [ 2drop STOP ] ;IF
+    dup x:hide! xnext x@ GO
+  ] while
 ;
 
 
-: M-PUBLIC
-  "PUBLIC" STUB
+: M-PRIVATE ( -- start closer )
+  xlatest [ xlatest x:hide_range ]
 ;
 
 
-: M-END <IMMED>
-  "END" STUB
+: M-PUBLIC ( start closer -- start end closer )
+  drop xlatest &x:hide_range
 ;
+
+
+: M-END <IMMED> ( q -- ) >r ;
 
 
 : M-<IMMED> <IMMED>
-  "<IMMED>" STUB
+  stub_handle_immed xlatest xhandler x!
 ;
 
 
