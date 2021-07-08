@@ -117,6 +117,14 @@ END
 ;
 
 
+: forth:each_word ( q -- )
+  forth:latest [
+    0 [ drop STOP ] ;CASE
+    2dup forth:next >r >r ( q header -- )
+    swap call r> r> GO
+  ] while
+;
+
 
 ( ===== Cross&Meta Dictionary ===== )
 
@@ -133,6 +141,8 @@ END
 
 MODULE
 
+  "M-" as: mprefix
+
   : unknown_mode ? " unknown mode" panic ;
 
   : mhandle_normal ( xxt state -- )
@@ -142,7 +152,6 @@ MODULE
     forth:run_mode     [ "called in meta" panic ] ;CASE
     unknown_mode
   ;
-
 
   ( ----- primitives ----- )
 
@@ -159,6 +168,8 @@ MODULE
   10 as: prim_max
 
   : prim>code 1 << 1 or ;
+  : xLIT, 2 prim>code x, x, ;
+  : xRET, 3 prim>code x, ;
 
   : mcreate_prim ( q num name -- )
     prim_buf s:copy ( LIT -> M-LIT )
@@ -168,9 +179,46 @@ MODULE
     ( q:run   ) ,
   ;
 
----EXPOSE---
+  : meta:num_handler ( n mode -- )
+    forth:compile_mode [ xLIT,    ] ;CASE
+    forth:run_mode     [ ( -- n ) ] ;CASE
+  ;
+  
+  : meta:amp_handler ( name mode -- )
+    swap dup forth:find [ drop epr " ?" panic ] unless nip ( mode header -- )
+    forth:xt swap
+    forth:compile_mode [ xLIT,     ] ;CASE
+    forth:run_mode     [ ( -- xt ) ] ;CASE
+    ? " unknown mode" panic
+  ;
+  
+  : meta:reveal
+    forth:latest [
+      0 [ STOP ] ;CASE
+      dup forth:name mprefix s:start? [
+        dup forth:name 2 + over forth:name!
+      ] when
+      forth:next GO
+    ] while
+  ;
 
-  "M-" as: mprefix
+  : meta:handle_nonmeta ( xt state -- )
+    # Guard from compiling non-meta words
+    forth:compile_mode [ "Attempt to compile non-meta word" panic ] ;CASE
+    forth:run_mode     [ >r                                       ] ;CASE
+    unknown_mode
+  ;
+
+  : meta:guard_nonmeta
+    [ ( header -- )
+      dup forth:handler &handle:normal = [
+        &meta:handle_nonmeta swap forth:handler!
+      ] ;when
+      drop
+    ] forth:each_word
+  ;
+
+---EXPOSE---
 
   ( latest )
   xhere as: adr_xlatest
@@ -217,35 +265,10 @@ MODULE
 
   : compile_only [ "compile only primitive" panic ] ;
 
-  : xLIT, 2 prim>code x, x, ;
-  : xRET, 3 prim>code x, ;
-
   ( ----- metacompiler ----- )
 
-  : meta:num_handler ( n mode -- )
-    forth:compile_mode [ xLIT, ] ;CASE
-    forth:run_mode     [ drop  ] ;CASE
-  ;
-  
-  : meta:amp_handler ( name mode -- )
-    swap dup forth:find [ drop epr " ?" panic ] unless nip ( mode header -- )
-    forth:xt swap
-    forth:compile_mode [ xLIT,     ] ;CASE
-    forth:run_mode     [ ( -- xt ) ] ;CASE
-    ? " unknown mode" panic
-  ;
-  
-  : meta:reveal
-    forth:latest [
-      0 [ STOP ] ;CASE
-      dup forth:name mprefix s:start? [
-        dup forth:name 2 + over forth:name!
-      ] when
-      forth:next GO
-    ] while
-  ;
-
   : meta:start
+    meta:guard_nonmeta
     &meta:num_handler forth:num_handler!
     &meta:amp_handler forth:amp_handler!
     meta:reveal
@@ -263,7 +286,8 @@ MODULE
     "out/tmp.ark" save
     bye
   ;
-  
+
+  : xRET, xRET, ;
 END
 
 
