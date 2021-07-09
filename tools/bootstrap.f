@@ -131,7 +131,6 @@ END
 #  | next
 #  | &name
 #  | flags
-#  | handler
 #  | xt
 #  |-----
 #  | code ...
@@ -216,10 +215,6 @@ PRIVATE
 
 PUBLIC
 
-  0 as: stub_handle_normal
-  1 as: stub_handle_const
-  2 as: stub_handle_immed
-
   ( latest )
   xhere as: adr_xlatest
   0 x,
@@ -231,7 +226,6 @@ PUBLIC
     cell: xnext
     cell: xname
     cell: xflags
-    cell: xhandler
     cell: xxt
   END
 
@@ -265,7 +259,6 @@ PUBLIC
     xhere xlatest x, xlatest!      # -- &name
     ( &name   ) x,
     ( flags   ) 0 x,
-    ( handler ) stub_handle_normal x,
     ( xt      ) xhere cell + x,
   ;
 
@@ -289,7 +282,6 @@ PUBLIC
 
   : meta:create_const ( n name -- )
     meta:create
-    stub_handle_const xlatest xhandler x!
     &meta:handle_const forth:latest forth:handler!
     [ xlatest xxt x! ] [ forth:latest forth:xt! ] biq
   ;
@@ -468,7 +460,7 @@ END
 
 
 : M-<IMMED> <IMMED>
-  stub_handle_immed xlatest xhandler x!
+  "M-<IMMED>" STUB
 ;
 
 
