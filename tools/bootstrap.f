@@ -2,7 +2,7 @@ require: lib/core.f
 
 
 ( for debug )
-val: verbose  no verbose!
+val: verbose  yes verbose!
 
 
 # Naming and Abbrev
@@ -128,9 +128,8 @@ END
 # Cross Dictionary
 #  | name ...
 #  | ( 0alined )
-#  | next
+#  | next | hidden? | immed? ( least 2 bit )
 #  | &name
-#  | flags
 #  | xt
 #  |-----
 #  | code ...
@@ -225,30 +224,43 @@ PUBLIC
   STRUCT xheader
     cell: xnext
     cell: xname
-    cell: xflags
     cell: xxt
   END
 
-  : x:hide! dup xflags x@ 0x01 or  swap xflags x! ;
-  : x:show! dup xflags x@ 0x01 xor swap xflags x! ;
-  : x:hidden? xflags x@ 0x01 and ;
+  0x01 as: immed_flag
+  0x02 as: hidden_flag
+  0x03 as: flags
+  : on  or         ;
+  : off invert and ;
+  : on!  over x@ swap on  swap x! ; # xadr flag
+  : off! over x@ swap off swap x! ; # xadr flag
+  : x:hide! xnext hidden_flag on!  ;
+  : x:show! xnext hidden_flag off! ;
+  : x:hidden? xnext x@ hidden_flag and ;
+  : xnext! xnext x! ;
+  : xnext  xnext x@ flags off ;
+
+  : xname! xname x! ;
+  : xname  xname x@ ;
+  : xxt!   xxt   x! ;
+  : xxt    xxt   x@ ;
 
   : x:each_word ( q -- ) # q: ( xheader -- )
     xlatest [ ( q xheader )
       0 [ STOP ] ;CASE
-      2dup xnext x@ >r >r
+      2dup xnext >r >r
       swap call
       r> r> GO
     ] while
   ;
 
-  : x:words [ xname x@ x>t pr " " pr ] x:each_word cr ;
+  : x:words [ xname x>t pr " " pr ] x:each_word cr ;
 
   : x:find ( name -- xheader yes | no )
     xlatest [ ( s xheader )
       0 [ no STOP ] ;CASE
-      2dup xname x@ x>t s= [ nip yes STOP ] ;when
-      xnext x@ GO
+      2dup xname x>t s= [ nip yes STOP ] ;when
+      xnext GO
     ] while
   ;
 
@@ -258,7 +270,6 @@ PUBLIC
     xhere swap x:sput xhere:align! # -- &name
     xhere xlatest x, xlatest!      # -- &name
     ( &name   ) x,
-    ( flags   ) 0 x,
     ( xt      ) xhere cell + x,
   ;
 
@@ -271,7 +282,7 @@ PUBLIC
   : meta:create ( name -- )
     verbose [ dup epr " " epr ] when
     [ xcreate ] [ mcreate ] biq
-    xlatest xxt x@ forth:latest forth:xt!
+    xlatest xxt forth:latest forth:xt!
   ;
 
   : meta:handle_const ( v mode -- )
@@ -281,9 +292,11 @@ PUBLIC
   ;
 
   : meta:create_const ( n name -- )
+    # will be patched: LIT v RET 0 => LIT v JMP doconst
     meta:create
     &meta:handle_const forth:latest forth:handler!
-    [ xlatest xxt x! ] [ forth:latest forth:xt! ] biq
+    [ xLIT, xRET, 0 x, ]
+    [ forth:latest forth:xt! ] biq
   ;
 
   ( ----- primitives ----- )
@@ -389,6 +402,7 @@ END
 : M-:
   in:read [ "word name required" panic ] unless
   meta:create
+  xlatest x:hide!
   forth:latest forth:hide!
   forth:compile_mode!
 ;
@@ -397,6 +411,7 @@ END
 : M-; <IMMED>
   xRET,
   forth:latest forth:show!
+  xlatest x:show!
   forth:run_mode!
 ;
 
@@ -424,7 +439,7 @@ END
 
 
 : M-AGAIN <IMMED>
-  xlatest xxt x@ x,
+  xlatest xxt x,
 ;
 
 
@@ -441,7 +456,7 @@ END
 : x:hide_range ( start -- end )
   # hide start < word <= end
   [ 2dup = [ 2drop STOP ] ;IF
-    dup x:hide! xnext x@ GO
+    dup x:hide! xnext GO
   ] while
 ;
 
@@ -460,7 +475,7 @@ END
 
 
 : M-<IMMED> <IMMED>
-  "M-<IMMED>" STUB
+  xlatest x:show!
 ;
 
 
@@ -475,7 +490,7 @@ END
 : M-is: ( &actual &defered -- )
   in:read [ "word name required" panic ] unless
   dup x:find [ epr " ?" panic ] unless nip
-  xxt x@
+  xxt
   # replace actual at `JMP (here)`
   cell + x!
 ;
