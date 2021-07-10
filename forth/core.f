@@ -291,6 +291,10 @@ END
 
 ( ===== Forth ===== )
 
+val: forth:mode
+1 as: forth:compile_mode
+0 as: forth:run_mode
+
 0x01 as: flag_immed
 0x02 as: flag_hidden
 0x03 as: flags
@@ -351,7 +355,6 @@ defer: forth:find
 : putc 0 1 io ;
 : atmark 64 putc ;
 
-
 defer: FOO
 defer: BAR
 
@@ -366,7 +369,5 @@ defer: BAR
 : bye 0 HALT ;
 
 : main
-  forth:words
-  forth:latest forth:name inc forth:find!
   bye
 ;

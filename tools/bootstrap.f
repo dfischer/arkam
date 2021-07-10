@@ -2,7 +2,7 @@ require: lib/core.f
 
 
 ( for debug )
-val: verbose  yes verbose!
+val: verbose  no verbose!
 
 
 # Naming and Abbrev
@@ -164,7 +164,8 @@ PRIVATE
   10 as: prim_max
 
   : prim>code 1 << 1 or ;
-  : xLIT, 2 prim>code x, x, ;
+  : xLIT, 2 prim>code x, ;
+  : xLIT,, xLIT, x, ;
   : xRET, 3 prim>code x, ;
   : xJMP,  16 prim>code x, ;
   : xZJMP, 17 prim>code x, ;
@@ -178,14 +179,14 @@ PRIVATE
   ;
 
   : meta:num_handler ( n mode -- )
-    forth:compile_mode [ xLIT,    ] ;CASE
+    forth:compile_mode [ xLIT,,   ] ;CASE
     forth:run_mode     [ ( -- n ) ] ;CASE
   ;
   
   : meta:amp_handler ( name mode -- )
     swap dup forth:find [ drop epr " ?" panic ] unless nip ( mode header -- )
     forth:xt swap
-    forth:compile_mode [ xLIT,     ] ;CASE
+    forth:compile_mode [ xLIT,,    ] ;CASE
     forth:run_mode     [ ( -- xt ) ] ;CASE
     ? " unknown mode" panic
   ;
@@ -207,7 +208,7 @@ PRIVATE
 
     forth:mode forth:compile_mode = IF
       xhere swap x! # backpatch
-      xLIT, # str
+      xLIT,, # str
     THEN
   ;
 
@@ -306,7 +307,7 @@ PUBLIC
   ;
 
   : meta:handle_const ( v mode -- )
-    forth:compile_mode [ xLIT, ] ;CASE
+    forth:compile_mode [ xLIT,, ] ;CASE
     forth:run_mode     [       ] ;CASE
     unknown_mode
   ;
@@ -315,7 +316,7 @@ PUBLIC
     # will be patched: LIT v RET 0 => LIT v JMP doconst
     meta:create
     &meta:handle_const forth:latest forth:handler!
-    [ xLIT, xRET, 0 x, ]
+    [ xLIT,, xRET, 0 x, ]
     [ forth:latest forth:xt! ] biq
   ;
 
@@ -357,6 +358,7 @@ PUBLIC
   ;
 
   : xLIT, xLIT, ;
+  : xLIT,, xLIT,, ;
   : xRET, xRET, ;
   : xJMP, xJMP, ;
   : xZJMP, xZJMP, ;
@@ -468,7 +470,7 @@ END
 
 
 : M-] <IMMED> ( &quot &back -- )
-  xRET, xhere swap x! xLIT,
+  xRET, xhere swap x! xLIT,,
 ;
 
 
@@ -515,6 +517,19 @@ END
 ;
 
 
+: M-val: ( name: -- )
+  # val:  LIT v RET
+  # val!: LIT &v ! RET
+  in:read [ "val name required" panic ] unless
+  dup meta:create
+  xLIT, xhere swap 0 x, xRET, ( &v name )
+
+  dup "!" s:append! meta:create
+  xLIT,, &M-! @ x, xRET,
+  xlatest xname prn
+;
+
+
 : M-;IF   ";IF not defined yet" panic ; <IMMED> 
 : M-;CASE ";CASE not defined yet" panic ; <IMMED>
 
@@ -523,7 +538,6 @@ END
 
 #TODO patch x-handlers
 #TODO comment (tail of core.f)
-#TODO string
 #TODO val:
 
 meta:start
