@@ -221,6 +221,16 @@ PUBLIC
 END
 
 
+PRIVATE
+  : loop ( q n )
+    dup 1 < IF 2drop RET THEN
+    dec 2dup >r >r swap call r> r> AGAIN
+  ;
+PUBLIC
+  : for- ( n q -- ) swap loop ;
+END
+
+
 : while ( q -- )
   # loop while q put yes to TOS
   dup >r call IF r> AGAIN THEN rdrop
@@ -241,7 +251,9 @@ PUBLIC
   : sys:cell_size 6 query ;
   : sys:max_int 7 query ;
   : sys:min_int 8 query ;
-  : sys:depth sp cell + sys:ds sys:ds_size cells + swap - cell / ;
+  ( calculated )
+  : sys:ds_base sys:ds_size cells sys:ds + ;
+  : sys:depth sp cell + sys:ds_base swap - cell / ; # order matters
 END
 
 
@@ -353,11 +365,10 @@ END
 
 
 : ?stack ( -- )
-  [ sys:rs sp cell +
-    [ 2dup <= [ 2drop STOP ] ;UNLESS
-      dup @ ..
-      cell + GO
-    ] while
+  [ sp cell + ( adr )
+    sys:depth dec [ ( adr i )
+      cells over + @ ..
+    ] for- drop
     cr
   ] >stderr
 ;
@@ -532,11 +543,11 @@ PUBLIC
   : forth:run ( source stream -- )
     source >r stream >r stream! source!
     [ read
-      dup b@ 0 = [ STOP ] ;IF
+      dup b@ 0 = [ drop STOP ] ;IF
       forth:find
       ( found )
       2 [ forth:code call GO ] ;CASE
-      1 [ forth:mode IF , ELSE forth:code call THEN GO ] ;CASE
+      1 [ forth:code forth:mode IF , ELSE call THEN GO ] ;CASE
       2drop
       ( num )
       buf s>dec [ forth:handle_num GO ] ;IF
@@ -569,8 +580,16 @@ END
 256 as: len
 255 as: max
 val: buf
+val: show_depth
+val: show_stack
+
 : buf buf ?dup [ len allot dup buf! ] unless ;
-: prompt "> " pr ;
+
+: prompt
+  show_stack [ "| " pr ?stack ] when
+  show_depth [ sys:depth .. ] when
+  "> " pr
+;
 : listen buf len getline IF buf ELSE "" THEN forth:eval ;
 : repl [ prompt listen GO ] while ;
 
@@ -580,3 +599,57 @@ val: buf
   repl
   bye
 ;
+
+
+
+( ===== Primitives ===== )
+
+: compile_only ( prim -- ) forth:mode [ prim, ] [ "Compile Only" panic ] if ;
+: primitive ( prim q -- ) forth:mode [ drop prim, ] [ nip call ] if ;
+
+: noop <IMMED> ;
+: HALT <IMMED> 1 [ HALT ] primitive ;
+: LIT  <IMMED> 2 compile_only ;
+: RET  <IMMED> 3 compile_only ;
+
+: dup  <IMMED> 4 [ dup  ] primitive ;
+: drop <IMMED> 5 [ drop ] primitive ;
+: swap <IMMED> 6 [ swap ] primitive ;
+: over <IMMED> 7 [ over ] primitive ;
+
+: +    <IMMED> 8  [ +    ] primitive ;
+: -    <IMMED> 9  [ -    ] primitive ;
+: *    <IMMED> 10 [ *    ] primitive ;
+: /mod <IMMED> 11 [ /mod ] primitive ;
+
+: =  <IMMED> 12 [ =  ] primitive ;
+: != <IMMED> 13 [ != ] primitive ;
+: >  <IMMED> 14 [ >  ] primitive ;
+: <  <IMMED> 15 [ <  ] primitive ;
+
+: JMP  <IMMED> 16 compile_only ;
+: ZJMP <IMMED> 17 compile_only ;
+
+: @  <IMMED> 18 [ @  ] primitive ;
+: !  <IMMED> 19 [ !  ] primitive ;
+: b@ <IMMED> 20 [ b@ ] primitive ;
+: b! <IMMED> 21 [ b! ] primitive ;
+
+: and <IMMED> 22 [ and ] primitive ;
+: or  <IMMED> 23 [ or  ] primitive ;
+: not <IMMED> 24 [ not ] primitive ;
+: xor <IMMED> 25 [ xor ] primitive ;
+
+: lsft <IMMED> 26 [ lsft ] primitive ;
+: asft <IMMED> 27 [ asft ] primitive ;
+
+: io <IMMED> 28 [ io ] primitive ;
+
+: >r    <IMMED> 29 compile_only ;
+: r>    <IMMED> 30 compile_only ;
+: rdrop <IMMED> 31 compile_only ;
+
+: sp  <IMMED> 32 [ sp  ] primitive ;
+: sp! <IMMED> 33 [ sp! ] primitive ;
+: rp  <IMMED> 34 [ rp  ] primitive ;
+: rp! <IMMED> 35 [ rp! ] primitive ;
