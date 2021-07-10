@@ -21,6 +21,7 @@ image_max allot as: there
 
 0x04 as: adr_start
 0x08 as: adr_here
+0x0C as: adr_xlatest
 0x10 as: adr_begin
 
 
@@ -213,10 +214,6 @@ PRIVATE
   ;
 
 PUBLIC
-
-  ( latest )
-  xhere as: adr_xlatest
-  0 x,
 
   : xlatest  adr_xlatest x@ ;
   : xlatest! adr_xlatest x! ;
@@ -439,7 +436,7 @@ END
 
 
 : M-AGAIN <IMMED>
-  xlatest xxt x,
+  xJMP, xlatest xxt x,
 ;
 
 
@@ -496,13 +493,15 @@ END
 ;
 
 
+: M-;IF   ";IF not defined yet" panic ; <IMMED> 
+: M-;CASE ";CASE not defined yet" panic ; <IMMED>
+
 
 ( ===== metacompile ===== )
 
 #TODO patch x-handlers
 #TODO comment (tail of core.f)
-#TODO quotation
-#TODO PUBLIC/PRIVATE/END
+#TODO string
 
 meta:start
 include: forth/core.f

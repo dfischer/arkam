@@ -2,6 +2,17 @@
 
 
 
+# ----- Memory Layout -----
+# 0x04 &start
+# 0x08 here
+# 0x0C latest
+# 0x10 begin
+
+: here    0x08 @ ;
+: here!   0x08 ! ;
+
+
+
 ( ===== Boolean ===== )
 
 -1 as: ok
@@ -55,7 +66,7 @@ ng as: STOP
 
 
 
-( ===== bit ===== )
+( ===== Bitwise ===== )
 
 : <<  ( n -- n )     lsft ;
 : >>  ( n -- n ) neg lsft ;
@@ -63,21 +74,9 @@ ng as: STOP
 
 
 
-( ===== Memory ===== )
-
-4 as: cell
-: cells ( n -- n ) cell * ;
-: align ( n -- n ) 3 + 3 inv and ;
-
-: inc! ( addr -- ) dup @ 1 + swap ! ;
-: dec! ( addr -- ) dup @ 1 - swap ! ;
-
-
-
-( ===== Combinator ===== )
+( ===== Quotation 1 ===== )
 
 : call ( q -- ) >r ;
-
 
 : if ( ? q1 q2 -- ) >r swap IF rdrop >r ELSE drop THEN ;
   # example:
@@ -87,6 +86,47 @@ ng as: STOP
 : when   ( ? q -- ) swap IF >r ELSE drop THEN ;
 : unless ( ? q -- ) swap IF drop ELSE >r THEN ;
 
+
+# ;IF / ;UNLESS
+# call q and exit from caller if ? is true
+: ;IF     ( ? q -- ... ) swap IF rdrop >r RET ELSE drop         THEN ;
+: ;UNLESS ( ? q -- ... ) swap IF drop         ELSE rdrop >r RET THEN ;
+
+
+: ;CASE ( a b q -- ... | a )
+  # if a=b call q and escape from caller
+  # or ramain a
+  >r over = IF drop r> rdrop >r RET THEN rdrop
+;
+
+
+
+( ===== Memory ===== )
+
+4 as: cell
+: cells ( n -- n ) cell * ;
+: align ( n -- n ) 3 + 3 inv and ;
+
+: inc! ( adr -- ) dup @ 1 + swap ! ;
+: dec! ( adr -- ) dup @ 1 - swap ! ;
+
+: +! ( v adr -- ) swap over @ + swap ! ;
+: -! ( v adr -- ) swap over @ - swap ! ;
+
+: update! ( adr q -- )
+  # q: v -- v
+  over >r swap @ swap call r> !
+;
+
+: on  or      ; # n -- n
+: off inv and ; # n -- n
+
+: on!  swap [ swap on  ] update! ; # adr flag --
+: off! swap [ swap off ] update! ; # adr flag --
+
+
+
+( ===== Combinator ===== )
 
 : dip ( a q -- ... ) swap >r call r> ;
   # escape a, call q, then restore a
@@ -136,6 +176,36 @@ ng as: STOP
 
 
 
+( ===== Iterator ===== )
+
+PRIVATE
+  : loop ( q n ) dup 1 < IF 2drop RET THEN
+    1 - over swap >r >r call r> r> AGAIN
+  ;
+PUBLIC
+  : times ( n q -- ) swap loop ;
+END
+
+
+PRIVATE
+  : loop ( q n i )
+    2dup <= IF 3drop RET THEN
+    swap over 1 +     # q i n i+1
+    >r >r swap dup >r # i q | i+1 n q
+    call r> r> r> AGAIN
+  ;
+PUBLIC
+ : for ( n q -- ) swap 0 loop ;
+END
+
+
+: while ( q -- )
+  # loop while q put yes to TOS
+  dup >r call IF r> AGAIN THEN rdrop
+;
+
+
+
 ( ===== Stdio ===== )
 
 # port 1:stdout 2:stderr
@@ -156,7 +226,8 @@ ng as: STOP
 
 : pr ( s -- )
   dup b@ dup 0 = [ 2drop ] ;IF
-  putc 1 + AGAIN ;
+  putc 1 + AGAIN
+;
 
 : prn ( s -- ) pr cr ;
 
@@ -174,7 +245,22 @@ ng as: STOP
 
 
 : die 1 HALT ;
-: panic eprn die ;
+
+defer: panic
+: (panic) eprn die ;
+&(panic) is: panic
+
+
+
+( ===== String ===== )
+
+: s= ( s1 s2 -- ? )
+  [ 2dup [ b@ ] bia over != # s1 s2 c diff?
+    ( diff ) [ 3drop no STOP ] ;IF
+    ( end  ) 0 [ 2drop yes STOP ] ;CASE drop
+    ( next ) &inc bia GO
+  ] while
+;
 
 
 
@@ -202,6 +288,66 @@ PUBLIC
 END
 
 
+
+( ===== Forth ===== )
+
+0x01 as: flag_immed
+0x02 as: flag_hidden
+0x03 as: flags
+
+: forth:latest  0x0C @ ;
+: forth:latest! 0x0C ! ;
+
+# Dictionary
+# | next:30 | hidden:1 | immed:1  tagged 32bit pointer
+# | &name
+# | &code
+# | code...
+
+: forth:next  @ flags off ; # &entry -- &entry
+: forth:next! !           ; # &next &entry --
+
+: forth:name  cell + @    ; # &entry -- &name
+: forth:name! cell + !    ; # &name -- &entry
+
+: forth:code  2 cells + @ ; # &entry -- &code
+: forth:code! 2 cells + ! ; # &code &entry --
+
+: forth:hide! flag_hidden on!  ; # &entry --
+: forth:show! flag_hidden off! ; # &entry --
+: forth:hidden? flag_hidden and ; # &entry -- ?
+
+: forth:immed!     flag_immed on!  ; # &entry --
+: forth:non-immed! flag_immed off! ; # &entry --
+: forth:immed? flag_immed and ; # &entry -- ?
+
+
+defer: forth:find
+: forth:(find) ( name -- name 0 | normal: &entry -1 | immed: &entry 1 )
+  forth:latest [ # name latest
+    ( notfound ) 0 [ no STOP ] ;CASE
+    ( hidden   ) dup forth:hidden? [ forth:next GO ] ;IF
+    ( found    ) 2dup forth:name s=
+                 [ nip dup forth:immed? IF 1 ELSE -1 THEN yes STOP ] ;IF
+    ( next     ) forth:next GO
+  ] while
+;
+&forth:(find) is: forth:find
+
+: forth:find! ( name -- normal: &entry -1 | immed: &entry 1 )
+  forth:find [ epr " ?" panic ] ;UNLESS
+;
+
+
+: forth:words
+  forth:latest [
+    0 [ STOP ] ;CASE
+    dup forth:name pr space
+    forth:next GO
+  ] while cr
+;
+
+
 : putc 0 1 io ;
 : atmark 64 putc ;
 
@@ -220,7 +366,7 @@ defer: BAR
 : bye 0 HALT ;
 
 : main
-  yes baz
-  no  baz
+  forth:words
+  forth:latest forth:name forth:find!
   bye
 ;
