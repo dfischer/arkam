@@ -166,6 +166,8 @@ PRIVATE
   : prim>code 1 << 1 or ;
   : xLIT, 2 prim>code x, x, ;
   : xRET, 3 prim>code x, ;
+  : xJMP,  16 prim>code x, ;
+  : xZJMP, 17 prim>code x, ;
 
   : mcreate_prim ( q num name -- )
     prim_buf s:copy ( LIT -> M-LIT )
@@ -186,6 +188,27 @@ PRIVATE
     forth:compile_mode [ xLIT,     ] ;CASE
     forth:run_mode     [ ( -- xt ) ] ;CASE
     ? " unknown mode" panic
+  ;
+
+  34 as: dquote
+  : meta:str_handler ( -- )
+    forth:mode forth:compile_mode = IF
+      xJMP, xhere 0 x, xhere swap # -- &str &back
+    ELSE
+      xhere # -- addr
+    THEN
+
+    [ in:take
+      0      [ "Unclosed string" panic ] ;CASE
+      dquote [ 0 bx, STOP              ] ;CASE
+      bx, GO
+    ] while
+    xhere:align!
+
+    forth:mode forth:compile_mode = IF
+      xhere swap x! # backpatch
+      xLIT, # str
+    THEN
   ;
 
   : meta:reveal
@@ -314,6 +337,7 @@ PUBLIC
     meta:guard_nonmeta
     &meta:num_handler forth:num_handler!
     &meta:amp_handler forth:amp_handler!
+    &meta:str_handler forth:str_parser!
     meta:reveal
   ;
 
@@ -334,6 +358,8 @@ PUBLIC
 
   : xLIT, xLIT, ;
   : xRET, xRET, ;
+  : xJMP, xJMP, ;
+  : xZJMP, xZJMP, ;
 
 END
 
@@ -390,10 +416,6 @@ PRIMITIVES
   [ rp! ] PRIM: rp!
 
 END
-
-
-: xJMP,  &M-JMP  @ x, ;
-: xZJMP, &M-ZJMP @ x, ;
 
 
 : M-:
@@ -502,6 +524,7 @@ END
 #TODO patch x-handlers
 #TODO comment (tail of core.f)
 #TODO string
+#TODO val:
 
 meta:start
 include: forth/core.f

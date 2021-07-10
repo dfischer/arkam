@@ -367,6 +367,6 @@ defer: BAR
 
 : main
   forth:words
-  forth:latest forth:name forth:find!
+  forth:latest forth:name inc forth:find!
   bye
 ;

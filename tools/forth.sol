@@ -185,9 +185,9 @@
       110 [ 10                      ] ;CASE # n: newline
       ( as is )
     ;
-    : parse_str ( c -- yes | c no )
-      dup dquote != IF no RET END drop
-
+    val: str_parser
+    : parse_str ( c -- ) str_parser >r ;
+    : _parse_str ( c -- )
       mode compile_mode = IF
         "JMP" compile, here 0 , here swap # -- &str &back
       ELSE
@@ -206,7 +206,6 @@
         here swap ! # backpatch
         "LIT" compile, , # str
       END
-      yes
     ;
     : parse_comment ( c -- c no | yes )
       dup lparen != IF no RET END drop
@@ -279,7 +278,7 @@
       stream >r source >r stream! source!
       [ stream not          IF      ng RET END ( no input stream )
         skip_spaces dup not IF drop ng RET END ( -- c , no more chars )
-        parse_str           IF      ok RET END
+        dup dquote =        IF drop parse_str ok RET END
         parse_comment       IF      ok RET END
         read_token
         buf eval_token  IF ok RET END
@@ -301,6 +300,7 @@
     : setup
       &num_evaler num_handler!
       &amp_parser amp_handler!
+      &_parse_str str_parser!
     ;
     str
   ;
@@ -574,6 +574,8 @@
       "forth:num_handler!" [ eval:num_handler! ] core
       "forth:amp_handler"  [ eval:amp_handler  ] core
       "forth:amp_handler!" [ eval:amp_handler! ] core
+      "forth:str_parser"   [ eval:str_parser   ] core
+      "forth:str_parser!"  [ eval:str_parser!  ] core
 
       "handle:normal"   &handle_normal  core
       "handle:immed"    &handle_immed   core
