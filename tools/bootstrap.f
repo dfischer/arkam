@@ -2,7 +2,7 @@ require: lib/core.f
 
 
 ( for debug )
-val: verbose  no verbose!
+val: verbose  yes verbose!
 
 
 # Naming and Abbrev
@@ -536,9 +536,7 @@ END
 
 ( ===== metacompile ===== )
 
-#TODO patch x-handlers
 #TODO comment (tail of core.f)
-#TODO val:
 
 meta:start
 include: forth/core.f

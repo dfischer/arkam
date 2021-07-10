@@ -39,6 +39,12 @@ ng as: STOP
 : 2drop drop drop ; # x x --
 : 3drop drop drop drop ; # x x x --
 
+: tuck ( a b -- b a b ) swap over ;
+: ?dup ( a -- a a | 0 ) dup IF dup THEN ;
+
+: pullup   ( a b c -- b c a ) >r swap r> swap ;
+: pushdown ( b c a -- a b c ) swap >r swap r> ;
+
 
 
 ( ===== Compare ===== )
@@ -74,6 +80,17 @@ ng as: STOP
 
 
 
+( ===== Heap ===== )
+
+: align 3 + 3 inv and ;
+: here:align! here align here! ;
+: ,  here  ! here cell + here! ;
+: b, here b! here inc    here! ;
+
+: allot here tuck + here! ; # n -- adr
+
+
+
 ( ===== Quotation 1 ===== )
 
 : call ( q -- ) >r ;
@@ -97,6 +114,11 @@ ng as: STOP
   # if a=b call q and escape from caller
   # or ramain a
   >r over = IF drop r> rdrop >r RET THEN rdrop
+;
+
+: ;EQ ( a b -- yes | a )
+  # same as [ yes ] ;CASE
+  over = IF drop rdrop yes THEN
 ;
 
 
@@ -206,6 +228,24 @@ END
 
 
 
+( ===== System ===== )
+
+PRIVATE
+  : query 0 io ;
+PUBLIC
+  : sys:size 0 query ;
+  : sys:ds_size 2 query ;
+  : sys:ds      3 query ;
+  : sys:rs_size 4 query ;
+  : sys:rs      5 query ;
+  : sys:cell_size 6 query ;
+  : sys:max_int 7 query ;
+  : sys:min_int 8 query ;
+  : sys:depth sp cell + sys:ds sys:ds_size cells + swap - cell / ;
+END
+
+
+
 ( ===== Stdio ===== )
 
 # port 1:stdout 2:stderr
@@ -244,11 +284,83 @@ END
 : eprn ( s -- ) [ prn ] >stderr ;
 
 
+: getline ( buf len -- success? )
+  swap ( len buf )
+  [ over 1 < [ ng STOP ] ;IF
+    getc ( len buf c )
+    0  [ 0 swap b! drop ok STOP ] ;CASE
+    10 [ 0 swap b! drop ok STOP ] ;CASE
+    over b! &dec &inc bi* GO
+  ] while
+;
+
+
 : die 1 HALT ;
 
 defer: panic
 : (panic) eprn die ;
 &(panic) is: panic
+
+
+
+( ===== Debug print ===== )
+
+: >hex ( n -- c ) dup 10 < IF 48 ELSE 55 THEN + ;
+
+: ?h "HERE" prn ;
+
+PRIVATE
+
+  11 as: max ( i32: max "-2147483648" )
+  val: buf
+  val: n
+  val: posi
+  val: base
+  val: q
+  val: r
+  val: i
+
+  : init buf ?dup [ max 1 + allot dup buf! ] unless max + i! ;
+  : check buf i > IF "too big num" panic THEN ;
+  : put i 1 - i! i b! ; # c --
+  : put_sign posi IF RET THEN 45 put ;
+  : check_sign n 0 < IF n neg n! no ELSE yes THEN posi! ;
+  : read n base /mod r! q!
+    r >hex put
+    q 0 = IF RET THEN q n! AGAIN
+  ;
+  : check_min ( minimum number )
+    n 0 = IF "0" pr space rdrop RET THEN
+    n dup neg != IF RET THEN ( 0x80000000 * -1 = 0x80000000 )
+    10 base = IF "-2147483648" pr space rdrop RET THEN
+    16 base = IF "-80000000"   pr space rdrop RET THEN
+    "?: invalid base" panic
+  ;
+  : go ( n -- )
+    n! check_min check_sign init read put_sign i pr space
+  ;
+
+PUBLIC
+
+  : ?    dup 10 base! go ;
+  : ?hex dup 16 base! go ;
+
+END
+
+
+: .. ? drop ;
+: . .. cr ;
+
+
+: ?stack ( -- )
+  [ sys:rs sp cell +
+    [ 2dup <= [ 2drop STOP ] ;UNLESS
+      dup @ ..
+      cell + GO
+    ] while
+    cr
+  ] >stderr
+;
 
 
 
@@ -262,6 +374,23 @@ defer: panic
   ] while
 ;
 
+
+: c:digit? ( c -- ? ) dup 48 < [ drop no ] [ 57  <= ] if ;
+: c:upper? ( c -- ? ) dup 65 < [ drop no ] [ 90  <= ] if ;
+: c:lower? ( c -- ? ) dup 97 < [ drop no ] [ 122 <= ] if ;
+
+: c>dec ( c -- n yes | no ) dup c:digit? [ 48 - yes ] [ drop no ] if ;
+
+: s>dec ( s -- n yes | no )
+  dup b@ 45 = IF inc -1 ELSE 1 THEN swap ( sign s )
+  0 swap ( sign acc s )
+  [ dup b@
+    0 [ drop yes STOP ] ;CASE
+    c>dec [ pullup 10 * + swap inc GO ] ;IF
+    drop no STOP
+  ] while ( sign acc dec? )
+  IF * yes ELSE no THEN
+;
 
 
 ( ===== File ===== )
@@ -327,47 +456,127 @@ val: forth:mode
 
 
 defer: forth:find
-: forth:(find) ( name -- name 0 | normal: &entry -1 | immed: &entry 1 )
+: forth:(find) ( name -- name 0 | normal: &entry 1 | immed: &entry 2 )
   forth:latest [ # name latest
     ( notfound ) 0 [ no STOP ] ;CASE
     ( hidden   ) dup forth:hidden? [ forth:next GO ] ;IF
     ( found    ) 2dup forth:name s=
-                 [ nip dup forth:immed? IF 1 ELSE -1 THEN yes STOP ] ;IF
+                 [ nip dup forth:immed? IF 2 ELSE 1 THEN STOP ] ;IF
     ( next     ) forth:next GO
   ] while
 ;
 &forth:(find) is: forth:find
 
-: forth:find! ( name -- normal: &entry -1 | immed: &entry 1 )
+: forth:find! ( name -- normal: &entry 1 | immed: &entry 2 )
   forth:find [ epr " ?" panic ] ;UNLESS
 ;
+
+
+: prim>code 1 << 1 or ;
+: prim, prim>code , ;
+: LIT,   2 prim, ;
+: RET,   3 prim, ;
+: JMP,  16 prim, ;
+: ZJMP, 17 prim, ;
+
+
+( ----- stream ----- )
+
+PRIVATE
+
+  32      as: len
+  len 1 - as: max
+  val: buf
+  : buf buf ?dup IF RET THEN len allot dup buf! ;
+
+  val: source
+  val: stream   # q: source -- c source
+
+  : take source stream call source! ; # -- c
+
+  : space? 0 ;EQ 32 ;EQ 10 ;EQ no ; # c -- yes | c no
+
+  : skip_spaces ( -- c )
+    [ take
+      0 [ 0 STOP ] ;CASE
+      space? [ GO ] ;IF
+      STOP
+    ] while
+  ;
+
+  : read ( -- buf )
+    stream [ "No stream" panic ] ;UNLESS
+    skip_spaces max swap buf swap ( n buf c )
+    [ >r over r> ( n buf+ n c )
+      0 [ drop 0 swap b! drop buf STOP ] ;CASE
+      swap 0 = [ 3drop buf epr " ...Too long" panic STOP ] ;IF
+      space? [ 0 swap b! drop buf STOP ] ;IF
+      over b! &dec &inc bi* take GO
+    ] while
+  ;
+
+  : handle_num forth:mode [ LIT, , ] [ ( n -- n ) ] if ;
+
+PUBLIC
+
+  : forth:stream  stream  ;
+  : forth:stream! stream! ;
+  : forth:source  source  ;
+  : forth:source! source! ;
+  : forth:take    take ;
+  : forth:read    read ;
+
+  defer: forth:handle_num
+  &handle_num is: forth:handle_num
+
+  : forth:run ( source stream -- )
+    source >r stream >r stream! source!
+    [ read
+      dup b@ 0 = [ STOP ] ;IF
+      forth:find
+      ( found )
+      2 [ forth:code call GO ] ;CASE
+      1 [ forth:mode IF , ELSE forth:code call THEN GO ] ;CASE
+      2drop
+      ( num )
+      buf s>dec [ forth:handle_num GO ] ;IF
+      ( not found )
+      buf epr " ?" panic STOP
+    ] while
+    r> stream! r> source!
+  ;
+
+  : forth:eval ( s -- )
+    [ ( str -- str+ ) dup b@ tuck IF inc THEN ] forth:run
+  ;
+
+END
 
 
 : forth:words
   forth:latest [
     0 [ STOP ] ;CASE
+    dup forth:hidden? [ forth:next GO ] ;IF
     dup forth:name pr space
     forth:next GO
   ] while cr
 ;
 
 
-: putc 0 1 io ;
-: atmark 64 putc ;
 
-defer: FOO
-defer: BAR
+( ===== REPL ===== )
 
-: foo 64 10 [ putc ] bia ;
-: bar 38 10 [ putc ] bia ;
-
-&foo is: FOO
-&bar is: BAR
-
-: baz [ FOO ] [ BAR ] if ;
+256 as: len
+255 as: max
+val: buf
+: buf buf ?dup [ len allot dup buf! ] unless ;
+: prompt "> " pr ;
+: listen buf len getline IF buf ELSE "" THEN forth:eval ;
+: repl [ prompt listen GO ] while ;
 
 : bye 0 HALT ;
 
 : main
+  repl
   bye
 ;
