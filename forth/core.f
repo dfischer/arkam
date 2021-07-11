@@ -710,7 +710,7 @@ x: defer:
 
 : is ( xt name -- )
   forth:find [ forth:notfound ] unless
-  ( xt &entry ) forth:code cell + ,
+  ( xt &entry ) forth:code cell + !
 ;
 
 x: is:
@@ -797,50 +797,50 @@ END
 : compile_only ( prim -- ) forth:mode [ prim, ] [ "Compile Only" panic ] if ;
 : primitive ( prim q -- ) forth:mode [ drop prim, ] [ nip call ] if ;
 
-: noop <IMMED> ;
-: HALT <IMMED> 1 [ HALT ] primitive ;
-: LIT  <IMMED> 2 compile_only ;
-: RET  <IMMED> 3 compile_only ;
+x: noop <IMMED> ;
+x: HALT <IMMED> 1 [ HALT ] primitive ;
+x: LIT  <IMMED> 2 compile_only ;
+x: RET  <IMMED> 3 compile_only ;
 
-: dup  <IMMED> 4 [ dup  ] primitive ;
-: drop <IMMED> 5 [ drop ] primitive ;
-: swap <IMMED> 6 [ swap ] primitive ;
-: over <IMMED> 7 [ over ] primitive ;
+x: dup  <IMMED> 4 [ dup  ] primitive ;
+x: drop <IMMED> 5 [ drop ] primitive ;
+x: swap <IMMED> 6 [ swap ] primitive ;
+x: over <IMMED> 7 [ over ] primitive ;
 
-: +    <IMMED> 8  [ +    ] primitive ;
-: -    <IMMED> 9  [ -    ] primitive ;
-: *    <IMMED> 10 [ *    ] primitive ;
-: /mod <IMMED> 11 [ /mod ] primitive ;
+x: +    <IMMED> 8  [ +    ] primitive ;
+x: -    <IMMED> 9  [ -    ] primitive ;
+x: *    <IMMED> 10 [ *    ] primitive ;
+x: /mod <IMMED> 11 [ /mod ] primitive ;
 
-: =  <IMMED> 12 [ =  ] primitive ;
-: != <IMMED> 13 [ != ] primitive ;
-: >  <IMMED> 14 [ >  ] primitive ;
-: <  <IMMED> 15 [ <  ] primitive ;
+x: =  <IMMED> 12 [ =  ] primitive ;
+x: != <IMMED> 13 [ != ] primitive ;
+x: >  <IMMED> 14 [ >  ] primitive ;
+x: <  <IMMED> 15 [ <  ] primitive ;
 
-: JMP  <IMMED> 16 compile_only ;
-: ZJMP <IMMED> 17 compile_only ;
+x: JMP  <IMMED> 16 compile_only ;
+x: ZJMP <IMMED> 17 compile_only ;
 
-: @  <IMMED> 18 [ @  ] primitive ;
-: !  <IMMED> 19 [ !  ] primitive ;
-: b@ <IMMED> 20 [ b@ ] primitive ;
-: b! <IMMED> 21 [ b! ] primitive ;
+x: @  <IMMED> 18 [ @  ] primitive ;
+x: !  <IMMED> 19 [ !  ] primitive ;
+x: b@ <IMMED> 20 [ b@ ] primitive ;
+x: b! <IMMED> 21 [ b! ] primitive ;
 
-: and <IMMED> 22 [ and ] primitive ;
-: or  <IMMED> 23 [ or  ] primitive ;
-: not <IMMED> 24 [ not ] primitive ;
-: xor <IMMED> 25 [ xor ] primitive ;
+x: and <IMMED> 22 [ and ] primitive ;
+x: or  <IMMED> 23 [ or  ] primitive ;
+x: not <IMMED> 24 [ not ] primitive ;
+x: xor <IMMED> 25 [ xor ] primitive ;
 
-: lsft <IMMED> 26 [ lsft ] primitive ;
-: asft <IMMED> 27 [ asft ] primitive ;
+x: lsft <IMMED> 26 [ lsft ] primitive ;
+x: asft <IMMED> 27 [ asft ] primitive ;
 
-: io <IMMED> 28 [ io ] primitive ;
+x: io <IMMED> 28 [ io ] primitive ;
 
-: >r    <IMMED> 29 compile_only ;
-: r>    <IMMED> 30 compile_only ;
-: rdrop <IMMED> 31 compile_only ;
+x: >r    <IMMED> 29 compile_only ;
+x: r>    <IMMED> 30 compile_only ;
+x: rdrop <IMMED> 31 compile_only ;
 
-: sp  <IMMED> 32 [ sp  ] primitive ;
-: sp! <IMMED> 33 [ sp! ] primitive ;
-: rp  <IMMED> 34 [ rp  ] primitive ;
-: rp! <IMMED> 35 [ rp! ] primitive ;
+x: sp  <IMMED> 32 [ sp  ] primitive ;
+x: sp! <IMMED> 33 [ sp! ] primitive ;
+x: rp  <IMMED> 34 [ rp  ] primitive ;
+x: rp! <IMMED> 35 [ rp! ] primitive ;
 
