@@ -732,6 +732,7 @@ END
 
 : main
   yes show_depth!
+  ": <IMMED> forth:latest forth:immed! ; <IMMED>" forth:eval
   repl
   bye
 ;

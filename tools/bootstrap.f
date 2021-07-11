@@ -2,7 +2,7 @@ require: lib/core.f
 
 
 ( for debug )
-val: verbose  yes verbose!
+val: verbose  no verbose!
 
 
 # Naming and Abbrev
@@ -350,10 +350,10 @@ PUBLIC
 
   : meta:finish
     "main" set_entrypoint
-    "<info>" prn xinfo
-    "<dump>" prn 0 128 xdump
-    "<words>" prn x:words
-    "out/tmp.ark" save
+    # "<info>" prn xinfo
+    # "<dump>" prn 0 128 xdump
+    # "<words>" prn x:words
+    "out/forth1.ark" save
     "DONE" eprn
     bye
   ;
@@ -527,7 +527,6 @@ END
 
   dup "!" s:append! meta:create
   xLIT,, &M-! @ x, xRET,
-  xlatest xname prn
 ;
 
 
