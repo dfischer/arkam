@@ -668,41 +668,41 @@ END
 
 ( ===== Syntax ===== )
 
-# will be overwrited later
-
-: _:
+x: :
   forth:read [ "Word name required" panic ] unless
   forth:create
   forth:latest forth:hide!
   forth:compile_mode forth:mode!
 ;
 
-: _;
+x: ; <IMMED>
   RET,
   forth:latest forth:show!
   forth:run_mode forth:mode!
 ;
 
-: _[ ( -- &q &back mode | &q mode )
+x: <IMMED> <IMMED> forth:latest forth:immed! ;
+
+x: [ <IMMED> ( -- &q &back mode | &q mode )
   forth:mode [ JMP, here 0 , here swap ] [ here:align! here ] if
   forth:mode forth:compile_mode forth:mode!
 ;
 
-: _] ( &q &back mode -- )
+x: ] <IMMED> ( &q &back mode -- )
   RET,
   dup forth:mode!
   [ here swap ! LIT, , ] when
 ;
 
 
-: _IF   ZJMP, here 0 , ;                 # -- &back
-: _ELSE JMP, here swap 0 , here swap ! ; # &back -- &back
-: _THEN here swap ! ;                    # &back --
+x: IF   <IMMED> ZJMP, here 0 , ;                 # -- &back
+x: ELSE <IMMED> JMP, here swap 0 , here swap ! ; # &back -- &back
+x: THEN <IMMED> here swap ! ;                    # &back --
 
-: _AGAIN JMP, forth:latest forth:code , ;
+x: AGAIN <IMMED> JMP, forth:latest forth:code , ;
 
 
-: _defer:
+x: defer:
   forth:read [ "Defered name required" panic ] unless
   forth:create
   JMP, 0 ,
@@ -713,7 +713,7 @@ END
   ( xt &entry ) forth:code cell + ,
 ;
 
-: _is:
+x: is:
   forth:read [ "Defered name required" panic ] unless
   is
 ;
@@ -844,18 +844,3 @@ END
 : rp  <IMMED> 34 [ rp  ] primitive ;
 : rp! <IMMED> 35 [ rp! ] primitive ;
 
-
-
-( ===== Overwrite Syntaxes ===== )
-
-defer: :  &_: is: :
-defer: ;  &_; is: ; <IMMED>
-
-defer: [  &_[ is: [ <IMMED>
-defer: ]  &_] is: ] <IMMED>
-
-defer: IF   &_IF   is: IF   <IMMED>
-defer: ELSE &_ELSE is: ELSE <IMMED>
-defer: THEN &_THEN is: THEN <IMMED>
-
-defer: AGAIN &_AGAIN is: AGAIN <IMMED>

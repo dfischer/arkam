@@ -421,20 +421,32 @@ PRIMITIVES
 END
 
 
-: M-:
+: M-: ( -- q )
   in:read [ "word name required" panic ] unless
   meta:create
   xlatest x:hide!
   forth:latest forth:hide!
   forth:compile_mode!
+  [
+    xRET,
+    forth:latest forth:show!
+    xlatest x:show!
+    forth:run_mode!
+  ]
 ;
 
 
-: M-; <IMMED>
-  xRET,
-  forth:latest forth:show!
-  xlatest x:show!
-  forth:run_mode!
+: M-; <IMMED> ( q -- ) call ;
+
+
+: M-x: ( -- q )
+  in:read [ "word name required" panic ] unless
+  xcreate
+  forth:compile_mode!
+  [
+    xRET,
+    forth:run_mode!
+  ]
 ;
 
 
