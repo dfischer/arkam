@@ -603,11 +603,41 @@ END
 
 ( ===== Forth Utils ===== )
 
+: ;0 ( ? -- ) IF ELSE rdrop THEN ;
+
+: forth:read_find ( -- &entry yes | no )
+  forth:read [ "Word name required" eprn no ] ;UNLESS
+  forth:find [ epr " ?" eprn no ] ;UNLESS
+  yes
+;
+
 : ' <IMMED>
-  forth:read [ "Word name required" eprn ] ;UNLESS
-  forth:find [ epr " ?" eprn ] ;UNLESS
+  forth:read_find ;0
   forth:code
   forth:mode [ LIT, , ] when
+;
+
+: POSTPONE: <IMMED>
+  forth:read_find ;0
+  forth:code
+  forth:mode [ , ] [ call ] if
+;
+
+: COMPILE: <IMMED>
+  forth:read_find ;0
+  forth:code LIT, , &, ,
+;
+
+
+: " <IMMED>
+  forth:mode [ JMP, here 0 , here swap ] [ here ] if
+  [ forth:take
+    0  [ "Unclosed string" panic ] ;CASE
+    34 [ STOP ] ;CASE
+    b, GO
+  ] while
+  0 b, here:align!
+  forth:mode [ here swap ! LIT, , ] when
 ;
 
 
@@ -639,6 +669,7 @@ END
   dup forth:mode!
   [ here swap ! LIT, , ] when
 ;
+
 
 : _IF   ZJMP, here 0 , ;                 # -- &back
 : _ELSE JMP, here swap 0 , here swap ! ; # &back -- &back
@@ -774,4 +805,3 @@ defer: ELSE &_ELSE is: ELSE <IMMED>
 defer: THEN &_THEN is: THEN <IMMED>
 
 defer: AGAIN &_AGAIN is: AGAIN <IMMED>
-
