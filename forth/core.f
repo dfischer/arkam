@@ -82,7 +82,10 @@ ng as: STOP
 
 ( ===== Heap ===== )
 
-: align 3 + 3 inv and ;
+4 as: cell
+: cells ( n -- n ) cell * ;
+: align ( n -- n ) 3 + 3 inv and ;
+
 : here:align! here align here! ;
 : ,  here  ! here cell + here! ;
 : b, here b! here inc    here! ;
@@ -124,10 +127,6 @@ ng as: STOP
 
 
 ( ===== Memory ===== )
-
-4 as: cell
-: cells ( n -- n ) cell * ;
-: align ( n -- n ) 3 + 3 inv and ;
 
 : inc! ( adr -- ) dup @ 1 + swap ! ;
 : dec! ( adr -- ) dup @ 1 - swap ! ;
@@ -404,6 +403,19 @@ END
 ;
 
 
+: s:each ( s q -- ) # q: ( c -- )
+  swap
+  [ dup b@ ( q s c )
+    0 [ 2drop STOP ] ;CASE
+    swap inc >r swap dup >r call r> r> GO
+  ] while
+;
+
+: s:put ( s -- )
+  [ b, ] s:each 0 b,
+;
+
+
 ( ===== File ===== )
 
 PRIVATE
@@ -464,6 +476,13 @@ val: forth:mode
 : forth:immed!     flag_immed on!  ; # &entry --
 : forth:non-immed! flag_immed off! ; # &entry --
 : forth:immed? flag_immed and ; # &entry -- ?
+
+: forth:create ( name -- ) "name " pr ? space dup prn
+  here:align! here >r s:put here:align! r> ( &name )
+  ( latest ) here forth:latest , forth:latest!
+  ( &name  ) ,
+  ( &code  ) here cell + ,
+;
 
 
 defer: forth:find
@@ -535,15 +554,16 @@ PUBLIC
   : forth:source  source  ;
   : forth:source! source! ;
   : forth:take    take ;
-  : forth:read    read ;
+  : forth:read ( -- buf yes | no )
+    read dup b@ IF yes ELSE drop no THEN
+  ;
 
   defer: forth:handle_num
   &handle_num is: forth:handle_num
 
   : forth:run ( source stream -- )
     source >r stream >r stream! source!
-    [ read
-      dup b@ 0 = [ drop STOP ] ;IF
+    [ forth:read [ STOP ] ;UNLESS
       forth:find
       ( found )
       2 [ forth:code call GO ] ;CASE
@@ -552,7 +572,7 @@ PUBLIC
       ( num )
       buf s>dec [ forth:handle_num GO ] ;IF
       ( not found )
-      buf epr " ?" panic STOP
+      buf epr " ?" eprn STOP
     ] while
     r> stream! r> source!
   ;
@@ -571,6 +591,20 @@ END
     dup forth:name pr space
     forth:next GO
   ] while cr
+;
+
+
+: $:
+  forth:read [ "Word name required" panic ] unless
+  forth:create
+  forth:latest forth:hide!
+  forth:compile_mode forth:mode!
+;
+
+: $; <IMMED>
+  RET,
+  forth:latest forth:show!
+  forth:run_mode forth:mode!
 ;
 
 
@@ -594,6 +628,7 @@ val: show_stack
 : repl [ prompt listen GO ] while ;
 
 : bye 0 HALT ;
+
 
 : main
   repl
