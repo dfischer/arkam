@@ -12,11 +12,11 @@ LDFLAGS =
 
 .PHONY: bootstarp
 
-out/forth1.ark: bin/forth tools/bootstrap.f
+out/forth1.ark: bin/forth tools/bootstrap.f forth/core.f
 	./bin/forth tools/bootstrap.f
 
 bootstrap: out/forth1.ark
-	./bin/arkam out/forth1.ark
+	./bin/arkam out/forth1.ark --quit
 
 
 

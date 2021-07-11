@@ -434,11 +434,23 @@ PUBLIC
   : file:fullpath 8 query ; # path buf max -- ?
   : file:size     9 query ; # id -- n
   ( --- defensive --- )
-  : file:open!  dup file:open [ "Can't open " epr eprn die ] nip ; # path mode -- id
+  : file:open!  file:open [ "Can't open " epr eprn die ] unless ; # path mode -- id
   : file:close! file:close drop ; # id --
   : file:read!  file:read  IF RET THEN "Can't read" panic ;
   : file:write! file:write IF RET THEN "Can't write" panic ;
 END
+
+
+
+( ===== CLI ===== )
+
+: cli:query 12 io ;
+: cli:argc    0 cli:query ; # -- n
+: cli:get_arg 1 cli:query ; # buf i len -- ?
+
+: cli:get_arg! ( buf i len -- )
+  cli:get_arg IF RET THEN "Can't get arg!" panic
+;
 
 
 
@@ -600,6 +612,18 @@ END
 ;
 
 
+: include ( fname -- )
+  "r" file:open! dup >r
+  [ ( id -- c id ) dup file:getc swap ] forth:run
+  r> file:close!
+;
+
+: include:
+  forth:read [ "File name required" panic ] ;UNLESS
+  include
+;
+
+
 
 ( ===== Forth Utils ===== )
 
@@ -696,6 +720,35 @@ END
 
 
 
+( ===== CLI Option ===== )
+
+PRIVATE
+
+  64 as: len
+  val: buf
+
+  : read buf swap len cli:get_arg [ "too long option" panic ] unless ;
+
+PUBLIC
+
+  val: opt:repl
+  : opt:parse_all
+    len allot buf!
+    yes opt:repl!
+    cli:argc 2 < IF RET THEN
+    no opt:repl!
+    cli:argc dec [
+      inc read
+      buf "--repl" s= [ yes opt:repl! ] ;IF
+      buf "--quit" s= [ no  opt:repl! ] ;IF
+      buf include
+    ] for
+  ;
+
+END
+
+
+
 ( ===== REPL ===== )
 
 PRIVATE
@@ -731,9 +784,9 @@ END
 : bye 0 HALT ;
 
 : main
-  yes show_depth!
   ": <IMMED> forth:latest forth:immed! ; <IMMED>" forth:eval
-  repl
+  opt:parse_all
+  opt:repl [ yes show_depth! repl ] when
   bye
 ;
 
