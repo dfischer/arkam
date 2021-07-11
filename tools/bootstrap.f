@@ -258,6 +258,7 @@ PUBLIC
   : x:hide! xnext hidden_flag on!  ;
   : x:show! xnext hidden_flag off! ;
   : x:hidden? xnext x@ hidden_flag and ;
+  : x:immed! xnext immed_flag on! ;
   : xnext! xnext x! ;
   : xnext  xnext x@ flags off ;
 
@@ -496,7 +497,7 @@ END
 
 
 : M-<IMMED> <IMMED>
-  xlatest x:show!
+  xlatest x:immed!
 ;
 
 

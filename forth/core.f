@@ -471,13 +471,13 @@ val: forth:mode
 
 : forth:hide! flag_hidden on!  ; # &entry --
 : forth:show! flag_hidden off! ; # &entry --
-: forth:hidden? flag_hidden and ; # &entry -- ?
+: forth:hidden? @ flag_hidden and ; # &entry -- ?
 
 : forth:immed!     flag_immed on!  ; # &entry --
 : forth:non-immed! flag_immed off! ; # &entry --
-: forth:immed? flag_immed and ; # &entry -- ?
+: forth:immed? @ flag_immed and ; # &entry -- ?
 
-: forth:create ( name -- ) "name " pr ? space dup prn
+: forth:create ( name -- )
   here:align! here >r s:put here:align! r> ( &name )
   ( latest ) here forth:latest , forth:latest!
   ( &name  ) ,
