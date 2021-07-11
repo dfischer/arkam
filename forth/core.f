@@ -107,20 +107,20 @@ ng as: STOP
 : unless ( ? q -- ) swap IF drop ELSE >r THEN ;
 
 
-# ;IF / ;UNLESS
+# ;when / ;unless
 # call q and exit from caller if ? is true
-: ;IF     ( ? q -- ... ) swap IF rdrop >r RET ELSE drop         THEN ;
-: ;UNLESS ( ? q -- ... ) swap IF drop         ELSE rdrop >r RET THEN ;
+: ;when   ( ? q -- ... ) swap IF rdrop >r RET ELSE drop         THEN ;
+: ;unless ( ? q -- ... ) swap IF drop         ELSE rdrop >r RET THEN ;
 
 
-: ;CASE ( a b q -- ... | a )
+: ;case ( a b q -- ... | a )
   # if a=b call q and escape from caller
   # or ramain a
   >r over = IF drop r> rdrop >r RET THEN rdrop
 ;
 
-: ;EQ ( a b -- yes | a )
-  # same as [ yes ] ;CASE
+: ;eq ( a b -- yes | a )
+  # same as [ yes ] ;case
   over = IF drop rdrop yes THEN
 ;
 
@@ -277,7 +277,7 @@ END
 
 
 : pr ( s -- )
-  dup b@ dup 0 = [ 2drop ] ;IF
+  dup b@ dup 0 = [ 2drop ] ;when
   putc 1 + AGAIN
 ;
 
@@ -298,10 +298,10 @@ END
 
 : getline ( buf len -- success? )
   swap ( len buf )
-  [ over 1 < [ ng STOP ] ;IF
+  [ over 1 < [ ng STOP ] ;when
     getc ( len buf c )
-    0  [ 0 swap b! drop ok STOP ] ;CASE
-    10 [ 0 swap b! drop ok STOP ] ;CASE
+    0  [ 0 swap b! drop ok STOP ] ;case
+    10 [ 0 swap b! drop ok STOP ] ;case
     over b! &dec &inc bi* GO
   ] while
 ;
@@ -379,8 +379,8 @@ END
 
 : s= ( s1 s2 -- ? )
   [ 2dup [ b@ ] bia over != # s1 s2 c diff?
-    ( diff ) [ 3drop no STOP ] ;IF
-    ( end  ) 0 [ 2drop yes STOP ] ;CASE drop
+    ( diff ) [ 3drop no STOP ] ;when
+    ( end  ) 0 [ 2drop yes STOP ] ;case drop
     ( next ) &inc bia GO
   ] while
 ;
@@ -396,8 +396,8 @@ END
   dup b@ 45 = IF inc -1 ELSE 1 THEN swap ( sign s )
   0 swap ( sign acc s )
   [ dup b@
-    0 [ drop yes STOP ] ;CASE
-    c>dec [ pullup 10 * + swap inc GO ] ;IF
+    0 [ drop yes STOP ] ;case
+    c>dec [ pullup 10 * + swap inc GO ] ;when
     drop no STOP
   ] while ( sign acc dec? )
   IF * yes ELSE 2drop no THEN
@@ -407,7 +407,7 @@ END
 : s:each ( s q -- ) # q: ( c -- )
   swap
   [ dup b@ ( q s c )
-    0 [ 2drop STOP ] ;CASE
+    0 [ 2drop STOP ] ;case
     swap inc >r swap dup >r call r> r> GO
   ] while
 ;
@@ -501,17 +501,17 @@ val: forth:mode
 defer: forth:find
 : forth:(find) ( name -- name 0 | normal: &entry 1 | immed: &entry 2 )
   forth:latest [ # name latest
-    ( notfound ) 0 [ no STOP ] ;CASE
-    ( hidden   ) dup forth:hidden? [ forth:next GO ] ;IF
+    ( notfound ) 0 [ no STOP ] ;case
+    ( hidden   ) dup forth:hidden? [ forth:next GO ] ;when
     ( found    ) 2dup forth:name s=
-                 [ nip dup forth:immed? IF 2 ELSE 1 THEN STOP ] ;IF
+                 [ nip dup forth:immed? IF 2 ELSE 1 THEN STOP ] ;when
     ( next     ) forth:next GO
   ] while
 ;
 &forth:(find) is: forth:find
 
 : forth:find! ( name -- normal: &entry 1 | immed: &entry 2 )
-  forth:find [ epr " ?" panic ] ;UNLESS
+  forth:find [ epr " ?" panic ] ;unless
 ;
 
 
@@ -537,23 +537,23 @@ PRIVATE
 
   : take source stream call source! ; # -- c
 
-  : space? 0 ;EQ 32 ;EQ 10 ;EQ no ; # c -- yes | c no
+  : space? 0 ;eq 32 ;eq 10 ;eq no ; # c -- yes | c no
 
   : skip_spaces ( -- c )
     [ take
-      0 [ 0 STOP ] ;CASE
-      space? [ GO ] ;IF
+      0 [ 0 STOP ] ;case
+      space? [ GO ] ;when
       STOP
     ] while
   ;
 
   : read ( -- buf )
-    stream [ "No stream" panic ] ;UNLESS
+    stream [ "No stream" panic ] ;unless
     skip_spaces max swap buf swap ( n buf c )
     [ >r over r> ( n buf+ n c )
-      0 [ drop 0 swap b! drop buf STOP ] ;CASE
-      swap 0 = [ 3drop buf epr " ...Too long" panic STOP ] ;IF
-      space? [ 0 swap b! drop buf STOP ] ;IF
+      0 [ drop 0 swap b! drop buf STOP ] ;case
+      swap 0 = [ 3drop buf epr " ...Too long" panic STOP ] ;when
+      space? [ 0 swap b! drop buf STOP ] ;when
       over b! &dec &inc bi* take GO
     ] while
   ;
@@ -581,14 +581,14 @@ PUBLIC
 
   : forth:run ( source stream -- )
     source >r stream >r stream! source!
-    [ forth:read [ STOP ] ;UNLESS
+    [ forth:read [ STOP ] ;unless
       forth:find
       ( found )
-      2 [ forth:code call GO ] ;CASE
-      1 [ forth:code forth:mode IF , ELSE call THEN GO ] ;CASE
+      2 [ forth:code call GO ] ;case
+      1 [ forth:code forth:mode IF , ELSE call THEN GO ] ;case
       2drop
       ( num )
-      buf s>dec [ forth:handle_num GO ] ;IF
+      buf s>dec [ forth:handle_num GO ] ;when
       ( not found )
       buf forth:notfound STOP
     ] while
@@ -604,8 +604,8 @@ END
 
 : forth:words
   forth:latest [
-    0 [ STOP ] ;CASE
-    dup forth:hidden? [ forth:next GO ] ;IF
+    0 [ STOP ] ;case
+    dup forth:hidden? [ forth:next GO ] ;when
     dup forth:name pr space
     forth:next GO
   ] while cr
@@ -619,7 +619,7 @@ END
 ;
 
 : include:
-  forth:read [ "File name required" panic ] ;UNLESS
+  forth:read [ "File name required" panic ] ;unless
   include
 ;
 
@@ -630,8 +630,8 @@ END
 : ;0 ( ? -- ) IF ELSE rdrop THEN ;
 
 : forth:read_find ( -- &entry yes | no )
-  forth:read [ "Word name required" eprn no ] ;UNLESS
-  forth:find [ epr " ?" eprn no ] ;UNLESS
+  forth:read [ "Word name required" eprn no ] ;unless
+  forth:find [ epr " ?" eprn no ] ;unless
   yes
 ;
 
@@ -656,8 +656,8 @@ END
 : " <IMMED>
   forth:mode [ JMP, here 0 , here swap ] [ here ] if
   [ forth:take
-    0  [ "Unclosed string" panic ] ;CASE
-    34 [ STOP ] ;CASE
+    0  [ "Unclosed string" panic ] ;case
+    34 [ STOP ] ;case
     b, GO
   ] while
   0 b, here:align!
@@ -739,8 +739,8 @@ PUBLIC
     no opt:repl!
     cli:argc dec [
       inc read
-      buf "--repl" s= [ yes opt:repl! ] ;IF
-      buf "--quit" s= [ no  opt:repl! ] ;IF
+      buf "--repl" s= [ yes opt:repl! ] ;when
+      buf "--quit" s= [ no  opt:repl! ] ;when
       buf include
     ] for
   ;
@@ -784,7 +784,6 @@ END
 : bye 0 HALT ;
 
 : main
-  ": <IMMED> forth:latest forth:immed! ; <IMMED>" forth:eval
   opt:parse_all
   opt:repl [ yes show_depth! repl ] when
   bye
