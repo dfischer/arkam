@@ -594,17 +594,28 @@ END
 ;
 
 
-: $:
+: _:
   forth:read [ "Word name required" panic ] unless
   forth:create
   forth:latest forth:hide!
   forth:compile_mode forth:mode!
 ;
 
-: $; <IMMED>
+: _;
   RET,
   forth:latest forth:show!
   forth:run_mode forth:mode!
+;
+
+: _[ ( -- &q &back mode | &q mode )
+  forth:mode [ JMP, here 0 , here swap ] [ here:align! here ] if
+  forth:mode forth:compile_mode forth:mode!
+;
+
+: _] ( &q &back mode -- )
+  RET,
+  dup forth:mode!
+  [ here swap ! LIT, , ] when
 ;
 
 
@@ -688,3 +699,9 @@ val: show_stack
 : sp! <IMMED> 33 [ sp! ] primitive ;
 : rp  <IMMED> 34 [ rp  ] primitive ;
 : rp! <IMMED> 35 [ rp! ] primitive ;
+
+
+defer: :  &_: is: :
+defer: ;  &_; is: ; <IMMED>
+defer: [  &_[ is: [ <IMMED>
+defer: ]  &_] is: ] <IMMED>
