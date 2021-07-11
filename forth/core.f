@@ -594,6 +594,11 @@ END
 ;
 
 
+
+( ===== Syntax ===== )
+
+# will be overwrited later
+
 : _:
   forth:read [ "Word name required" panic ] unless
   forth:create
@@ -617,6 +622,10 @@ END
   dup forth:mode!
   [ here swap ! LIT, , ] when
 ;
+
+: _IF   ZJMP, here 0 , ;                 # -- &back
+: _ELSE JMP, here swap 0 , here swap ! ; # &back -- &back
+: _THEN here swap ! ;                    # &back --
 
 
 
@@ -642,6 +651,7 @@ val: show_stack
 
 
 : main
+  yes show_depth!
   repl
   bye
 ;
@@ -701,7 +711,15 @@ val: show_stack
 : rp! <IMMED> 35 [ rp! ] primitive ;
 
 
+
+( ===== Overwrite Syntaxes ===== )
+
 defer: :  &_: is: :
 defer: ;  &_; is: ; <IMMED>
+
 defer: [  &_[ is: [ <IMMED>
 defer: ]  &_] is: ] <IMMED>
+
+defer: IF   &_IF   is: IF   <IMMED>
+defer: ELSE &_ELSE is: ELSE <IMMED>
+defer: THEN &_THEN is: THEN <IMMED>
