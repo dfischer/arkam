@@ -3,7 +3,7 @@
 require: lib/core.f
 
 
-MODULE
+PRIVATE
 
   # entities:
   #   | count
@@ -75,7 +75,7 @@ MODULE
     &handle_set forth:latest forth:handler!
   ;
 
----EXPOSE---
+PUBLIC
 
 : ecs:new_es ( n -- es )
   here swap dup , allot drop here:align! ;

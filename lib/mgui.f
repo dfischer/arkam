@@ -7,7 +7,7 @@ require: lib/entity.f
 
 ( ===== button ===== )
 
-MODULE
+PRIVATE
 
   128 as: max
   
@@ -74,7 +74,7 @@ MODULE
     id
   ;
 
----EXPOSE---
+PUBLIC
 
   : btn:delete ( id -- ) btn entity:kill ;
 
@@ -116,7 +116,7 @@ END
 
 ( ===== slider ===== )
 
-MODULE
+PRIVATE
 
   128 as: max_sliders
 
@@ -189,7 +189,7 @@ MODULE
     draw_bar
   ;
 
----EXPOSE---
+PUBLIC
 
   # range: 0 <= v <= max
   #

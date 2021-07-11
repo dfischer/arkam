@@ -10,7 +10,7 @@ fm:deluxe_color 4 [ ppu:palette_color! ] for
 0 fm:operator!
 
 
-MODULE
+PRIVATE
 
   16 as: steps
   steps allot as: seq
@@ -120,7 +120,7 @@ MODULE
     steps [ 2 rand IF 0 ELSE dur 2 - THEN swap at! ] for
   <init>
 
----EXPOSE---
+PUBLIC
 
   : seq:pos! ( x y -- ) oy! ox! ;
 
@@ -138,7 +138,7 @@ END
 
 ( ===== params ===== )
 
-MODULE
+PRIVATE
   32 as: max
 
   max ENTITY sliders
@@ -217,7 +217,7 @@ MODULE
   10  26 0 oparams
   110 26 1 oparams
 
----EXPOSE---
+PUBLIC
 
   : params:draw draw_all ;
 

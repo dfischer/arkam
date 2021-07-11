@@ -89,13 +89,13 @@ MARKER: <NUM>
 
 
 
-MARKER: <MODULE>
+MARKER: <PRIVATE>
 
 123 as: x
 
-MODULE
+PRIVATE
   234 as: x
----EXPOSE---
+PUBLIC
   123 as: y
   x 234 = "in module" ASSERT
 END
@@ -106,7 +106,7 @@ y 123 = "module exposed" ASSERT
 
 ( ----- no exposed ----- )
 
-MODULE
+PRIVATE
   234 as: x
   x 234 = "in module - no exposed" ASSERT
 END
@@ -115,9 +115,9 @@ x 123 = "out of module - no exposed" ASSERT
 
 
 ( ----- no content ----- )
-MODULE END
+PRIVATE END
 
-<MODULE>
+<PRIVATE>
 
 
 
@@ -136,6 +136,17 @@ MARKER: <STRING>
   "" 0 scheck not "s:check 0 exc.null" ASSERT
   "" 1 scheck     "s:check 0 inc.null" ASSERT
 
+  ok
+] CHECK
+
+
+"s:start?" [
+  "foo" "foo"  s:start?     "s:start foo/foo"  ASSERT
+  "foo" "f"    s:start?     "s:start foo/f"    ASSERT
+  "foo" ""     s:start?     "s:start foo/0"    ASSERT
+  ""    ""     s:start?     "s:start 0/0"      ASSERT
+  "foo" "fooo" s:start? not "s:start foo/fooo" ASSERT
+  ""    "foo"  s:start? not "s:start 0/foo"    ASSERT
   ok
 ] CHECK
 

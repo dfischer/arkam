@@ -144,9 +144,10 @@
   ;
 
   ( ----- eval ----- )
+  : eval_header ( header -- ) [ dict:xt ] [ dict:handler ] biq mode swap call ;
   : eval_token_from ( name link -- found? )
     dict:find_from not IF no RET END # -- header
-    [ dict:xt ] [ dict:handler ] biq mode swap call ok ;
+    eval_header ok ;
   ( testing from latest )
   : eval_token ( name -- found? ) dict:latest eval_token_from ;
   : eval_token_in ( name mode -- found? )
@@ -184,9 +185,9 @@
       110 [ 10                      ] ;CASE # n: newline
       ( as is )
     ;
-    : parse_str ( c -- yes | c no )
-      dup dquote != IF no RET END drop
-
+    val: str_parser
+    : parse_str ( c -- ) str_parser >r ;
+    : _parse_str ( c -- )
       mode compile_mode = IF
         "JMP" compile, here 0 , here swap # -- &str &back
       ELSE
@@ -205,7 +206,6 @@
         here swap ! # backpatch
         "LIT" compile, , # str
       END
-      yes
     ;
     : parse_comment ( c -- c no | yes )
       dup lparen != IF no RET END drop
@@ -232,11 +232,13 @@
     : notfound ( name -- ) "'" epr epr "'" epr " ?" repl? IF eprn ELSE panic END ;
     ( num )
     : parse_num ( -- n yes | no ) buf s>dec ;
-    : eval_num ( n -- ) mode
+    val: num_handler
+    : num_evaler ( n mode -- )
       compile_mode [ "LIT" compile, ,  ] ;CASE
       run_mode     [ ( remain on TOS ) ] ;CASE
       unknown_mode
     ;
+    : eval_num num_handler call ;
     ( hex )
     : parse_hex ( -- n yes | no )
       : >n ( c -- n yes | no )
@@ -260,28 +262,29 @@
       ] while
     ;
     ( reference )
-    : parse_amp ( -- parsed? )
-      buf b@ amp != IF no RET END
-      buf inc dup >r # -- actual
-      dict:find not IF r> notfound no RET END rdrop # -- header
-      dict:xt
-      mode
-      compile_mode [ "LIT" compile, ,  yes ] ;CASE
-      run_mode     [ ( remain on TOS ) yes ] ;CASE
+    val: amp_handler
+    : amp_parser ( buf mode -- )
+      swap dup dict:find not IF notfound drop no RET END nip # -- mode header
+      dict:xt swap ( xt mode -- )
+      compile_mode [ "LIT" compile, ,  ] ;CASE
+      run_mode     [ ( remain on TOS ) ] ;CASE
       unknown_mode
     ;
+    : parse_amp ( buf mode -- parsed? ) amp_handler call ;
+    : amp? ( -- ? ) buf b@ amp = ;
+    : amp>word buf inc ;
     ( main )
     : run ( source stream -- )
       stream >r source >r stream! source!
       [ stream not          IF      ng RET END ( no input stream )
         skip_spaces dup not IF drop ng RET END ( -- c , no more chars )
-        parse_str           IF      ok RET END
+        dup dquote =        IF drop parse_str ok RET END
         parse_comment       IF      ok RET END
         read_token
-        parse_amp       IF ok RET END
         buf eval_token  IF ok RET END
-        parse_num       IF eval_num ok RET END
-        parse_hex       IF eval_num ok RET END
+        amp?            IF amp>word mode parse_amp ok RET END
+        parse_num       IF mode eval_num ok RET END
+        parse_hex       IF mode eval_num ok RET END
         buf notfound ng
       ] while
       r> source! r> stream! ( restore ) ;
@@ -293,6 +296,11 @@
       "r" file:open! dup >r
       [ ( id -- c id ) dup file:getc swap ] run
       r> file:close!
+    ;
+    : setup
+      &num_evaler num_handler!
+      &amp_parser amp_handler!
+      &_parse_str str_parser!
     ;
     str
   ;
@@ -481,6 +489,7 @@
       "?ff"    &?ff    core
       "?stack" &?stack core
       "?here"  &?here  core
+      "dump"   &dump   core
       ( ----- stack 2 ----- )
       "pick"  &pick  core
       "rpick" &rpick comp
@@ -541,6 +550,7 @@
       "forth:create"   &dict:create   core
       "forth:latest"   [ dict:latest  ] core
       "forth:latest!"  [ dict:latest! ] core
+      "forth:find"     &dict:find     core
       "forth:next"     &dict:next     core
       "forth:show!"    &dict:show!    core
       "forth:hide!"    &dict:hide!    core
@@ -559,6 +569,13 @@
       "forth:run_mode"      [ run_mode     ] core
       "forth:compile_mode"  [ compile_mode ] core
       "forth:compile," &compile, core
+      "forth:handle"   &eval_header core ( header -- .. )
+      "forth:num_handler"  [ eval:num_handler  ] core
+      "forth:num_handler!" [ eval:num_handler! ] core
+      "forth:amp_handler"  [ eval:amp_handler  ] core
+      "forth:amp_handler!" [ eval:amp_handler! ] core
+      "forth:str_parser"   [ eval:str_parser   ] core
+      "forth:str_parser!"  [ eval:str_parser!  ] core
 
       "handle:normal"   &handle_normal  core
       "handle:immed"    &handle_immed   core
@@ -589,6 +606,7 @@
     ] while
   ;
   : setup
+    eval:setup
     primitives:setup
     corewords:setup
   ;

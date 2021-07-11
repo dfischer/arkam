@@ -20,7 +20,7 @@ basic.spr:load
 
 
 
-MODULE
+PRIVATE
 
   # bresenham's algorithm
   
@@ -51,7 +51,7 @@ MODULE
     AGAIN
   ;
   
----EXPOSE---
+PUBLIC
 
   : line ( x0 y0 x1 y1 -- )
     y1! x1! y0! x0!
@@ -67,11 +67,11 @@ END
 
 
 
-MODULE
+PRIVATE
 
   val: x  val: y  val: w  val: h
 
----EXPOSE---
+PUBLIC
 
   : rect ( x y w h )
     1 - h! 1 - w! y! x!
@@ -85,11 +85,11 @@ END
 
 
 
-MODULE
+PRIVATE
 
   val: x  val: y  val: w  val: h
 
----EXPOSE---
+PUBLIC
 
   : fill_rect ( x y w h )
     h! w! y! x!
@@ -104,7 +104,7 @@ END
 
 
 
-MODULE
+PRIVATE
 
   # bresenham's algorithm
   val: x   val: y   val: r
@@ -133,7 +133,7 @@ MODULE
     cx 1 + cx!
     AGAIN ;
 
----EXPOSE---
+PUBLIC
 
   : circle ( r x y -- )
     y! x! r!
@@ -149,11 +149,11 @@ END
 
 
 
-MODULE
+PRIVATE
 
   val: dx  val: dy  val: w  val: h
 
----EXPOSE---
+PUBLIC
 
   : hover_rect? ( x1 y1 x0 y0 w h -- yes | no )
     # point(x1 y1) on rect(x0 y0 w h) ?
@@ -176,7 +176,7 @@ END
 
 ( ===== draw loop ===== )
 
-MODULE
+PRIVATE
   # usage:
   #   [ some_draw ] draw_loop:register!
   #   draw_loop
@@ -189,7 +189,7 @@ MODULE
     ppu:switch!
   ;
 
----EXPOSE---
+PUBLIC
 
   : draw_loop:register ( q -- ) callback! ;
 
@@ -221,7 +221,7 @@ val: mouse:rp
 # basic_sprite.f should load character sprite
 # at same ascii code
 
-MODULE
+PRIVATE
 
   val: x   val: y
   val: ox  val: s
@@ -246,7 +246,7 @@ MODULE
     ] while
   ;
 
----EXPOSE---
+PUBLIC
 
   w as: put_text:w
 
@@ -256,7 +256,7 @@ END
 
 
 
-MODULE
+PRIVATE
 
   11 as: max ( i32: max "-2147483648" )
   max 1 + allot as: buf
@@ -290,7 +290,7 @@ MODULE
     x y p put_text
   ;
   
----EXPOSE---
+PUBLIC
 
   : put_dec ( n x y -- ) 10 base! run ;
   : put_hex ( n x y -- ) 16 base! run ;
@@ -299,13 +299,13 @@ END
 
 
 
-MODULE
+PRIVATE
 
   16 as: base
   3 allot as: buf
   val: x  val: y
 
----EXPOSE---
+PUBLIC
 
   : put_ff ( n x y -- )
     y! x!
