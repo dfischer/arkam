@@ -253,6 +253,7 @@ PUBLIC
   ( calculated )
   : sys:ds_base sys:ds_size cells sys:ds + ;
   : sys:depth sp cell + sys:ds_base swap - cell / ; # order matters
+  : sys:ds0! sys:ds_base cell - sp! ;
 END
 
 
@@ -399,7 +400,7 @@ END
     c>dec [ pullup 10 * + swap inc GO ] ;IF
     drop no STOP
   ] while ( sign acc dec? )
-  IF * yes ELSE no THEN
+  IF * yes ELSE 2drop no THEN
 ;
 
 
@@ -547,7 +548,12 @@ PRIVATE
 
   : handle_num forth:mode [ LIT, , ] [ ( n -- n ) ] if ;
 
+  : notfound ( name -- ) epr " ?" panic ;
+
 PUBLIC
+
+  defer: forth:notfound ( name -- )
+  &notfound is: forth:notfound
 
   : forth:stream  stream  ;
   : forth:stream! stream! ;
@@ -572,7 +578,7 @@ PUBLIC
       ( num )
       buf s>dec [ forth:handle_num GO ] ;IF
       ( not found )
-      buf epr " ?" eprn STOP
+      buf forth:notfound STOP
     ] while
     r> stream! r> source!
   ;
@@ -591,6 +597,17 @@ END
     dup forth:name pr space
     forth:next GO
   ] while cr
+;
+
+
+
+( ===== Forth Utils ===== )
+
+: ' <IMMED>
+  forth:read [ "Word name required" eprn ] ;UNLESS
+  forth:find [ epr " ?" eprn ] ;UNLESS
+  forth:code
+  forth:mode [ LIT, , ] when
 ;
 
 
@@ -627,28 +644,60 @@ END
 : _ELSE JMP, here swap 0 , here swap ! ; # &back -- &back
 : _THEN here swap ! ;                    # &back --
 
+: _AGAIN JMP, forth:latest forth:code , ;
+
+
+: _defer:
+  forth:read [ "Defered name required" panic ] unless
+  forth:create
+  JMP, 0 ,
+;
+
+: is ( xt name -- )
+  forth:find [ forth:notfound ] unless
+  ( xt &entry ) forth:code cell + ,
+;
+
+: _is:
+  forth:read [ "Defered name required" panic ] unless
+  is
+;
+
 
 
 ( ===== REPL ===== )
 
-256 as: len
-255 as: max
-val: buf
-val: show_depth
-val: show_stack
+PRIVATE
 
-: buf buf ?dup [ len allot dup buf! ] unless ;
+  256 as: len
+  255 as: max
+  val: buf
+  val: show_depth
+  val: show_stack
+  
+  : buf buf ?dup [ len allot dup buf! ] unless ;
+  
+  : prompt
+    show_stack [ "| " pr ?stack ] when
+    show_depth [ sys:depth .. ] when
+    "> " pr
+  ;
+  : listen buf len getline IF buf ELSE "" THEN forth:eval ;
 
-: prompt
-  show_stack [ "| " pr ?stack ] when
-  show_depth [ sys:depth .. ] when
-  "> " pr
-;
-: listen buf len getline IF buf ELSE "" THEN forth:eval ;
-: repl [ prompt listen GO ] while ;
+  : notfound ( name -- ) epr " ?" eprn ;
+
+PUBLIC
+
+  &notfound is: forth:notfound
+  : repl:hide_depth! no  show_depth! ;
+  : repl:show_depth! yes show_depth! ;
+  : repl:hide_stack! no  show_stack! ;
+  : repl:show_stack! yes show_stack! ;
+  : repl [ prompt listen GO ] while ;
+
+END
 
 : bye 0 HALT ;
-
 
 : main
   yes show_depth!
@@ -723,3 +772,6 @@ defer: ]  &_] is: ] <IMMED>
 defer: IF   &_IF   is: IF   <IMMED>
 defer: ELSE &_ELSE is: ELSE <IMMED>
 defer: THEN &_THEN is: THEN <IMMED>
+
+defer: AGAIN &_AGAIN is: AGAIN <IMMED>
+
