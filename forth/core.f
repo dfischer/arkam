@@ -668,18 +668,20 @@ END
 
 ( ===== Syntax ===== )
 
-x: :
+x: : ( name: -- q )
   forth:read [ "Word name required" panic ] unless
   forth:create
   forth:latest forth:hide!
   forth:compile_mode forth:mode!
+  [
+    RET,
+    forth:latest forth:show!
+    forth:run_mode forth:mode!
+  ]
 ;
 
-x: ; <IMMED>
-  RET,
-  forth:latest forth:show!
-  forth:run_mode forth:mode!
-;
+x: ; <IMMED> ( q -- ) >r ;
+
 
 x: <IMMED> <IMMED> forth:latest forth:immed! ;
 
@@ -719,6 +721,9 @@ x: is:
 ;
 
 
+x: END <IMMED> ( q -- ) >r ;
+
+
 
 ( ===== Comment ===== )
 
@@ -743,6 +748,26 @@ x: # <IMMED>
     10 [ STOP ] ;case
     drop GO
   ] while
+;
+
+
+
+( ===== Private/Public ===== )
+
+: forth:hide_range ( start end -- )
+  # hide  start < word <= end
+  [ 2dup = [ 2drop STOP ] ;when
+    dup forth:hide! forth:next GO
+  ] while
+;
+
+x: PRIVATE ( -- start closer )
+  forth:latest 
+  [ forth:latest forth:hide_range ]
+;
+
+x: PUBLIC ( start closer -- start end closer )
+  drop forth:latest &forth:hide_range
 ;
 
 
