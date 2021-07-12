@@ -489,33 +489,6 @@ END
 
 
 
-( ===== Test ===== )
-
-: ASSERT ( v s )
-  swap IF drop ELSE "Assertion failed: " epr panic THEN
-;
-
-: CHECK ( s q -- ) # q: -- ok?
-  # Call q then check TOS is true and sp is balanced
-  # or die with printing s.
-  # Quotation q should not remain values on rstack
-
-  swap >r >r sp r> swap >r ( r: s sp )
-  call
-
-  # check stack balacne first to avoid invalid result
-  sp cell + ( sp + result )
-  r> != IF "Stack imbalance: " epr r> panic THEN
-
-  # check result
-  not IF "Failed: " epr r> panic THEN
-
-  # drop description
-  rdrop
-;
-
-
-
 ( ===== CLI ===== )
 
 : cli:query 12 io ;
@@ -892,6 +865,60 @@ END
 
 
 
+( ===== Test ===== )
+
+: ASSERT ( v s )
+  swap IF drop ELSE "Assertion failed: " epr panic THEN
+;
+
+: CHECK ( s q -- ) # q: -- ok?
+  # Call q then check TOS is true and sp is balanced
+  # or die with printing s.
+  # Quotation q should not remain values on rstack
+
+  swap >r >r sp r> swap >r ( r: s sp )
+  call
+
+  # check stack balacne first to avoid invalid result
+  sp cell + ( sp + result )
+  r> != IF "Stack imbalance: " epr r> panic THEN
+
+  # check result
+  not IF "Failed: " epr r> panic THEN
+
+  # drop description
+  rdrop
+;
+
+
+
+( ===== Marker ===== )
+
+PRIVATE
+
+  : sweep ( here latest -- )
+    forth:latest! here over here! ( start end )
+    over - memclear
+    rdrop ( return through cleared marker )
+  ;
+
+PUBLIC
+
+  : marker ( name -- )
+    >r forth:latest here
+    r> forth:create
+    LIT, , LIT, , &sweep , ( returned from sweep )
+  ;
+  
+  : MARKER: ( name: -- )
+    forth:read [ "marker name required" panic ] ;unless
+    marker
+  ;
+
+END
+
+
+
 ( ===== CLI Option ===== )
 
 PRIVATE
@@ -957,7 +984,11 @@ END
 
 : main
   opt:parse_all
-  opt:repl [ yes show_depth! repl ] when
+  opt:repl [
+    yes show_depth!
+    "clear" marker
+    repl
+  ] when
   bye
 ;
 
