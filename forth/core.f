@@ -652,13 +652,18 @@ PUBLIC
 END
 
 
-: forth:words
+: forth:each_word ( q -- ) # q: &entry --
   forth:latest [
-    0 [ STOP ] ;case
-    dup forth:hidden? [ forth:next GO ] ;when
-    dup forth:name pr space
-    forth:next GO
-  ] while cr
+    0 [ drop STOP ] ;case
+    2dup forth:next >r >r swap call r> r> GO
+  ] while
+;
+
+
+: forth:words
+  [ dup forth:hidden? [ drop ] ;when
+    forth:name pr space
+  ] forth:each_word cr
 ;
 
 
