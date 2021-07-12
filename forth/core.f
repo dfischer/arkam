@@ -519,6 +519,7 @@ defer: forth:find
 : prim, prim>code , ;
 : LIT,   2 prim, ;
 : RET,   3 prim, ;
+: +,     8 prim, ;
 : JMP,  16 prim, ;
 : ZJMP, 17 prim, ;
 
@@ -769,6 +770,36 @@ x: PRIVATE ( -- start closer )
 x: PUBLIC ( start closer -- start end closer )
   drop forth:latest &forth:hide_range
 ;
+
+
+
+( ===== Struct ===== )
+
+PRIVATE
+
+  : close ( -- &back offset ) swap ! ;
+
+PUBLIC
+
+  : STRUCT ( -- &back offset q )
+    # LIT n RET
+    forth:read [ "struct name required" panic ] ;unless
+    forth:create
+    LIT, here 0 , RET,
+    0 &close
+  ;
+  
+  : field: ( offset q n -- offset+n q)
+    forth:read [ "field name required" panic ] ;unless
+    forth:create
+    swap >r over
+    LIT, , JMP, [ + ] ,
+    + r>
+  ;
+
+  : cell: ( offset q -- offset+n q ) cell field: ;
+
+END
 
 
 
