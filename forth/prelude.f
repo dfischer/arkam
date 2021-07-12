@@ -1,27 +1,3 @@
-: CHAR: <IMMED>
-  forth:read [ " A character required" panic ] ;unless
-  b@ forth:mode [ LIT, , ] when
-;
-
-
-: ( <IMMED>
-  [ forth:take
-    0 [ " Unclosed comment" panic STOP ] ;case
-    CHAR: ) [ STOP ] ;case
-    drop GO
-  ] while
-;
-
-
-: # <IMMED>
-  [ forth:take
-    0  [ STOP ] ;case
-    10 [ STOP ] ;case
-    drop GO
-  ] while
-;
-
-
 : ." <IMMED>
   forth:mode [ here ] unless
   POSTPONE: "

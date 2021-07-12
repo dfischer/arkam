@@ -542,8 +542,11 @@ END
 ;
 
 
-: M-;IF   ";IF not defined yet" panic ; <IMMED> 
-: M-;CASE ";CASE not defined yet" panic ; <IMMED>
+: M-CHAR: <IMMED> ( c: -- )
+  in:read [ "A character required" panic ] ;unless
+  b@ forth:mode forth:compile_mode = [ xLIT, x, ] when
+;
+
 
 
 ( ===== metacompile ===== )

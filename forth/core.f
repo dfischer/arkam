@@ -720,6 +720,33 @@ x: is:
 
 
 
+( ===== Comment ===== )
+
+x: CHAR: <IMMED>
+  forth:read [ "A character required" panic ] ;unless
+  b@ forth:mode [ LIT, , ] when
+;
+
+
+x: ( <IMMED>
+  [ forth:take
+    0 [ "Unclosed comment" panic STOP ] ;case
+    CHAR: ) [ STOP ] ;case
+    drop GO
+  ] while
+;
+
+
+x: # <IMMED>
+  [ forth:take
+    0  [ STOP ] ;case
+    10 [ STOP ] ;case
+    drop GO
+  ] while
+;
+
+
+
 ( ===== CLI Option ===== )
 
 PRIVATE
