@@ -398,19 +398,21 @@ END
 ;
 
 
-: c:digit? ( c -- ? ) dup 48 < [ drop no ] [ 57  <= ] if ;
-: c:upper? ( c -- ? ) dup 65 < [ drop no ] [ 90  <= ] if ;
-: c:lower? ( c -- ? ) dup 97 < [ drop no ] [ 122 <= ] if ;
+: c:digit? ( c -- ? ) dup CHAR: 0 < [ drop no ] [ CHAR: 9 <= ] if ;
+: c:upper? ( c -- ? ) dup CHAR: A < [ drop no ] [ CHAR: Z <= ] if ;
+: c:lower? ( c -- ? ) dup CHAR: a < [ drop no ] [ CHAR: z <= ] if ;
 
-: c>dec ( c -- n yes | no ) dup c:digit? [ 48 - yes ] [ drop no ] if ;
+: c>dec ( c -- n yes | no )
+  dup c:digit? [ CHAR: 0 - yes ] [ drop no ] if
+;
 
 : c>hex ( c -- n yes | no )
-  dup 48 < [ drop no  ] ;when  # < 0
-  dup 58 < [ 48 - yes ] ;when  # 0-9
-  dup 65 < [ drop no  ] ;when  # 9 < c < A
-  dup 71 < [ 55 - yes ] ;when  # A-F
-  dup 97 < [ drop no  ] ;when  # A < c < a
-  87 - dup 16 > [ drop no ] [ yes ] if
+  dup CHAR: 0 <  [ drop no  ] ;when  # < 0
+  dup CHAR: 9 <= [ 48 - yes ] ;when  # 0-9
+  dup CHAR: A <  [ drop no  ] ;when  # 9 < c < A
+  dup CHAR: G <  [ 55 - yes ] ;when  # A-F
+  dup CHAR: a <  [ drop no  ] ;when  # A < c < a
+  CHAR: a - dup 6 > [ drop no ] [ 10 + yes ] if
 ;
 
 
@@ -419,7 +421,7 @@ PRIVATE
 PUBLIC
   : s>n ( s base -- n yes | no )
     base!
-    dup b@ 45 = IF inc -1 ELSE 1 THEN swap ( sign s )
+    dup b@ CHAR: - = IF inc -1 ELSE 1 THEN swap ( sign s )
     0 swap ( sign acc s )
     [ dup b@
       0 [ drop yes STOP ] ;case
@@ -737,11 +739,29 @@ END
 
 ( ===== String ===== )
 
+: c:escaped ( qtake -- c ok | ng )
+  dup call
+  ( no following sequence ) 0 [ drop ng ] ;case
+  ( \b bs      ) CHAR: b [ drop 8  ok ] ;case
+  ( \t htab    ) CHAR: t [ drop 9  ok ] ;case
+  ( \n newline ) CHAR: n [ drop 10 ok ] ;case
+  ( \r cr      ) CHAR: r [ drop 13 ok ] ;case
+  ( \" dquote  ) CHAR: " [ drop 34 ok ] ;case
+  ( \0 null    ) CHAR: 0 [ drop 0  ok ] ;case
+  ( as-is      ) nip
+;
+
+
 : " <IMMED>
   forth:mode [ JMP, here 0 , here swap ] [ here ] if
   [ forth:take
-    0  [ "Unclosed string" panic ] ;case
-    34 [ STOP ] ;case
+    0  [ "Unclosed string" panic STOP ] ;case
+    CHAR: " [ STOP ] ;case
+    dup CHAR: \ = [
+      drop &forth:take c:escaped
+      [ "Escape sequence required" panic STOP ] ;unless
+      b, GO
+    ] ;when
     b, GO
   ] while
   0 b, here:align!
