@@ -403,7 +403,7 @@ PRIMITIVES
   [ and    ] PRIM: and
   [ or     ] PRIM: or
   [ invert ] PRIM: inv
-  [ xor    ] PRIM: xoro
+  [ xor    ] PRIM: xor
   [ lshift ] PRIM: lsft
   [ ashift ] PRIM: asft
 
