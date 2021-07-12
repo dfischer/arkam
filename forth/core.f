@@ -926,6 +926,34 @@ END
 
 
 
+( ===== Val ===== )
+
+: var>
+  forth:read [ "Val name required" panic ] ;unless
+  forth:create
+  LIT, , RET,
+;
+
+: var: 0 var> ;
+
+: var' <IMMED>
+  forth:read [ "Val name required" panic ] ;unless
+  forth:find [ " ?" epr panic ] ;unless
+  forth:code cell +
+  forth:mode [ LIT, , ] ;when
+;
+
+
+: 2nd! ( v xt -- ) cell + ! ;
+
+: -> <IMMED>
+  forth:read_find [ "Word name required" panic ] ;unless
+  forth:code
+  forth:mode [ LIT, , &2nd! , ] [ 2nd! ] if
+;
+
+
+
 ( ===== CLI Option ===== )
 
 PRIVATE
