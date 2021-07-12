@@ -70,6 +70,12 @@ ng as: STOP
 : inc 1 + ;
 : dec 1 - ;
 
+: clamp ( n min max -- min<=n<max )
+  >r 2dup < IF rdrop nip RET THEN # -- min
+  drop r> 2dup < IF drop RET THEN # -- n
+  nip dec # -- max-1
+; 
+
 
 
 ( ===== Bitwise ===== )
