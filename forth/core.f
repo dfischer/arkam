@@ -954,6 +954,48 @@ END
 
 
 
+( ===== Loadfile ===== )
+
+# loadfile ( path -- addr )
+# loadfile: ( :path -- addr )
+# addr:
+#   0x00 size
+#   0x04 data...
+#        0000 ( null terminated, aligned )
+
+
+PRIVATE
+
+  val: id
+  val: addr
+  val: size
+
+PUBLIC
+
+  : loadfile ( path -- addr )
+    "rb" file:open! id!
+    id file:size size!
+    here addr!
+    size ,
+    here size id file:read!
+    here size + here!
+    0 b, here:align!
+    id file:close!
+    addr
+  ;
+  
+  : loadfile: ( :path -- addr )
+    forth:read [ "file name required" ] ;unless
+    loadfile
+  ;
+
+  : filesize @ ;      # & -- n 
+  : filedata cell + ; # & -- &data
+
+END
+
+
+
 ( ===== CLI Option ===== )
 
 PRIVATE
