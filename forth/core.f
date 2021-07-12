@@ -404,16 +404,33 @@ END
 
 : c>dec ( c -- n yes | no ) dup c:digit? [ 48 - yes ] [ drop no ] if ;
 
-: s>dec ( s -- n yes | no )
-  dup b@ 45 = IF inc -1 ELSE 1 THEN swap ( sign s )
-  0 swap ( sign acc s )
-  [ dup b@
-    0 [ drop yes STOP ] ;case
-    c>dec [ pullup 10 * + swap inc GO ] ;when
-    drop no STOP
-  ] while ( sign acc dec? )
-  IF * yes ELSE 2drop no THEN
+: c>hex ( c -- n yes | no )
+  dup 48 < [ drop no  ] ;when  # < 0
+  dup 58 < [ 48 - yes ] ;when  # 0-9
+  dup 65 < [ drop no  ] ;when  # 9 < c < A
+  dup 71 < [ 55 - yes ] ;when  # A-F
+  dup 97 < [ drop no  ] ;when  # A < c < a
+  87 - dup 16 > [ drop no ] [ yes ] if
 ;
+
+
+PRIVATE
+  val: base
+PUBLIC
+  : s>n ( s base -- n yes | no )
+    base!
+    dup b@ 45 = IF inc -1 ELSE 1 THEN swap ( sign s )
+    0 swap ( sign acc s )
+    [ dup b@
+      0 [ drop yes STOP ] ;case
+      c>hex [ pullup base * + swap inc GO ] ;when
+      drop no STOP
+    ] while ( sign acc dec? )
+    IF * yes ELSE 2drop no THEN
+  ;
+  : s>dec 10 s>n ;  # s -- n yes | no
+  : s>hex 16 s>n ;  # s -- n yes | no
+END
 
 
 : s:each ( s q -- ) # q: ( c -- )
@@ -610,6 +627,13 @@ PRIVATE
 
   : notfound ( name -- ) epr " ?" panic ;
 
+  : tk>hex ( tk -- n yes | no )
+    # prefix: 0x
+    dup b@ CHAR: 0 = [ drop no ] ;unless inc
+    dup b@ CHAR: x = [ drop no ] ;unless inc
+    s>hex
+  ;
+
 PUBLIC
 
   : forth:init len allot buf! ;
@@ -637,8 +661,10 @@ PUBLIC
       2 [ forth:code call GO ] ;case
       1 [ forth:code forth:mode IF , ELSE call THEN GO ] ;case
       2drop
-      ( num )
+      ( dec )
       buf s>dec [ forth:handle_num GO ] ;when
+      ( hex )
+      buf tk>hex [ forth:handle_num GO ] ;when
       ( not found )
       buf forth:notfound STOP
     ] while
