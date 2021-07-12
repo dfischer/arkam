@@ -337,7 +337,7 @@ PRIVATE
   val: r
   val: i
 
-  : init buf ?dup [ max 1 + allot dup buf! ] unless max + i! ;
+  : init buf max + i! ;
   : check buf i > IF "too big num" panic THEN ;
   : put i 1 - i! i b! ; # c --
   : put_sign posi IF RET THEN 45 put ;
@@ -359,6 +359,7 @@ PRIVATE
 
 PUBLIC
 
+  : ?:init max 1 + allot buf! ;
   : ?    dup 10 base! go ;
   : ?hex dup 16 base! go ;
 
@@ -578,7 +579,6 @@ PRIVATE
   32      as: len
   len 1 - as: max
   val: buf
-  : buf buf ?dup IF RET THEN len allot dup buf! ;
 
   val: source
   val: stream   # q: source -- c source
@@ -611,6 +611,8 @@ PRIVATE
   : notfound ( name -- ) epr " ?" panic ;
 
 PUBLIC
+
+  : forth:init len allot buf! ;
 
   defer: forth:notfound ( name -- )
   &notfound is: forth:notfound
@@ -931,8 +933,8 @@ PRIVATE
 PUBLIC
 
   val: opt:repl
+  : opt:init len allot buf! ;
   : opt:parse_all
-    len allot buf!
     yes opt:repl!
     cli:argc 2 < IF RET THEN
     no opt:repl!
@@ -958,8 +960,6 @@ PRIVATE
   val: show_depth
   val: show_stack
   
-  : buf buf ?dup [ len allot dup buf! ] unless ;
-  
   : prompt
     show_stack [ "| " pr ?stack ] when
     show_depth [ sys:depth .. ] when
@@ -972,6 +972,7 @@ PRIVATE
 PUBLIC
 
   &notfound is: forth:notfound
+  : repl:init len allot buf! ;
   : repl:hide_depth! no  show_depth! ;
   : repl:show_depth! yes show_depth! ;
   : repl:hide_stack! no  show_stack! ;
@@ -983,8 +984,12 @@ END
 : bye 0 HALT ;
 
 : main
+  ( allocate buffers )
+  ?:init forth:init opt:init
+
   opt:parse_all
   opt:repl [
+    repl:init
     yes show_depth!
     "clear" marker
     repl
