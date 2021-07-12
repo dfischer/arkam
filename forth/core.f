@@ -28,7 +28,7 @@ ok as: GO
 ng as: STOP
 
 
-: not 0 != ;
+: not IF no ELSE yes THEN ;
 
 
 
@@ -242,7 +242,6 @@ END
 ;
 
 
-
 ( ===== System ===== )
 
 PRIVATE
@@ -445,6 +444,33 @@ PUBLIC
   : file:read!  file:read  IF RET THEN "Can't read" panic ;
   : file:write! file:write IF RET THEN "Can't write" panic ;
 END
+
+
+
+( ===== Test ===== )
+
+: ASSERT ( v s )
+  swap IF drop ELSE "Assertion failed: " epr panic THEN
+;
+
+: CHECK ( s q -- ) # q: -- ok?
+  # Call q then check TOS is true and sp is balanced
+  # or die with printing s.
+  # Quotation q should not remain values on rstack
+
+  swap >r >r sp r> swap >r ( r: s sp )
+  call
+
+  # check stack balacne first to avoid invalid result
+  sp cell + ( sp + result )
+  r> != IF "Stack imbalance: " epr r> panic THEN
+
+  # check result
+  not IF "Failed: " epr r> panic THEN
+
+  # drop description
+  rdrop
+;
 
 
 
@@ -930,7 +956,7 @@ x: b! <IMMED> 21 [ b! ] primitive ;
 
 x: and <IMMED> 22 [ and ] primitive ;
 x: or  <IMMED> 23 [ or  ] primitive ;
-x: not <IMMED> 24 [ not ] primitive ;
+x: inv <IMMED> 24 [ inv ] primitive ;
 x: xor <IMMED> 25 [ xor ] primitive ;
 
 x: lsft <IMMED> 26 [ lsft ] primitive ;
