@@ -382,6 +382,12 @@ END
 
 ( ===== String ===== )
 
+: memclear ( adr len -- ) [ 0 over b! inc ] times drop ;
+
+: s:end ( s -- s+ ) dup b@ IF inc AGAIN THEN ;
+
+: s:len ( s -- n ) dup s:end swap - ;
+
 : s= ( s1 s2 -- ? )
   [ 2dup [ b@ ] bia over != # s1 s2 c diff?
     ( diff ) [ 3drop no STOP ] ;when
@@ -420,6 +426,42 @@ END
 : s:put ( s -- )
   [ b, ] s:each 0 b,
 ;
+
+
+: s:check ( str max -- str ok? )
+  # check length
+  # max includes null termination
+  over s:len 1 + >=
+;
+
+
+: s:append! ( dst what -- )
+  ( no check )
+  &s:end dip ( dst+ what )
+  [ 2dup b@ swap over swap b!
+    [ &inc bia GO ] [ 2drop STOP ] if
+  ] while
+;
+
+: s:append ( dst what max -- ? )
+  # max includes null termination
+  ( check )
+  >r 2dup &s:len bia + inc r>
+  > [ 2drop ng ] ;when
+  s:append! ok
+;
+
+
+: s:start? ( src what -- ? )
+  # src starts with what?
+  [ 2dup [ b@ ] bia
+    0      [ 3drop yes STOP ] ;case
+    swap 0 [ 3drop no  STOP ] ;case
+    =      [ &inc bia GO    ] ;when
+    2drop no STOP
+  ] while
+;
+
 
 
 ( ===== File ===== )
