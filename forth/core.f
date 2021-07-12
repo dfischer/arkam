@@ -705,8 +705,16 @@ x: THEN <IMMED> here swap ! ;                    # &back --
 x: AGAIN <IMMED> JMP, forth:latest forth:code , ;
 
 
+x: as:
+  forth:read [ "Const name required" panic ] ;unless
+  forth:create
+  forth:latest forth:immed!
+  LIT, , JMP, [ ( v -- ) forth:mode [ LIT, , ] when ] ,
+;
+
+
 x: defer:
-  forth:read [ "Defered name required" panic ] unless
+  forth:read [ "Defered name required" panic ] ;unless
   forth:create
   JMP, 0 ,
 ;
