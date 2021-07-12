@@ -654,6 +654,9 @@ END
 ;
 
 
+
+( ===== String ===== )
+
 : " <IMMED>
   forth:mode [ JMP, here 0 , here swap ] [ here ] if
   [ forth:take
@@ -686,16 +689,20 @@ x: ; <IMMED> ( q -- ) >r ;
 
 x: <IMMED> <IMMED> forth:latest forth:immed! ;
 
-x: [ <IMMED> ( -- &q &back mode | &q mode )
+
+x: [ <IMMED> ( -- &q &back mode close | &q mode close )
   forth:mode [ JMP, here 0 , here swap ] [ here:align! here ] if
   forth:mode forth:compile_mode forth:mode!
+  [
+    RET,
+    dup forth:mode!
+    [ here swap ! LIT, , ] when
+  ]
 ;
 
-x: ] <IMMED> ( &q &back mode -- )
-  RET,
-  dup forth:mode!
-  [ here swap ! LIT, , ] when
-;
+x: ] <IMMED> ( q -- ) >r ;
+
+: [do <IMMED> forth:mode 0 forth:mode! [ forth:mode! ] ;
 
 
 x: IF   <IMMED> ZJMP, here 0 , ;                 # -- &back
