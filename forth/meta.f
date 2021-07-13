@@ -196,6 +196,12 @@ meta_name s:len       as: meta_len
   name>meta _:
 ;
 
+: <run_only> <IMMED>
+  POSTPONE: <IMMED>
+  LIT, forth:latest forth:name 2 + ,
+  [ forth:mode [ " Do not compile: " epr panic ] [ drop ] if ] ,
+;
+
 
 ( for const )
 var: const_link
@@ -356,7 +362,7 @@ END
 
 ( ===== Meta Syntax Word ===== )
 
-M: X: ( -- q )
+M: X: ( -- q ) <run_only>
   # No meta-word will be created.
   # used for words that conflicts meta-word
   # ex. : ; IF [ <IMMED>
@@ -367,7 +373,7 @@ M: X: ( -- q )
   [ xRET, xlatest x:hide! no forth:mode! ]
 ;
 
-M: :
+M: : <run_only>
   forth:read [ panic" Word name required" ] ;unless
   dup x:create m:create
   xlatest x:hide!
@@ -386,7 +392,7 @@ M: ; <IMMED> ( q -- ) >r ;
 M: <IMMED> <IMMED> xlatest x:immed! ;
 
 
-M: as: <IMMED> ( n name: -- )
+M: as: ( n name: -- ) <run_only>
   forth:mode [ panic" Do not call as: in compile mode" ] ;when
   forth:read [ panic" Const name required" ] ;unless
   dup
@@ -397,7 +403,7 @@ M: as: <IMMED> ( n name: -- )
   [ forth:mode [ xLIT, x, ] when ] ,
 ;
 
-M: patch_const ( xadr ) patch_const ;
+M: patch_const ( xadr ) <run_only> patch_const ;
 
 
 M: [ <IMMED>
@@ -431,16 +437,16 @@ M: AGAIN <IMMED>
 ;
 
 
-M: PRIVATE ( -- start closer )
+M: PRIVATE ( -- start closer ) <run_only>
   xlatest [ xlatest x:hide_range ]
 ;
 
-M: PUBLIC ( start closer -- start end closer )
+M: PUBLIC ( start closer -- start end closer ) <run_only>
   drop xlatest ' x:hide_range
 ;
 
 
-M: defer: ( name: -- )
+M: defer: ( name: -- ) <run_only>
   # JMP actual
   forth:read [ panic" Word name required" ] ;unless
   dup x:create m:create
@@ -464,9 +470,46 @@ M: ' <IMMED>
 ;
 
 
+M: var> <run_only>
+  forth:read [ panic" Var name required" ] ;unless
+  dup x:create m:create
+  xLIT, x, xRET,
+;
+
+M: var: <run_only> 0 var> ;
+
+
+M: CHAR: <IMMED>
+  forth:read [ panic" A character required" ] ;unless
+  dup b@ dup CHAR: \\ = [ drop inc
+    [ [ inc ] [ b@ ] biq ] c:escaped
+    [ panic" Escape sequence required" ] ;unless
+  ] when nip
+  forth:mode [ xLIT, x, ] when
+;
+
+
+M: " <IMMED>
+  forth:mode [ xJMP, xhere 0 x, xhere swap ] [ xhere ] if
+  [ forth:take
+    0  [ panic" Unclosed string" STOP ] ;case
+    CHAR: " [ STOP ] ;case
+    dup CHAR: \\ = [
+      drop ' forth:take c:escaped
+      [ panic" Escape sequence required" STOP ] ;unless
+      b, GO
+    ] ;when
+    bx, GO
+  ] while
+  0 bx, here:align!
+  forth:mode [ xhere swap x! xLIT, x, ] when
+;
+
+
 M: ?h <IMMED> " HERE" prn ;
 
 M: ?stack <IMMED> ?stack ;
+
 
 
 
@@ -477,7 +520,9 @@ m:start
 42 as: answer
 X: answer HALT ;
 
-: foo IF 42 ELSE answer 1 + THEN HALT ;
+answer var> ans
+
+: foo 43 -> ans IF ans 1 - ELSE ans 1 + THEN HALT ;
 : bar -1 foo ;
 : baz  0 foo ;
 

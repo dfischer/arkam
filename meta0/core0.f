@@ -762,6 +762,16 @@ END
 ;
 
 
+x: CHAR: <IMMED>
+  forth:read [ "A character required" panic ] ;unless
+  dup b@ dup CHAR: \ = [ drop inc
+    [ [ inc ] [ b@ ] biq ] c:escaped
+    [ "Escape sequence required" panic ] ;unless
+  ] when nip
+  forth:mode [ LIT, , ] when
+;
+
+
 : " <IMMED>
   forth:mode [ JMP, here 0 , here swap ] [ here ] if
   [ forth:take
@@ -861,16 +871,6 @@ x: END <IMMED> ( q -- ) >r ;
 
 
 ( ===== Comment ===== )
-
-x: CHAR: <IMMED>
-  forth:read [ "A character required" panic ] ;unless
-  dup b@ dup CHAR: \ = [ drop inc
-    [ [ inc ] [ b@ ] biq ] c:escaped
-    [ "Escape sequence required" panic ] ;unless
-  ] when nip
-  forth:mode [ LIT, , ] when
-;
-
 
 x: ( <IMMED>
   [ forth:take
