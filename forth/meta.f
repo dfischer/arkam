@@ -324,11 +324,23 @@ M: :
 M: ; <IMMED> ( q -- ) >r ;
 
 
+M: as: ( n name: -- ) <IMMED>
+  # TODO: backpatch xConst
+  forth:mode [ panic" Do not call as: in compile mode" ] ;when
+  forth:read [ panic" Const name required" ] ;unless
+  forth:create POSTPONE: <IMMED>
+  LIT, , JMP,
+  [ forth:mode [ xLIT, x, ] when ] ,
+;
+
+
 
 ( ----- testing ----- )
 
 m:start
-X: : 42 HALT ;
-: foo 42 HALT ;
+
+42 as: answer
+X: answer HALT ;
+: foo answer HALT ;
 m:finish
 
