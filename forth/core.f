@@ -740,7 +740,7 @@ END
 ( ===== String ===== )
 
 : c:escaped ( qtake -- c ok | ng )
-  dup call
+  dup >r call r> swap
   ( no following sequence ) 0 [ drop ng ] ;case
   ( \b bs      ) CHAR: b [ drop 8  ok ] ;case
   ( \t htab    ) CHAR: t [ drop 9  ok ] ;case
@@ -748,7 +748,7 @@ END
   ( \r cr      ) CHAR: r [ drop 13 ok ] ;case
   ( \" dquote  ) CHAR: " [ drop 34 ok ] ;case
   ( \0 null    ) CHAR: 0 [ drop 0  ok ] ;case
-  ( as-is      ) nip
+  ( as-is      ) nip ok
 ;
 
 
@@ -845,7 +845,11 @@ x: END <IMMED> ( q -- ) >r ;
 
 x: CHAR: <IMMED>
   forth:read [ "A character required" panic ] ;unless
-  b@ forth:mode [ LIT, , ] when
+  dup b@ dup CHAR: \ = [ drop inc
+    [ [ inc ] [ b@ ] biq ] c:escaped
+    [ "Escape sequence required" panic ] ;unless
+  ] when nip
+  forth:mode [ LIT, , ] when
 ;
 
 
