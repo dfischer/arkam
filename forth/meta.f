@@ -1,11 +1,25 @@
 ( for debug )
-yes var> verbose
+no var> verbose
 
 
 
 # Naming and Abbrev
 # x -- cross, works on target image
 # m -- meta, works on metacompiler (this code)
+
+
+( ===== Memo ===== )
+
+: #TODO <IMMED>
+  [ " #TODO " epr
+    [ forth:take
+      0  [ STOP ] ;case
+      10 [ STOP ] ;case
+      putc GO
+    ] while
+    cr
+  ] >stderr
+;
 
 
 
@@ -325,7 +339,7 @@ M: ; <IMMED> ( q -- ) >r ;
 
 
 M: as: ( n name: -- ) <IMMED>
-  # TODO: backpatch xConst
+  #TODO backpatch xConst
   forth:mode [ panic" Do not call as: in compile mode" ] ;when
   forth:read [ panic" Const name required" ] ;unless
   forth:create POSTPONE: <IMMED>
