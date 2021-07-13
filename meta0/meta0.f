@@ -551,9 +551,8 @@ END
 
 ( ===== metacompile ===== )
 
-#TODO comment (tail of core.f)
 
 meta:start
-include: forth/core.f
+include: meta0/core0.f
 meta:finish
 

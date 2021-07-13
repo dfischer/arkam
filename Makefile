@@ -10,14 +10,21 @@ LDFLAGS =
 
 
 
-.PHONY: bootstarp
+.PHONY: meta0
 
-out/forth1.ark: bin/forth tools/bootstrap.f forth/core.f
-	./bin/forth tools/bootstrap.f
+out/forth1.ark: bin/forth meta0/meta0.f meta0/core0.f
+	./bin/forth meta0/meta0.f
 
-bootstrap: out/forth1.ark
+meta0: bin/arkam out/forth1.ark
 	./bin/arkam out/forth1.ark --quit
 
+
+
+.PHONY: meta
+out/forth2.ark: bin/arkam out/forth1.ark forth/meta.f forth/core.f
+	./bin/arkam out/forth1.ark forth/meta.f
+meta: out/forth2.ark
+	./bin/arkam out/forth2.ark --quit
 
 
 .PHONY: all

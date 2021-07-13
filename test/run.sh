@@ -90,9 +90,9 @@ echo "===== forth.sol ====="
 
 
 
-echo "===== forth ====="
+echo "===== forth0 ====="
 
-for src in test/forth/*.f
+for src in test/forth0/*.f
 do
     echo -n "$src .."
     ./bin/forth $src || exit 1

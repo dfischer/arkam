@@ -278,10 +278,10 @@ include: "forth.sol"
   "quot/compile" [ ": foo [ 1 + ] ; 2 foo call" forth:eval 3 = ] CHECK
   "quot/run"     [ "1 2 [ 1 + ] dip +" forth:eval 4 = ] CHECK
 
-  "include" [ "include: ./test/forth_helper/include.f" forth:eval ] CHECK
+  "include" [ "include: ./test/forth0_helper/include.f" forth:eval ] CHECK
 
-  "require 1" [ "require: ./test/forth_helper/include.f"  forth:eval ] CHECK
-  "require 2" [ "require: ./test/forth_helper/require1.f" forth:eval ] CHECK
+  "require 1" [ "require: ./test/forth0_helper/include.f"  forth:eval ] CHECK
+  "require 2" [ "require: ./test/forth0_helper/require1.f" forth:eval ] CHECK
 ;
 
 
