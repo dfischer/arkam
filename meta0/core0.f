@@ -723,6 +723,11 @@ END
   yes
 ;
 
+: word' <IMMED>
+  forth:read_find ;0
+  forth:mode [ LIT, , ] when
+;
+
 : ' <IMMED>
   forth:read_find ;0
   forth:code

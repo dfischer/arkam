@@ -1,5 +1,5 @@
 ( for debug )
-no var> verbose
+yes var> verbose
 
 
 
@@ -113,8 +113,20 @@ END
 #  |-----
 #  | code ...
 
+0x01 as: immed_flag
+0x02 as: hidden_flag
+0x03 as: flags
+
 : xlatest  adr_xlatest x@ ;
 : xlatest! adr_xlatest x! ;
+
+: x:hide!   hidden_flag on!  ;    # xword --
+: x:show!   hidden_flag off! ;    # xword --
+: x:hidden? x@ hidden_flag and ;  # xword -- ?
+: x:immed!  immed_flag on! ;      # xword --
+
+: xnext! x! ;
+: xnext  x@ flags off ;
 
 : xname! cell + x! ;
 : xname  cell + x@ ;
@@ -142,9 +154,82 @@ END
 
 
 
+( ===== Setup/Finish ===== )
+
+: m:finish
+  xlatest xxt entrypoint!
+  " out/forth2.ark" save
+;
+
+: m:handle_num ( n -- )
+  forth:mode [ xLIT, x, ] [ ( n -- n ) ] if
+;
+
+: m:reveal ( start -- )
+  # reveal M-foo to foo
+  forth:latest [
+    0    [ STOP ] ;case
+    over [ STOP ] ;case
+    dup forth:name " M-" s:start? [
+      dup forth:name 2 + over forth:name!
+    ] when
+    forth:next GO
+  ] while drop
+;
+
+: m:hide ( start -- )
+  # hide words before &start
+  [ 0 [ STOP ] ;case
+    dup forth:hide!
+    forth:next GO
+  ] while
+;
+
+: m:install ( meta_start -- )
+  dup m:hide m:reveal
+  word' m:finish forth:show!
+  ' m:handle_num -> forth:handle_num
+  verbose [
+    " --Meta Words----- " prn forth:words
+  ] when
+;
+
+: m:start [do LIT, forth:latest , ] m:install ;
+
+
+
+( ###################### )
+( ##### Meta Words ##### )
+( ###################### )
+
+
+
+( ===== Meta Syntax Word ===== )
+
+: M-:
+  forth:read [ panic" Word name required" ] ;unless
+  dup x:create m:create
+  xlatest x:hide!
+  forth:latest  forth:hide!
+  yes forth:mode!
+  [
+    xRET,
+    xlatest x:show!
+    forth:latest forth:show!
+    no forth:mode!
+  ]
+;
+
+: M-; <IMMED> ( q -- ) >r ;
+
+: M-HALT <IMMED> xHALT, ;
+
+
+
+
 ( ----- testing ----- )
 
-xhere entrypoint!
-xLIT, 42 x, xHALT,
-save: out/forth2.ark
+m:start
+: foo 42 HALT ;
+m:finish
 
