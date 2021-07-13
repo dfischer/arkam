@@ -154,6 +154,31 @@ END
 
 
 
+( ===== Primitive Helper ===== )
+
+" M-            " as: prim_buf
+prim_buf 2 +      as: prim_name
+
+: PRIMITIVES 0 [ drop ] ;
+
+: PRIM: ( n closer q name: -- n+ )
+  # : name <IMMED> LIT code LIT q JMP handler
+  forth:read [ panic" Primitive name required" ] ;unless
+  prim_name s:copy
+  prim_buf forth:create POSTPONE: <IMMED>
+  >r over prim>code LIT, , r> LIT, , JMP,
+  [ forth:mode [ drop x, ] [ nip >r ] if ] ,
+  ' inc dip
+  verbose [
+    " prim " epr prim_name epr
+    "  code " epr over .. forth:latest forth:code cell + @ .
+  ] when
+;
+
+: compile_only [ panic" compile only!" ] ;
+
+
+
 ( ===== Setup/Finish ===== )
 
 : m:finish
@@ -203,6 +228,59 @@ END
 ( ###################### )
 
 
+( ===== Meta Primitive word ===== )
+
+PRIMITIVES
+
+  [      ] PRIM: NOOP
+  [ HALT ] PRIM: HALT
+  compile_only PRIM: LIT
+  compile_only PRIM: RET
+
+  [ dup  ] PRIM: dup
+  [ drop ] PRIM: drop
+  [ swap ] PRIM: swap
+  [ over ] PRIM: over
+
+  [ +    ] PRIM: +
+  [ -    ] PRIM: -
+  [ *    ] PRIM: *
+  [ /mod ] PRIM: /mod
+
+  [ =  ] PRIM: =
+  [ != ] PRIM: !=
+  [ >  ] PRIM: >
+  [ <  ] PRIM: <
+
+  compile_only PRIM: JMP
+  compile_only PRIM: ZJMP
+
+  [ @  ] PRIM: @
+  [ !  ] PRIM: !
+  [ b@ ] PRIM: b@
+  [ b! ] PRIM: b!
+
+  [ and  ] PRIM: and
+  [ or   ] PRIM: or
+  [ inv  ] PRIM: inv
+  [ xor  ] PRIM: xor
+  [ lsft ] PRIM: lsft
+  [ asft ] PRIM: asft
+
+  [ io ] PRIM: io
+
+  compile_only PRIM: >r
+  compile_only PRIM: r>
+  compile_only PRIM: rdrop
+
+  [ sp  ] PRIM: sp
+  [ sp! ] PRIM: sp!
+  [ rp  ] PRIM: rp
+  [ rp! ] PRIM: rp!
+
+END
+
+
 
 ( ===== Meta Syntax Word ===== )
 
@@ -221,9 +299,6 @@ END
 ;
 
 : M-; <IMMED> ( q -- ) >r ;
-
-: M-HALT <IMMED> xHALT, ;
-
 
 
 
