@@ -115,6 +115,7 @@ END
 : xRET,   3 prim, ;
 : xJMP,  16 prim, ;
 : xZJMP, 17 prim, ;
+: x!,    19 prim, ;
 
 
 
@@ -149,6 +150,14 @@ END
 
 : xxt!   2 cells + x! ;
 : xxt    2 cells + x@ ;
+
+: x:find ( name -- xword yes | name no )
+  xlatest [ ( name xword )
+    0 [ no STOP ] ;case
+    2dup xname x>t s= [ nip yes STOP ] ;when
+    xnext GO
+  ] while
+;
 
 : x:create ( name -- xword )
   xhere:align! xhere swap x:sput ( &name )
@@ -185,6 +194,7 @@ meta_name s:len       as: meta_len
 ;
 
 
+( for const )
 var: const_link
 
 : const_link, ( xadr -- )
@@ -202,6 +212,15 @@ var: const_link
 ;
 
 : const_done const_link -1 = ;
+
+
+( for PRIVATE/PUBLIC )
+: x:hide_range ( start -- end )
+  # hide start < word <= end
+  [ 2dup = [ 2drop STOP ] ;when
+    dup x:hide! xnext GO
+  ] while
+;
 
 
 
@@ -361,6 +380,8 @@ M: :
 
 M: ; <IMMED> ( q -- ) >r ;
 
+M: <IMMED> <IMMED> xlatest x:immed! ;
+
 
 M: as: <IMMED> ( n name: -- )
   forth:mode [ panic" Do not call as: in compile mode" ] ;when
@@ -388,6 +409,53 @@ M: [ <IMMED>
 M: ] <IMMED> ( q -- ) >r ;
 
 
+M: IF <IMMED> ( -- &back )
+  xZJMP, xhere 0 x,
+;
+
+M: ELSE <IMMED> ( &back -- &back2 )
+  xJMP, xhere 0 x, swap ( &back2 &back )
+  xhere swap x!
+;
+
+M: THEN <IMMED> ( &back -- )
+  xhere swap x!
+;
+
+
+M: AGAIN <IMMED>
+  xJMP, xlatest xxt x,
+;
+
+
+M: PRIVATE ( -- start closer )
+  xlatest [ xlatest x:hide_range ]
+;
+
+M: PUBLIC ( start closer -- start end closer )
+  drop xlatest ' x:hide_range
+;
+
+
+M: defer: ( name: -- )
+  # JMP actual
+  forth:read [ panic" Word name required" ] ;unless
+  dup x:create m:create
+  xJMP, 0 x,
+;
+
+M: -> <IMMED> ( v &code -- )
+  forth:read [ panic" Word name required" ] ;unless
+  x:find [ epr " ?" panic ] ;unless
+  xxt
+  # replace as `JMP|LIT v`
+  cell + forth:mode [ xLIT, , x!, ] [ x! ] if
+;
+
+M: ' <IMMED>
+  #TODO meta-tick
+;
+
 
 ( ----- testing ----- )
 
@@ -395,7 +463,11 @@ m:start
 
 42 as: answer
 X: answer HALT ;
-: foo answer HALT ;
+
+: foo 1 IF answer ELSE answer 1 + THEN HALT ;
+
+defer: bar
+' foo -> bar
 
 [ ( no-op ) ] patch_const
 
