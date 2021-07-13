@@ -8,6 +8,7 @@ no var> verbose
 # m -- meta, works on metacompiler (this code)
 
 
+
 ( ===== Memo ===== )
 
 : #TODO <IMMED>
@@ -110,9 +111,10 @@ END
 
 : prim>code 1 << 1 or ;
 : prim, prim>code x, ;
-: xHALT, 1 prim, ;
-: xLIT,  2 prim, ;
-: xRET,  3 prim, ;
+: xLIT,   2 prim, ;
+: xRET,   3 prim, ;
+: xJMP,  16 prim, ;
+: xZJMP, 17 prim, ;
 
 
 
@@ -183,6 +185,25 @@ meta_name s:len       as: meta_len
 ;
 
 
+var: const_link
+
+: const_link, ( xadr -- )
+  # LIT v RET link
+  xhere const_link x, -> const_link
+;
+
+: patch_const ( xadr -- )
+  # LIT v RET link -> LIT v JMP xadr
+  const_link [ ( adr link )
+    0 [ STOP ] ;case
+    dup x@ >r over swap x! r>
+  ] while drop
+  -1 -> const_link ( done )
+;
+
+: const_done const_link -1 = ;
+
+
 
 ( ===== Primitive Helper ===== )
 
@@ -209,6 +230,7 @@ meta_name s:len       as: meta_len
 ( ===== Setup/Finish ===== )
 
 : m:finish
+  const_done [ panic" do patch_const" ] ;unless
   xlatest xxt entrypoint!
   " out/forth2.ark" save
 ;
@@ -240,6 +262,8 @@ meta_name s:len       as: meta_len
 : m:install ( meta_start -- )
   dup m:hide m:reveal
   word' m:finish forth:show!
+  word' (        forth:show!
+  word' #        forth:show!
   ' m:handle_num -> forth:handle_num
   verbose [
     " --Meta Words----- " prn forth:words
@@ -338,14 +362,30 @@ M: :
 M: ; <IMMED> ( q -- ) >r ;
 
 
-M: as: ( n name: -- ) <IMMED>
-  #TODO backpatch xConst
+M: as: <IMMED> ( n name: -- )
   forth:mode [ panic" Do not call as: in compile mode" ] ;when
   forth:read [ panic" Const name required" ] ;unless
+  dup
+  ( x-const ) x:create drop xLIT, over x, xRET, const_link,
+  ( m-const )
   forth:create POSTPONE: <IMMED>
   LIT, , JMP,
   [ forth:mode [ xLIT, x, ] when ] ,
 ;
+
+M: patch_const ( xadr ) patch_const ;
+
+
+M: [ <IMMED>
+  forth:mode [ xJMP, xhere 0 , ] when xhere ( &back &q | &q )
+  forth:mode yes forth:mode! ( &back &q mode | &q mode )
+  [ xRET,
+    dup forth:mode!
+    [ swap xhere swap x! xLIT, x, ] when
+  ]
+;
+
+M: ] <IMMED> ( q -- ) >r ;
 
 
 
@@ -356,5 +396,8 @@ m:start
 42 as: answer
 X: answer HALT ;
 : foo answer HALT ;
+
+[ ( no-op ) ] patch_const
+
 m:finish
 
