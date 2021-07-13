@@ -787,8 +787,7 @@ END
 
 ( ===== Syntax ===== )
 
-x: : ( name: -- q )
-  forth:read [ "Word name required" panic ] unless
+: _: ( name -- q )
   forth:create
   forth:latest forth:hide!
   forth:compile_mode forth:mode!
@@ -797,6 +796,11 @@ x: : ( name: -- q )
     forth:latest forth:show!
     forth:run_mode forth:mode!
   ]
+;
+
+x: : ( name: -- q )
+  forth:read [ "Word name required" panic ] unless
+  _:
 ;
 
 x: ; <IMMED> ( q -- ) >r ;

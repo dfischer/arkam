@@ -153,24 +153,37 @@ END
 ;
 
 
+" M-                " as: meta_buf
+meta_buf 2 +          as: meta_name
+meta_name s:len       as: meta_len
+
+: name>meta ( s -- buf )
+  meta_len s:check [ epr panic" : too long" ] ;unless
+  meta_name s:copy
+  meta_buf
+;
+
+: M:
+  forth:read [ panic" Meta word name required" ] ;unless
+  name>meta _:
+;
+
+
 
 ( ===== Primitive Helper ===== )
 
-" M-            " as: prim_buf
-prim_buf 2 +      as: prim_name
-
-: PRIMITIVES 0 [ drop ] ;
+: PRIMITIVES 1 [ drop ] ;
 
 : PRIM: ( n closer q name: -- n+ )
   # : name <IMMED> LIT code LIT q JMP handler
   forth:read [ panic" Primitive name required" ] ;unless
-  prim_name s:copy
-  prim_buf forth:create POSTPONE: <IMMED>
+  name>meta forth:create
+  POSTPONE: <IMMED>
   >r over prim>code LIT, , r> LIT, , JMP,
   [ forth:mode [ drop x, ] [ nip >r ] if ] ,
   ' inc dip
   verbose [
-    " prim " epr prim_name epr
+    " prim " epr meta_name epr
     "  code " epr over .. forth:latest forth:code cell + @ .
   ] when
 ;
@@ -232,7 +245,6 @@ prim_buf 2 +      as: prim_name
 
 PRIMITIVES
 
-  [      ] PRIM: NOOP
   [ HALT ] PRIM: HALT
   compile_only PRIM: LIT
   compile_only PRIM: RET
@@ -284,7 +296,18 @@ END
 
 ( ===== Meta Syntax Word ===== )
 
-: M-:
+M: X: ( -- q ) <IMMED>
+  # No meta-word will be created.
+  # used for words that conflicts meta-word
+  # ex. : ; IF [ <IMMED>
+  forth:mode [ panic" Do not call X: in compile mode" ] ;when
+  forth:read [ panic" X-Word name required" ] ;unless
+  x:create drop
+  yes forth:mode!
+  [ xRET, xlatest x:hide! no forth:mode! ]
+;
+
+M: :
   forth:read [ panic" Word name required" ] ;unless
   dup x:create m:create
   xlatest x:hide!
@@ -298,13 +321,14 @@ END
   ]
 ;
 
-: M-; <IMMED> ( q -- ) >r ;
+M: ; <IMMED> ( q -- ) >r ;
 
 
 
 ( ----- testing ----- )
 
 m:start
+X: : 42 HALT ;
 : foo 42 HALT ;
 m:finish
 
