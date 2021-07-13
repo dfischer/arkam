@@ -137,10 +137,13 @@ END
 : xlatest  adr_xlatest x@ ;
 : xlatest! adr_xlatest x! ;
 
-: x:hide!   hidden_flag on!  ;    # xword --
-: x:show!   hidden_flag off! ;    # xword --
+: xon!  over x@ swap on  swap x! ;
+: xoff! over x@ swap off swap x! ;
+
+: x:hide!   hidden_flag xon!  ;    # xword --
+: x:show!   hidden_flag xoff! ;    # xword --
 : x:hidden? x@ hidden_flag and ;  # xword -- ?
-: x:immed!  immed_flag on! ;      # xword --
+: x:immed!  immed_flag xon! ;      # xword --
 
 : xnext! x! ;
 : xnext  x@ flags off ;
@@ -353,7 +356,7 @@ END
 
 ( ===== Meta Syntax Word ===== )
 
-M: X: ( -- q ) <IMMED>
+M: X: ( -- q )
   # No meta-word will be created.
   # used for words that conflicts meta-word
   # ex. : ; IF [ <IMMED>
@@ -449,12 +452,22 @@ M: -> <IMMED> ( v &code -- )
   x:find [ epr " ?" panic ] ;unless
   xxt
   # replace as `JMP|LIT v`
-  cell + forth:mode [ xLIT, , x!, ] [ x! ] if
+  cell + forth:mode [ xLIT, x, x!, ] [ x! ] if
 ;
 
+
 M: ' <IMMED>
-  #TODO meta-tick
+  forth:read [ panic" Word name required" ] ;unless
+  x:find [ epr "  ?" panic ] ;unless
+  xxt
+  forth:mode [ xLIT, x, ] when
 ;
+
+
+M: ?h <IMMED> " HERE" prn ;
+
+M: ?stack <IMMED> ?stack ;
+
 
 
 ( ----- testing ----- )
@@ -464,12 +477,13 @@ m:start
 42 as: answer
 X: answer HALT ;
 
-: foo 1 IF answer ELSE answer 1 + THEN HALT ;
+: foo IF 42 ELSE answer 1 + THEN HALT ;
+: bar -1 foo ;
+: baz  0 foo ;
 
-defer: bar
-' foo -> bar
+defer: main
+' bar -> main
 
 [ ( no-op ) ] patch_const
 
 m:finish
-
