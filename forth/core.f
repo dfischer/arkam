@@ -1117,25 +1117,40 @@ END
 
 PRIVATE
 
-  64 as: len
+  256 as: len
   var: buf
+  var: argc
+  var: included
 
   : read buf swap len cli:get_arg [ " too long option" panic ] unless ;
 
 PUBLIC
 
   var: opt:repl
+  var: opt:argi
+
   : opt:init len allot -> buf ;
+
   : opt:parse_all
     yes -> opt:repl
     cli:argc 2 < IF RET THEN
+
     no -> opt:repl
-    cli:argc dec [
-      inc read
+    no -> included
+    cli:argc dec -> argc
+    argc [ included [ drop ] ;when
+      inc dup read inc -> opt:argi
       buf " --repl" s= [ yes -> opt:repl ] ;when
       buf " --quit" s= [ no  -> opt:repl ] ;when
       buf include
+      yes -> included
     ] for
+  ;
+
+  : opt:read! ( -- buf yes | no )
+    opt:argi cli:argc >= [ no ] ;when
+    opt:argi read buf yes
+    opt:argi inc -> opt:argi
   ;
 
 END

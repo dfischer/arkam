@@ -22,9 +22,14 @@ meta0: bin/arkam out/forth1.ark
 
 .PHONY: meta
 out/forth2.ark: bin/arkam out/forth1.ark forth/meta.f forth/core.f
-	./bin/arkam out/forth1.ark forth/meta.f
+	./bin/arkam out/forth1.ark forth/meta.f out/forth2.ark
 meta: out/forth2.ark
 	./bin/arkam out/forth2.ark --quit
+
+.PHONY: check-meta
+check-meta: out/forth2.ark
+	./bin/arkam out/forth2.ark forth/meta.f out/forth3.ark
+	diff out/forth2.ark out/forth3.ark
 
 
 .PHONY: all

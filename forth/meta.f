@@ -257,11 +257,14 @@ var: const_link
 
 ( ===== Setup/Finish ===== )
 
+var: m:image_name
+
 : m:finish
+  m:image_name [ panic" No image name" ] ;unless
   const_done [ panic" do patch_const" ] ;unless
   xlatest xxt entrypoint!
   verbose [ " Turnkey: " epr xlatest xname x>t eprn ] when
-  " out/forth2.ark" save
+  m:image_name save
 ;
 
 : m:handle_num ( n -- )
@@ -302,6 +305,14 @@ var: const_link
 
 : m:start [do LIT, forth:latest , ] m:install ;
 
+: metacompile
+  opt:read! [ panic" Image name required" ] ;unless -> m:image_name
+  m:start
+  " forth/core.f" include
+  " doconst" x:find [ panic" doconst definition not found" ] ;unless
+  xxt patch_const
+  m:finish
+;
 
 
 ( ###################### )
@@ -524,10 +535,4 @@ M: ?STACK <IMMED> ?stack ;
 ( ## Start Metacompile ## )
 ( ####################### )
 
-m:start
-
-include: forth/core.f
-
-' doconst patch_const
-
-m:finish
+metacompile
