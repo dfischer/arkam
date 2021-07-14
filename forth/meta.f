@@ -215,7 +215,7 @@ var: const_link
   # LIT v RET link -> LIT v JMP xadr
   const_link [ ( adr link )
     0 [ STOP ] ;case
-    dup x@ >r over swap x! r>
+    dup x@ >r over swap x! r> GO
   ] while drop
   -1 -> const_link ( done )
 ;
@@ -260,6 +260,7 @@ var: const_link
 : m:finish
   const_done [ panic" do patch_const" ] ;unless
   xlatest xxt entrypoint!
+  verbose [ " Turnkey: " epr xlatest xname x>t eprn ] when
   " out/forth2.ark" save
 ;
 
@@ -292,6 +293,7 @@ var: const_link
   word' m:finish forth:show!
   word' (        forth:show!
   word' #        forth:show!
+  word' include: forth:show!
   ' m:handle_num -> forth:handle_num
   verbose [
     " --Meta Words----- " prn forth:words
@@ -370,7 +372,8 @@ M: X: ( -- q ) <run_only>
   forth:read [ panic" X-Word name required" ] ;unless
   x:create drop
   yes forth:mode!
-  [ xRET, xlatest x:hide! no forth:mode! ]
+  xlatest x:hide!
+  [ xRET, xlatest x:show! no forth:mode! ]
 ;
 
 M: : <run_only>
@@ -396,7 +399,7 @@ M: as: ( n name: -- ) <run_only>
   forth:mode [ panic" Do not call as: in compile mode" ] ;when
   forth:read [ panic" Const name required" ] ;unless
   dup
-  ( x-const ) x:create drop xLIT, over x, xRET, const_link,
+  ( x-const ) x:create drop xLIT, over x, xJMP, const_link, xlatest x:immed!
   ( m-const )
   forth:create POSTPONE: <IMMED>
   LIT, , JMP,
@@ -407,7 +410,7 @@ M: patch_const ( xadr ) <run_only> patch_const ;
 
 
 M: [ <IMMED>
-  forth:mode [ xJMP, xhere 0 , ] when xhere ( &back &q | &q )
+  forth:mode [ xJMP, xhere 0 x, ] when xhere ( &back &q | &q )
   forth:mode yes forth:mode! ( &back &q mode | &q mode )
   [ xRET,
     dup forth:mode!
@@ -445,6 +448,8 @@ M: PUBLIC ( start closer -- start end closer ) <run_only>
   drop xlatest ' x:hide_range
 ;
 
+M: END ( closer -- ) <IMMED> >r ;
+
 
 M: defer: ( name: -- ) <run_only>
   # JMP actual
@@ -476,7 +481,7 @@ M: var> <run_only>
   xLIT, x, xRET,
 ;
 
-M: var: <run_only> 0 var> ;
+M: var: <run_only> 0 POSTPONE: M-var> ;
 
 
 M: CHAR: <IMMED>
@@ -497,18 +502,18 @@ M: " <IMMED>
     dup CHAR: \\ = [
       drop ' forth:take c:escaped
       [ panic" Escape sequence required" STOP ] ;unless
-      b, GO
+      bx, GO
     ] ;when
     bx, GO
   ] while
-  0 bx, here:align!
+  0 bx, xhere:align!
   forth:mode [ xhere swap x! xLIT, x, ] when
 ;
 
 
-M: ?h <IMMED> " HERE" prn ;
+M: ?H <IMMED> " HERE" prn ;
 
-M: ?stack <IMMED> ?stack ;
+M: ?STACK <IMMED> ?stack ;
 
 
 
@@ -517,18 +522,8 @@ M: ?stack <IMMED> ?stack ;
 
 m:start
 
-42 as: answer
-X: answer HALT ;
+include: forth/core.f
 
-answer var> ans
-
-: foo 43 -> ans IF ans 1 - ELSE ans 1 + THEN HALT ;
-: bar -1 foo ;
-: baz  0 foo ;
-
-defer: main
-' bar -> main
-
-[ ( no-op ) ] patch_const
+' doconst patch_const
 
 m:finish
