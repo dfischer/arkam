@@ -488,8 +488,13 @@ M: ' <IMMED>
 
 M: var> <run_only>
   forth:read [ panic" Var name required" ] ;unless
+  30 s:check [ epr panic" : too long var name" ] ;unless
+  dup >r
   dup x:create m:create
-  xLIT, x, xRET,
+  xLIT, xhere swap x, xRET, r>
+  dup " !" s:append!
+  dup x:create m:create
+  xLIT, x, x!, xRET,
 ;
 
 M: var: <run_only> 0 POSTPONE: M-var> ;

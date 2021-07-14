@@ -594,6 +594,7 @@ defer: forth:find
 : +,     8 prim, ;
 : JMP,  16 prim, ;
 : ZJMP, 17 prim, ;
+: !,    19 prim, ;
 
 
 ( ----- stream ----- )
@@ -642,6 +643,7 @@ PRIVATE
   ;
 
 PUBLIC
+  max as: forth:max_len
 
   : forth:init len allot -> buf ;
 
@@ -993,8 +995,11 @@ END
 
 X: var>
   forth:read [ " Var name required" panic ] ;unless
-  forth:create
-  LIT, , RET,
+  forth:max_len dec s:check [ epr " : too long var name" panic ] ;unless
+  dup >r forth:create
+  LIT, here swap , RET,
+  r> dup " !" s:append! forth:create
+  LIT, , !, RET,
 ;
 
 X: var: 0 ' var> call ;
