@@ -511,14 +511,18 @@ M: " <IMMED>
 ;
 
 
+
+( ----- debug ----- )
+
 M: ?H <IMMED> " HERE" prn ;
 
 M: ?STACK <IMMED> ?stack ;
 
 
 
-
-( ----- testing ----- )
+( ####################### )
+( ## Start Metacompile ## )
+( ####################### )
 
 m:start
 
