@@ -130,6 +130,33 @@ ng as: STOP
 
 
 
+( ===== Stack 2 ===== )
+
+: pick ( n -- v ) 2 + cells sp + @ ;
+  # example:
+  #   1 2 3 0 pick => 1 2 3 3
+  #   1 2 3 2 pick => 1 2 3 1
+  # stack:
+  #   sp: |
+  #       | n
+  #       | ...
+  # target address: sp + (n+2)*cells
+
+
+: rpick ( n -- v ) 2 + cells rp + @ ;
+  # rstack:
+  #   rp: |
+  #       | caller
+  #   n=0 | ...
+  #   n=1 | ...
+  # target address: rp + (n+2)*cells
+
+
+: i ( -- v ) 2 cells rp + @ ;
+: j ( -- v ) 3 cells rp + @ ;
+
+
+
 ( ===== Memory ===== )
 
 : inc! ( adr -- ) dup @ 1 + swap ! ;
