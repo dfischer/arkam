@@ -254,7 +254,7 @@ var: x
   ok
 ] CHECK
 
-<VAL>
+<VAR>
 
 
 
