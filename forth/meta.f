@@ -451,12 +451,12 @@ M: AGAIN <IMMED>
 ;
 
 
-M: PRIVATE ( -- start closer ) <run_only>
-  xlatest [ xlatest x:hide_range ]
+M: PRIVATE ( -- xstart mstart closer ) <run_only>
+  xlatest forth:latest [ forth:latest forth:hide_range xlatest x:hide_range ]
 ;
 
-M: PUBLIC ( start closer -- start end closer ) <run_only>
-  drop xlatest ' x:hide_range
+M: PUBLIC ( xstart mstart closer -- xstart xend mstart mend closer ) <run_only>
+  drop xlatest swap forth:latest [ forth:hide_range x:hide_range ]
 ;
 
 M: END ( closer -- ) <IMMED> >r ;

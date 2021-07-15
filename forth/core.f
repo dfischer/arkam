@@ -513,6 +513,32 @@ END
 ;
 
 
+PRIVATE # ----- s:each_line! -----
+
+  # destructive!
+  # Every newline in s will be replaced by 0
+
+  : split ( src -- line src+ yes | no )
+    dup b@ [ drop no ] ;unless
+    dup ( line src )
+    [ dup b@
+      0  [ yes STOP ] ;case
+      10 [ [ inc ] [ 0 swap b! ] biq yes STOP ] ;case
+      drop inc GO
+    ] while
+  ;
+  
+PUBLIC
+
+  : s:each_line! ( s q -- )
+    [ >r split not IF rdrop STOP RET THEN
+      i swap >r call r> r>  GO
+    ] while
+  ;
+  
+END
+
+
 
 ( ===== File ===== )
 
@@ -1229,7 +1255,7 @@ END
   opt:parse_all
   opt:repl [
     repl:init
-    yes show_depth!
+    repl:show_depth!
     " clear" marker
     repl
   ] when
