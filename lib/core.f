@@ -385,7 +385,7 @@ PRIVATE
     n! check_min check_sign init read put_sign i pr space
   ;
 
-  [ max 1 + allot buf! ] >init
+  [ buf IF RET THEN max 1 + allot buf! ] >init
  
 PUBLIC
 
@@ -715,7 +715,7 @@ PUBLIC
 
   max as: forth:max_len
 
-  [ len allot buf! ] >init
+  [ buf IF RET THEN len allot buf! ] >init
 
   defer: forth:notfound ( name -- )
   ' notfound -> forth:notfound
@@ -1262,7 +1262,7 @@ PRIVATE
 
   : read buf swap len cli:get_arg [ " too long option" panic ] unless ;
 
-  [ len allot buf! ] >init
+  [ buf IF RET THEN len allot buf! ] >init
 
 PUBLIC
 
