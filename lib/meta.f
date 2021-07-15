@@ -93,7 +93,7 @@ PRIVATE
 PUBLIC
 
   : save ( fname -- )
-    " wb" file:open! -> id
+    " wb" file:open! id!
     there image_size id file:write!
     id file:close!
   ;

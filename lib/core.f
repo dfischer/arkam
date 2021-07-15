@@ -286,6 +286,8 @@ PUBLIC
   : sys:ds0! sys:ds_base cell - sp! ;
 END
 
+: bye 0 HALT ;
+
 
 
 ( ===== Stdio ===== )
@@ -999,6 +1001,41 @@ END
 
 
 
+( ===== Turnkey Image ===== )
+
+PRIVATE
+
+  var: id
+  defer: main
+  : set_boot! ( adr )
+    -> main
+    [ init:run main bye ] 0x04 !
+  ;
+
+PUBLIC
+
+  : save_image ( fname -- )
+    " wb" file:open! id!
+    # zero clear 0x00-0x03
+    0 here ! here 4 id file:write!
+    # write current image
+    0x04 here id file:write!
+    id file:close!
+  ;
+
+  : turnkey ( fname adr -- )
+    set_boot! save_image
+  ;
+
+  : turnkey: ( adr fname: -- )
+    forth:read [ " Image name required" panic ] ;unless
+    swap turnkey
+  ;
+
+END
+
+
+
 ( ===== Struct ===== )
 
 PRIVATE
@@ -1289,7 +1326,6 @@ PUBLIC
 
 END
 
-: bye 0 HALT ;
 
 
 : main
