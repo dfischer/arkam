@@ -449,23 +449,27 @@ END
 ;
 
 
+
 PRIVATE
   var: base
 PUBLIC
   : s>n ( s base -- n yes | no )
     base!
     dup b@ CHAR: - = IF inc -1 ELSE 1 THEN swap ( sign s )
+    dup b@ [ 2drop no ] ;unless ( null string )
     0 swap ( sign acc s )
     [ dup b@
-      0 [ drop yes STOP ] ;case
-      c>hex [ pullup base * + swap inc GO ] ;when
-      drop no STOP
+      ( done      ) 0 [ drop yes STOP ] ;case
+      ( NaN       ) c>hex [ drop no STOP ] ;unless
+      ( over base ) dup base >= [ 2drop no STOP ] ;when
+      ( ok        ) pullup base * + swap inc GO
     ] while ( sign acc dec? )
     IF * yes ELSE 2drop no THEN
   ;
   : s>dec 10 s>n ;  # s -- n yes | no
   : s>hex 16 s>n ;  # s -- n yes | no
 END
+
 
 
 : s:each ( s q -- ) # q: ( c -- )

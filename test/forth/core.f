@@ -122,6 +122,16 @@ PRIVATE END
 
 MARKER: <STRING>
 
+" s= same" [ " foo" " foo" s=     ] CHECK
+" s= diff" [ " foo" " bar" s= not ] CHECK
+
+" s>dec positive" [ " 123"  s>dec IF  123 = ELSE no THEN ] CHECK
+" s>dec negative" [ " -123" s>dec IF -123 = ELSE no THEN ] CHECK
+" s>dec ng1" [ " "  s>dec not ] CHECK
+" s>dec ng2" [ " -" s>dec not ] CHECK
+" s>dec ng3" [ " 0a" s>dec not ] CHECK
+
+
 " s:len" [
   ok
 ] CHECK
