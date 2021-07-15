@@ -996,6 +996,10 @@ END
   swap IF drop ELSE " Assertion failed: " epr panic THEN
 ;
 
+: ASSERT" <IMMED>
+  ' " call forth:mode [ ' ASSERT , ] [ ASSERT ] if
+;
+
 : CHECK ( s q -- ) # q: -- ok?
   # Call q then check TOS is true and sp is balanced
   # or die with printing s.

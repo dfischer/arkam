@@ -1,6 +1,8 @@
 MARKER: <TEST-TOOLS>
 
-ok " ASSERT" ASSERT
+ok ASSERT" ASSERT"
+
+ok ASSERT" ASSERT\""
 
 " CHECK" [ ok ] CHECK
 
@@ -8,8 +10,8 @@ ok " ASSERT" ASSERT
 
 
 
-# ( ng " COMMENT" ASSERT
-( ng " COMMENT" ASSERT )
+# ( ng ASSERT" COMMENT"
+( ng ASSERT" COMMENT" )
 
 
 
@@ -22,17 +24,17 @@ MARKER: <STACK>
 
 " pullup" [
   1 2 3 pullup
-  1 = " pullup TOS" ASSERT
-  3 = " pullup 2nd" ASSERT
-  2 = " pullup 3rd" ASSERT
+  1 = ASSERT" pullup TOS"
+  3 = ASSERT" pullup 2nd"
+  2 = ASSERT" pullup 3rd"
   ok
 ] CHECK
 
 " pushdown" [
   1 2 3 pushdown
-  2 = " pushdown TOS" ASSERT
-  1 = " pushdown 2nd" ASSERT
-  3 = " pushdown 3rd" ASSERT
+  2 = ASSERT" pushdown TOS"
+  1 = ASSERT" pushdown 2nd"
+  3 = ASSERT" pushdown 3rd"
   ok
 ] CHECK
 
@@ -46,14 +48,14 @@ MARKER: <CONTROLFLOW>
 : test;unless [ yes ] ;unless no ;
 
 " ;when" [
-  yes test;when     " ;when yes" ASSERT
-  no  test;when not " ;when no"  ASSERT
+  yes test;when     ASSERT" ;when yes"
+  no  test;when not ASSERT" ;when no"
   ok
 ] CHECK
 
 " ;unless" [
-  yes test;unless not " ;unless yes" ASSERT
-  no  test;unless     " ;unless no"  ASSERT
+  yes test;unless not ASSERT" ;unless yes"
+  no  test;unless     ASSERT" ;unless no"
   ok
 ] CHECK
 
@@ -74,11 +76,11 @@ MARKER: <FORTH>
 MARKER: <NUM>
 
 " clamp" [
-  0 1 4 clamp 1 = " clamp under"  ASSERT
-  1 1 4 clamp 1 = " clamp min"    ASSERT
-  2 1 4 clamp 2 = " clamp middle" ASSERT
-  3 1 4 clamp 3 = " clamp max"    ASSERT
-  4 1 4 clamp 3 = " clamp over"   ASSERT
+  0 1 4 clamp 1 = ASSERT" clamp under"
+  1 1 4 clamp 1 = ASSERT" clamp min"
+  2 1 4 clamp 2 = ASSERT" clamp middle"
+  3 1 4 clamp 3 = ASSERT" clamp max"
+  4 1 4 clamp 3 = ASSERT" clamp over"
   ok
 ] CHECK
 
@@ -94,21 +96,21 @@ PRIVATE
   234 as: x
 PUBLIC
   123 as: y
-  x 234 = " in module" ASSERT
+  x 234 = ASSERT" in module"
 END
 
-x 123 = " out of module" ASSERT
-y 123 = " module exposed" ASSERT
+x 123 = ASSERT" out of module"
+y 123 = ASSERT" module exposed"
 
 
 ( ----- no exposed ----- )
 
 PRIVATE
   234 as: x
-  x 234 = " in module - no exposed" ASSERT
+  x 234 = ASSERT" in module - no exposed"
 END
 
-x 123 = " out of module - no exposed" ASSERT
+x 123 = ASSERT" out of module - no exposed"
 
 
 ( ----- no content ----- )
@@ -127,23 +129,23 @@ MARKER: <STRING>
 
 : scheck s:check nip ; # str max -- ?
 " s:check" [
-  " foo" 3 scheck not " s:check exclude null" ASSERT
-  " foo" 4 scheck     " s:check include null" ASSERT
+  " foo" 3 scheck not ASSERT" s:check exclude null"
+  " foo" 4 scheck     ASSERT" s:check include null"
 
-  " " 0 scheck not " s:check 0 exc.null" ASSERT
-  " " 1 scheck     " s:check 0 inc.null" ASSERT
+  " " 0 scheck not ASSERT" s:check 0 exc.null"
+  " " 1 scheck     ASSERT" s:check 0 inc.null"
 
   ok
 ] CHECK
 
 
 " s:start?" [
-  " foo" " foo"  s:start?     " s:start foo/foo"  ASSERT
-  " foo" " f"    s:start?     " s:start foo/f"    ASSERT
-  " foo" " "     s:start?     " s:start foo/0"    ASSERT
-  " "    " "     s:start?     " s:start 0/0"      ASSERT
-  " foo" " fooo" s:start? not " s:start foo/fooo" ASSERT
-  " "    " foo"  s:start? not " s:start 0/foo"    ASSERT
+  " foo" " foo"  s:start?     ASSERT" s:start foo/foo"
+  " foo" " f"    s:start?     ASSERT" s:start foo/f"
+  " foo" " "     s:start?     ASSERT" s:start foo/0"
+  " "    " "     s:start?     ASSERT" s:start 0/0"
+  " foo" " fooo" s:start? not ASSERT" s:start foo/fooo"
+  " "    " foo"  s:start? not ASSERT" s:start 0/foo"
   ok
 ] CHECK
 
@@ -160,7 +162,7 @@ len dec as: max
 " memclear" [
   1 buf max + b!
   clear
-  buf max + b@ 0 = " after memclear" ASSERT
+  buf max + b@ 0 = ASSERT" after memclear"
   ok
 ] CHECK
 
@@ -169,18 +171,18 @@ len dec as: max
 " s:append!" [
   clear
   buf " foo" s:append!
-  buf " foo" s= " 0+foo" ASSERT
+  buf " foo" s= ASSERT" 0+foo"
 
   " foo" >buf
   buf " bar" s:append!
-  buf " foobar" s= " foo+bar" ASSERT
+  buf " foobar" s= ASSERT" foo+bar"
 
   " foo" >buf
   buf " " s:append!
-  buf " foo" s= " foo+0" ASSERT
+  buf " foo" s= ASSERT" foo+0"
 
   clear
-  buf s:len 0 = " 0+0" ASSERT
+  buf s:len 0 = ASSERT" 0+0"
 
   ok
 ] CHECK
@@ -188,15 +190,15 @@ len dec as: max
 
 " s:append" [
   " foo" >buf
-  buf " " max s:append " s:append foo+0 len" ASSERT
-  buf " foo" s= " s:append foo+0" ASSERT
+  buf " " max s:append ASSERT" s:append foo+0 len"
+  buf " foo" s= ASSERT" s:append foo+0"
 
   clear
-  buf " " max s:append " s:append 0+0" ASSERT
+  buf " " max s:append ASSERT" s:append 0+0"
 
   " foo" >buf
-  buf " bar" 6 s:append not " s:append exclude null" ASSERT
-  buf " bar" 7 s:append     " s:append include null" ASSERT
+  buf " bar" 6 s:append not ASSERT" s:append exclude null"
+  buf " bar" 7 s:append     ASSERT" s:append include null"
 
   ok
 ] CHECK
@@ -204,16 +206,16 @@ len dec as: max
 
 " s:each_line!" [
   " foo" >buf
-  buf [ " foo" s= " foo 1" ASSERT ] s:each_line!
+  buf [ " foo" s= ASSERT" foo 1" ] s:each_line!
 
   " " >buf
-  buf [ " do not reach here" panic ] s:each_line!
+  buf [ panic" do not reach here" ] s:each_line!
 
   " foo\nfoo" >buf
-  buf [ " foo" s= " foo 2" ASSERT ] s:each_line!
+  buf [ " foo" s= ASSERT" foo 2" ] s:each_line!
 
   " foo\nfoo\n" >buf
-  buf [ " foo" s= " ignore trailing newline" ASSERT ] s:each_line!
+  buf [ " foo" s= ASSERT" ignore trailing newline" ] s:each_line!
 
   ok
 ] CHECK
@@ -228,13 +230,13 @@ var: x
 
 " var" [
   yes x!
-  x " var set/get" ASSERT
+  x ASSERT" var set/get"
 
   123 x!
-  var' x @ 123 = " var addr" ASSERT
+  var' x @ 123 = ASSERT" var addr"
 
   234 ' x! call
-  x 234 = " var setter reference" ASSERT
+  x 234 = ASSERT" var setter reference"
 
   ok
 ] CHECK
@@ -243,13 +245,13 @@ var: x
   123 x!
 
   var' x inc!
-  x 124 = " &var inc!" ASSERT
+  x 124 = ASSERT" &var inc!"
 
   var' x dec!
-  x 123 = " &var dec!" ASSERT
+  x 123 = ASSERT" &var dec!"
 
   var' x [ inc ] update!
-  x 124 = " &var update!" ASSERT
+  x 124 = ASSERT" &var update!"
 
   ok
 ] CHECK
@@ -263,11 +265,11 @@ MARKER: <CHAR>
 64 as: atmark
 
 " char:" [
-  CHAR: @ atmark = " char: in compile mode" ASSERT
+  CHAR: @ atmark = ASSERT" char: in compile mode"
   ok
 ] CHECK
 
-CHAR: @ atmark = " char: in run mode" ASSERT
+CHAR: @ atmark = ASSERT" char: in run mode"
 
 <CHAR>
 
@@ -282,11 +284,11 @@ STRUCT foo
 END
 
 " struct" [
-  foo 11 = " struct size" ASSERT
+  foo 11 = ASSERT" struct size"
 
-  foo a  foo       = " struct 1st field" ASSERT
-  foo b  foo 3 +   = " struct 2nd field" ASSERT
-  foo c  foo b 4 + = " struct 3rd field" ASSERT
+  foo a  foo       = ASSERT" struct 1st field"
+  foo b  foo 3 +   = ASSERT" struct 2nd field"
+  foo c  foo b 4 + = ASSERT" struct 3rd field"
 
   ok
 ] CHECK
