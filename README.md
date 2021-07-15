@@ -34,13 +34,13 @@ Purposes
 
 ## Meta
 
-Edit `forth/meta.f` and `forth/core.f`.
+Edit `lib/meta.f` and `lib/core.f`.
 
-Then build `out/forth1.ark` with `$ make meta`.
+Then build `out/forth1.ark` with `make meta`.
 
-Check with `$ make meta-check && make meta-test`.
+Check with `make meta-check && make meta-test`.
 
-Finally install new forth.ark by `$ make meta-install`.
+Finally install new forth.ark with `make meta-install`.
 
 
 
