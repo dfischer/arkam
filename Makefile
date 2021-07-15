@@ -47,7 +47,7 @@ sarkam: bin/sarkam
 
 
 .PHONY: test
-test: arkam bin/forth bin/test_arkam bin/sol bin/forth_test.ark
+test: arkam bin/forth bin/test_arkam bin/sol bin/forth_test.ark meta
 	./test/run.sh
 
 

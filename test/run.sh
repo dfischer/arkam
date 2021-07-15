@@ -98,3 +98,13 @@ do
     ./bin/forth $src || exit 1
     echo "ok"
 done
+
+
+echo "===== forth ====="
+
+for src in test/forth/*.f
+do
+    echo -n "$src .."
+    ./bin/arkam out/forth2.ark $src || exit 1
+    echo "ok"
+done

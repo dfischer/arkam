@@ -335,14 +335,14 @@ PRIVATE
   var: r
   var: i
 
-  : init buf max + -> i ;
+  : init buf max + i! ;
   : check buf i > IF " too big num" panic THEN ;
-  : put i 1 - dup -> i b! ; # c --
+  : put i 1 - dup i! b! ; # c --
   : put_sign posi IF RET THEN 45 put ;
-  : check_sign n 0 < IF n neg -> n no ELSE yes THEN -> posi ;
-  : read n base /mod -> r -> q
+  : check_sign n 0 < IF n neg n! no ELSE yes THEN posi! ;
+  : read n base /mod r! q!
     r >hex put
-    q 0 = IF RET THEN q -> n AGAIN
+    q 0 = IF RET THEN q n! AGAIN
   ;
   : check_min ( minimum number )
     n 0 = IF " 0" pr space rdrop RET THEN
@@ -352,14 +352,14 @@ PRIVATE
     " ?: invalid base" panic
   ;
   : go ( n -- )
-    -> n check_min check_sign init read put_sign i pr space
+    n! check_min check_sign init read put_sign i pr space
   ;
 
 PUBLIC
 
-  : ?:init max 1 + allot -> buf ;
-  : ?    dup 10 -> base go ;
-  : ?hex dup 16 -> base go ;
+  : ?:init max 1 + allot buf! ;
+  : ?    dup 10 base! go ;
+  : ?hex dup 16 base! go ;
 
 END
 
@@ -418,7 +418,7 @@ PRIVATE
   var: base
 PUBLIC
   : s>n ( s base -- n yes | no )
-    -> base
+    base!
     dup b@ CHAR: - = IF inc -1 ELSE 1 THEN swap ( sign s )
     0 swap ( sign acc s )
     [ dup b@
@@ -527,7 +527,7 @@ END
 ( ===== Forth ===== )
 
 var: forth:mode
-: forth:mode! -> forth:mode ;
+: forth:mode! forth:mode! ;
 
 1 as: forth:compile_mode
 0 as: forth:run_mode
@@ -608,7 +608,7 @@ PRIVATE
   var: source
   var: stream   # q: source -- c source
 
-  : take source stream call -> source ; # -- c
+  : take source stream call source! ; # -- c
 
   : space? 0 ;eq 32 ;eq 10 ;eq no ; # c -- yes | c no
 
@@ -645,15 +645,15 @@ PRIVATE
 PUBLIC
   max as: forth:max_len
 
-  : forth:init len allot -> buf ;
+  : forth:init len allot buf! ;
 
   defer: forth:notfound ( name -- )
   ' notfound -> forth:notfound
 
   : forth:stream  stream  ;
-  : forth:stream! -> stream ;
+  : forth:stream! stream! ;
   : forth:source  source  ;
-  : forth:source! -> source ;
+  : forth:source! source! ;
   : forth:take    take ;
   : forth:read ( -- buf yes | no )
     read dup b@ IF yes ELSE drop no THEN
@@ -663,7 +663,7 @@ PUBLIC
   ' handle_num -> forth:handle_num
 
   : forth:run ( source stream -- )
-    source >r stream >r -> stream -> source
+    source >r stream >r stream! source!
     [ forth:read [ STOP ] ;unless
       forth:find
       ( found )
@@ -677,7 +677,7 @@ PUBLIC
       ( not found )
       buf forth:notfound STOP
     ] while
-    r> -> stream r> -> source
+    r> stream! r> source!
   ;
 
   : forth:eval ( s -- )
@@ -1095,9 +1095,9 @@ PRIVATE
 PUBLIC
 
   : loadfile ( path -- addr )
-    " rb" file:open! -> id
-    id file:size -> size
-    here -> addr
+    " rb" file:open! id!
+    id file:size size!
+    here addr!
     size ,
     here size id file:read!
     here size + here!
@@ -1134,28 +1134,28 @@ PUBLIC
   var: opt:repl
   var: opt:argi
 
-  : opt:init len allot -> buf ;
+  : opt:init len allot buf! ;
 
   : opt:parse_all
-    yes -> opt:repl
+    yes opt:repl!
     cli:argc 2 < IF RET THEN
 
-    no -> opt:repl
-    no -> included
-    cli:argc dec -> argc
+    no opt:repl!
+    no included!
+    cli:argc dec argc!
     argc [ included [ drop ] ;when
-      inc dup read inc -> opt:argi
-      buf " --repl" s= [ yes -> opt:repl ] ;when
-      buf " --quit" s= [ no  -> opt:repl ] ;when
+      inc dup read inc opt:argi!
+      buf " --repl" s= [ yes opt:repl! ] ;when
+      buf " --quit" s= [ no  opt:repl! ] ;when
       buf include
-      yes -> included
+      yes included!
     ] for
   ;
 
   : opt:read! ( -- buf yes | no )
     opt:argi cli:argc >= [ no ] ;when
     opt:argi read buf yes
-    opt:argi inc -> opt:argi
+    opt:argi inc opt:argi!
   ;
 
 END
@@ -1184,11 +1184,11 @@ PRIVATE
 PUBLIC
 
   ' notfound -> forth:notfound
-  : repl:init len allot -> buf ;
-  : repl:hide_depth! no  -> show_depth ;
-  : repl:show_depth! yes -> show_depth ;
-  : repl:hide_stack! no  -> show_stack ;
-  : repl:show_stack! yes -> show_stack ;
+  : repl:init len allot buf! ;
+  : repl:hide_depth! no  show_depth! ;
+  : repl:show_depth! yes show_depth! ;
+  : repl:hide_stack! no  show_stack! ;
+  : repl:show_stack! yes show_stack! ;
   : repl [ prompt listen GO ] while ;
 
 END
@@ -1202,7 +1202,7 @@ END
   opt:parse_all
   opt:repl [
     repl:init
-    yes -> show_depth
+    yes show_depth!
     " clear" marker
     repl
   ] when
