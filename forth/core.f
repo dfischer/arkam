@@ -406,7 +406,15 @@ END
 
 
 
-( ===== String ===== )
+( ===== Memory and String ===== )
+
+: memcopy ( src dst len -- )
+  dup 1 < IF 3drop RET THEN
+  1 - >r
+  over b@ over b!
+  1 + swap 1 + swap
+  r> AGAIN
+;
 
 : memclear ( adr len -- ) [ 0 over b! inc ] times drop ;
 

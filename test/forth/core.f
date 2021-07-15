@@ -168,6 +168,17 @@ len dec as: max
 
 : >buf clear buf swap s:append! ;
 
+" memcopy" [
+  clear
+  " foo" >buf
+  " bar" buf 3 + 4 memcopy
+  buf " foobar" s= ASSERT" memcopy"
+
+  " xxx" buf 3 + 0 memcopy
+  buf " foobar" s= ASSERT" no memcopy"
+  ok
+] CHECK
+
 " s:append!" [
   clear
   buf " foo" s:append!
