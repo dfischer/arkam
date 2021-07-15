@@ -378,13 +378,15 @@ PRIVATE
     16 base = IF " -80000000"   pr space rdrop RET THEN
     " ?: invalid base" panic
   ;
+
   : go ( n -- )
     n! check_min check_sign init read put_sign i pr space
   ;
 
+  [ max 1 + allot buf! ] >init
+ 
 PUBLIC
 
-  : ?:init max 1 + allot buf! ;
   : ?    dup 10 base! go ;
   : ?hex dup 16 base! go ;
 
@@ -708,9 +710,10 @@ PRIVATE
   ;
 
 PUBLIC
+
   max as: forth:max_len
 
-  : forth:init len allot buf! ;
+  [ len allot buf! ] >init
 
   defer: forth:notfound ( name -- )
   ' notfound -> forth:notfound
@@ -886,6 +889,7 @@ X: ; <IMMED> ( q -- ) >r ;
 X: <IMMED> <IMMED> forth:latest forth:immed! ;
 
 
+
 X: [ <IMMED> ( -- &q &back mode close | &q mode close )
   forth:mode [ JMP, here 0 , here swap ] [ here:align! here ] if
   forth:mode forth:compile_mode forth:mode!
@@ -969,6 +973,29 @@ X: PRIVATE ( -- start closer )
 X: PUBLIC ( start closer -- start end closer )
   drop forth:latest ' forth:hide_range
 ;
+
+
+
+( ===== Initializer ===== )
+
+PRIVATE
+
+  init:link as: link
+
+PUBLIC
+
+  X: >init ( xt -- )
+    here link @ , link ! ,
+  ;
+
+  X: init:run
+    link @ [
+      0 [ STOP ] ;case 
+      dup cell + @ call @ GO
+    ] while
+  ;
+
+END
 
 
 
@@ -1198,12 +1225,12 @@ PRIVATE
 
   : read buf swap len cli:get_arg [ " too long option" panic ] unless ;
 
+  [ len allot buf! ] >init
+
 PUBLIC
 
   var: opt:repl
   var: opt:argi
-
-  : opt:init len allot buf! ;
 
   : opt:parse_all
     yes opt:repl!
@@ -1266,8 +1293,7 @@ END
 
 
 : main
-  ( allocate buffers )
-  ?:init forth:init opt:init
+  init:run
   opt:parse_all
   opt:repl [
     repl:init

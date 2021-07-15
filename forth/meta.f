@@ -528,6 +528,27 @@ M: " <IMMED>
 
 
 
+PRIVATE
+
+  xhere 0 x, as: link
+
+PUBLIC
+
+  link M-as: M-init:link
+
+  M: >init <run_only>
+    xhere link x@ x, link x!
+    x,
+  ;
+
+  M: init:run <IMMED>
+    " init:run" x:find [ drop panic" Define init:run" ] ;unless
+    xxt x,
+  ;
+
+END
+
+
 ( ----- debug ----- )
 
 M: ?H <IMMED> " HERE" prn ;
