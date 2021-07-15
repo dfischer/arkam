@@ -10,26 +10,28 @@ LDFLAGS =
 
 
 
-.PHONY: meta0
-
-out/forth1.ark: bin/forth meta0/meta0.f meta0/core0.f
-	./bin/forth meta0/meta0.f
-
-meta0: bin/arkam out/forth1.ark
+.PHONY: meta
+out/forth1.ark: bin/arkam forth.ark forth/meta.f forth/core.f
+	./bin/arkam forth.ark forth/meta.f out/forth1.ark
+meta: out/forth1.ark
 	./bin/arkam out/forth1.ark --quit
 
 
-
-.PHONY: meta
-out/forth2.ark: bin/arkam out/forth1.ark forth/meta.f forth/core.f
+.PHONY: meta-check
+out/forth2.ark: out/forth1.ark
 	./bin/arkam out/forth1.ark forth/meta.f out/forth2.ark
-meta: out/forth2.ark
-	./bin/arkam out/forth2.ark --quit
+meta-check: out/forth2.ark
+	diff out/forth1.ark out/forth2.ark
 
-.PHONY: check-meta
-check-meta: out/forth2.ark
-	./bin/arkam out/forth2.ark forth/meta.f out/forth3.ark
-	diff out/forth2.ark out/forth3.ark
+.PHONY: meta-test
+meta-test: out/forth1.ark
+	./test/run.sh out/forth1.ark
+
+
+.PHONY: meta-install
+meta-install: meta meta-check meta-test
+	cp forth.ark out/forth.ark.old
+	mv out/forth1.ark forth.ark
 
 
 .PHONY: all
@@ -47,8 +49,8 @@ sarkam: bin/sarkam
 
 
 .PHONY: test
-test: arkam bin/forth bin/test_arkam bin/sol bin/forth_test.ark meta
-	./test/run.sh
+test: arkam bin/forth bin/test_arkam forth.ark
+	./test/run.sh forth.ark
 
 
 
@@ -81,11 +83,8 @@ fmparams: bin sarkam bin/forth.ark
 forth: arkam bin/forth
 	./bin/forth
 
-bin/forth.ark: bin/sol tools/forth.sol
-	./bin/sol tools/forth.sol bin/forth.ark
-
-out/forth.ark.h: bin/forth.ark bin/text2c
-	./bin/text2c -b forth bin/forth.ark out/forth.ark.h
+out/forth.ark.h: forth.ark bin/text2c
+	./bin/text2c -b forth forth.ark out/forth.ark.h
 
 
 
@@ -144,10 +143,6 @@ bin/text2c: src/text2c.c
 
 out/core.sol.h: lib/core.sol bin/text2c
 	./bin/text2c core_lib lib/core.sol out/core.sol.h
-
-
-bin/forth_test.ark: bin/forth.ark tools/forth_test.sol
-	./bin/sol tools/forth_test.sol bin/forth_test.ark
 
 
 
