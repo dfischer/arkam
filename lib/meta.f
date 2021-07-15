@@ -308,7 +308,7 @@ var: m:image_name
 : metacompile
   opt:read! [ panic" Image name required" ] ;unless -> m:image_name
   m:start
-  " forth/core.f" include
+  " lib/core.f" include
   " doconst" x:find [ panic" doconst definition not found" ] ;unless
   xxt patch_const
   m:finish

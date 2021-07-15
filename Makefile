@@ -11,15 +11,15 @@ LDFLAGS =
 
 
 .PHONY: meta
-out/forth1.ark: bin/arkam forth.ark forth/meta.f forth/core.f
-	./bin/arkam forth.ark forth/meta.f out/forth1.ark
+out/forth1.ark: bin/arkam forth.ark lib/meta.f lib/core.f
+	./bin/arkam forth.ark lib/meta.f out/forth1.ark
 meta: out/forth1.ark
 	./bin/arkam out/forth1.ark --quit
 
 
 .PHONY: meta-check
 out/forth2.ark: out/forth1.ark
-	./bin/arkam out/forth1.ark forth/meta.f out/forth2.ark
+	./bin/arkam out/forth1.ark lib/meta.f out/forth2.ark
 meta-check: out/forth2.ark
 	diff out/forth1.ark out/forth2.ark
 
@@ -132,17 +132,8 @@ bin/test_arkam: $(TEST_DEPS)
 	$(CC) -o bin/test_arkam $(TEST_DEPS) $(CFLAGS) $(LDFLAGS)
 
 
-SOL_DEPS := $(call DEPS, src/sol.c)
-bin/sol: $(SOL_DEPS) out/core.sol.h
-	$(CC) -o bin/sol $(SOL_DEPS) $(CFLAGS) $(LDFLAGS)
-
-
 bin/text2c: src/text2c.c
 	$(CC) -o bin/text2c src/text2c.c $(CFLAGS) $(LDFLAGS)
-
-
-out/core.sol.h: lib/core.sol bin/text2c
-	./bin/text2c core_lib lib/core.sol out/core.sol.h
 
 
 

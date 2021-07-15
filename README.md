@@ -11,6 +11,7 @@ Purposes
 
 # Status
 
+- 2021-07-15 arkam-forth is now metacompiled
 - 2021-07-04 switched to forth from sol
 - 2021-05-06 start
 
@@ -21,7 +22,6 @@ Purposes
 - [uxn](https://wiki.xxiivv.com/site/uxn.html)
 - [Mako](https://github.com/JohnEarnest/Mako)
 - [Retro](http://www.retroforth.org/)
-- (SOL) Nested word from [Reforth](https://github.com/seanpringle/reforth)
 
 
 
@@ -29,7 +29,18 @@ Purposes
 
 - arkam: console vm
 - sarkam: sdl vm with fm synthesizer
-- sol: one pass compiler of forth like assembly
+
+
+
+## Meta
+
+Edit `forth/meta.f` and `forth/core.f`.
+
+Then build `out/forth1.ark` with `$ make meta`.
+
+Check with `$ make meta-check && make meta-test`.
+
+Finally install new forth.ark by `$ make meta-install`.
 
 
 
