@@ -52,7 +52,7 @@ Finally install new forth.ark with `make meta-install`.
 
 [fmparams](example/fmparams.f)
 
-![fmparams](misc/ss_sprited.png)
+![fmparams](misc/ss_fmparams.png)
 
 
 ## LICENSE
