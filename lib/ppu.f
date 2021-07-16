@@ -37,12 +37,14 @@
   sprite:size / [ ( addr i -- addr )
     sprite:i!
     [ sprite:size + ] [ sprite:load ] biq
-  ] for drop ;
+  ] for drop
+;
 
 : sprite:load_blob ( addr -- )
   # addr | size
   #      | data...
-  [ cell + ] [ @ ] biq sprite:bulk_load ;
+  [ cell + ] [ @ ] biq sprite:bulk_load
+;
 
 
 

@@ -55,7 +55,7 @@ PRIVATE
     id dcallback >r
   ;
 
-  : new ( -- id ) btn entity:new [ "Too many buttons" panic ] unless ;
+  : new ( -- id ) btn entity:new [ " Too many buttons" panic ] unless ;
 
   : create ( param x y dparam callback width height dcallback -- id )
     # q: ( param -- )
@@ -204,7 +204,7 @@ PUBLIC
   #    as: freq_slider
 
   : slider:new ( -- id )
-    slider entity:new [ "Too many sliders" panic ] unless ;
+    slider entity:new [ " Too many sliders" panic ] unless ;
 
   : slider:size! ( id width height -- id )
     >r over r> over >height >width
@@ -212,7 +212,7 @@ PUBLIC
 
   : slider:pos! ( id x y -- id )
     >r >r
-    dup width not IF "set size first" panic THEN
+    dup width not IF " set size first" panic THEN
     dup r> swap >x dup r> swap >y
   ;
 
@@ -233,10 +233,10 @@ PUBLIC
   : slider:update! ( v id -- ) update! ;
 
   : slider:validate ( id -- err ng | id ok ) id!
-    id v id vmin <  [ "Out of range" ng ] ;IF
-    id v id vmax >= [ "Out of range" ng ] ;IF
-    id width  0 <=  [ "No width"     ng ] ;IF
-    id height 0 <=  [ "No height"    ng ] ;IF
+    id v id vmin <  [ " Out of range" ng ] ;when
+    id v id vmax >= [ " Out of range" ng ] ;when
+    id width  0 <=  [ " No width"     ng ] ;when
+    id height 0 <=  [ " No height"    ng ] ;when
     id ok
   ;
 
@@ -244,13 +244,13 @@ PUBLIC
     slider:validate [ panic ] unless ;
 
   : ?slider ( id -- id )
-    "v " epr dup v .
-    "x " epr dup x ..
-    "y " epr dup y .
-    "w " epr dup width ..
-    "h " epr dup height .
-    "vmax " epr dup vmax ..
-    "vmin " epr dup vmin .
+    " v " epr dup v .
+    " x " epr dup x ..
+    " y " epr dup y .
+    " w " epr dup width ..
+    " h " epr dup height .
+    " vmax " epr dup vmax ..
+    " vmin " epr dup vmin .
   ;
 
   : slider:draw_all

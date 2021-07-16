@@ -237,9 +237,9 @@ PRIVATE
 
   : loop
     [ s b@
-      0  [ STOP            ] ;CASE
-      10 [ newline next GO ] ;CASE
-      32 [ right   next GO ] ;CASE
+      0  [ STOP            ] ;case
+      10 [ newline next GO ] ;case
+      32 [ right   next GO ] ;case
       draw right next GO
     ] while
   ;
@@ -256,12 +256,12 @@ END
 
 PRIVATE
 
-  11 as: max ( i32: max "-2147483648" )
+  11 as: max ( i32: max " -2147483648" )
   max 1 + allot as: buf
   var: n  var: p  var: nega  var: q  var: r  var: x  var: y  var: base
 
   : init buf max + p! ;
-  : check buf p > IF "too big num" panic THEN ;
+  : check buf p > IF " too big num" panic THEN ;
   : put ( n -- ) p 1 - p! p b! ;
   : put_sign nega IF 45 put THEN ;
   : read ( -- )
@@ -273,11 +273,11 @@ PRIVATE
   : check_sign n 0 < IF n neg n! yes ELSE no THEN nega! ;
   : check_min ( n -- )
     # minimum number
-    n 0 = IF x y "0" put_text rdrop RET THEN
+    n 0 = IF x y " 0" put_text rdrop RET THEN
     n dup neg != IF RET THEN ( 0x80000000 * -1 = 0x80000000 )
-    10 base = IF x y "-2147483648" put_text rdrop RET THEN
-    16 base = IF x y "-80000000"   put_text rdrop RET THEN
-    "?: invalid base" panic
+    10 base = IF x y " -2147483648" put_text rdrop RET THEN
+    16 base = IF x y " -80000000"   put_text rdrop RET THEN
+    " ?: invalid base" panic
   ;
   : run ( n x y -- ) y! x! n!
     check_min

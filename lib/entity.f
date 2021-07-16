@@ -26,51 +26,37 @@ PRIVATE
   : new ( es -- id yes | no )
     [ alives dup ] [ size @ ] biq
     [ ( start current n )
-      0 [ 2drop no STOP ] ;CASE
-      over b@ [ ' inc ' dec bi* GO ] ;IF
+      0 [ 2drop no STOP ] ;case
+      over b@ [ ' inc ' dec bi* GO ] ;when
       drop yes over b! swap - yes STOP
     ] while
   ;
 
 
   ( --- name buffer --- )
-  # ">name" and "name"
+  # " >name" and " name"
   32         as: actual
   actual 1 - as: max
   actual allot
     dup CHAR: > swap b!
     dup 1 +
-    as: getter (  "name" )
-    as: setter ( ">name" )
+    as: getter (  " name" )
+    as: setter ( " >name" )
 
   ( --- components --- )
   : get ( id cs -- v ) data swap cells + @ ;
   : set ( v id cs -- ) data swap cells + ! ;
 
-  : handle_get ( cs state -- )
-    ( run )    [ ( id cs -- v ) get ]
-    ( compile )[ ( xt -- ) LIT, ' get , ]
-    forth:handle_mode
-  ;
-
   : cgetter ( cs -- )
     # ( id -- v )
     getter forth:create
-    forth:latest forth:xt!
-    ' handle_get forth:latest forth:handler!
-  ;
-
-  : handle_set ( cs state -- )
-    ( run )    [ ( v id cs -- ) set ]
-    ( compile )[ ( cs -- ) LIT, ' set , ]
-    forth:handle_mode
+    LIT, , JMP, [ forth:mode [ LIT, , COMPILE: get ] [ get ] if ] ,
   ;
 
   : csetter ( cs -- )
     # ( v id -- )
     setter forth:create
-    forth:latest forth:xt!
-    ' handle_set forth:latest forth:handler!
+    LIT, , JMP, [ forth:mode [ LIT, , COMPILE: set ] [ set ] if ] ,
   ;
 
 PUBLIC
@@ -84,7 +70,7 @@ PUBLIC
 
 : entity:new  ( es -- id yes | no ) new ;
 
-: entity:new! ( es -- id ) new [ "Too many entities" panic ] unless ;
+: entity:new! ( es -- id ) new [ " Too many entities" panic ] unless ;
 
 : entity:kill ( id es -- ) alives + no swap b! ;
 
@@ -102,8 +88,8 @@ PUBLIC
   here swap dup , size @ cells allot drop ;
 
 : components: ( es name: -- )
-  in:read [ "component name required" panic ] unless
-  max s:check [ "too long component name" panic ] unless
+  in:read [ " component name required" panic ] unless
+  max s:check [ " too long component name" panic ] unless
   getter s:copy
   ecs:new_cs dup cgetter csetter
 ;
