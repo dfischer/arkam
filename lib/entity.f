@@ -88,7 +88,7 @@ PUBLIC
   here swap dup , size @ cells allot drop ;
 
 : components: ( es name: -- )
-  in:read [ " component name required" panic ] unless
+  forth:read [ " component name required" panic ] unless
   max s:check [ " too long component name" panic ] unless
   getter s:copy
   ecs:new_cs dup cgetter csetter

@@ -556,6 +556,14 @@ END
 
 
 
+( ===== Random ===== )
+
+: rand       0 2 io ;
+: rand:seed! 1 2 io ;
+: rand:init  2 2 io ;
+
+
+
 ( ===== File ===== )
 
 PRIVATE

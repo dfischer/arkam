@@ -1,4 +1,3 @@
-require: lib/core.f
 require: lib/mgui.f
 
 
@@ -21,17 +20,16 @@ PRIVATE
 
   256     as: len
   len dec as: max
-  val: id
+  var: id
 
 PUBLIC
 
-  app:argc 2 != [ "filename required" panic ] unless
-
   len allot as: fname
-  fname 2 max app:get_arg [ "Too long filename" panic ] unless
-
+  opt:read! [ panic" filename required" ] unless
+  max s:check [ panic" Too long file name" ] unless
+  fname s:copy
   fname loadfile
-    dup filesize spr_bytes != [ "Invalid sprite file" panic ] when
+    dup filesize spr_bytes != [ " Invalid sprite file" panic ] when
     filedata as: spr_buf
   
   spr_bytes allot as: spr_back
@@ -40,7 +38,7 @@ PUBLIC
   : reset_all ( -- ) spr_back spr_buf spr_bytes memcopy ;
 
   : save
-    fname "wb" file:open! id!
+    fname " wb" file:open! id!
     spr_buf spr_bytes id file:write!
     id file:close!
   ;
@@ -63,7 +61,7 @@ spr_max dec spr/screen - as: spr_start
 
 
 ( base )
-val: spr_base  ( start sprite on showcase )
+var: spr_base  ( start sprite on showcase )
 : basealign ( i -- i ) spr/line / spr/line * ;
 : spr_base! ( i -- ) spr_max + spr_max mod basealign dup spr_base! load_area ;
 0 spr_base!
@@ -71,8 +69,8 @@ val: spr_base  ( start sprite on showcase )
 
 ( select )
 spr_start dec as: spr_target
-val: selected
-val: spr_adr ( target )
+var: selected
+var: spr_adr ( target )
 
 : selected!
   dup selected!
@@ -119,12 +117,12 @@ PRIVATE
   bl          as: idx
   bt bh + 4 + as: idy
 
-  val: row  val: col
-  val: x  val: y
+  var: row  var: col
+  var: x  var: y
 
-  val: spr
-  val: rowspr
-  val: actual
+  var: spr
+  var: rowspr
+  var: actual
 
   : basespr+! ( n -- ) spr_base swap + spr_base! ;
   : basespr-! ( n -- ) spr_base swap - spr_base! ;
@@ -223,9 +221,9 @@ PRIVATE
   left width +                      as: right
   top height +                      as: bottom
 
-  val: x  val: y
-  val: col val: row
-  val: adr
+  var: x  var: y
+  var: col var: row
+  var: adr
   : dot  adr b@ ;
   : dot! adr b! ;
   
@@ -267,9 +265,9 @@ PRIVATE
 
   ( ----- handle mouse ----- )
 
-  val: pressed
-  val: color  ( 0-3 ) 3 color!
-  val: curcol ( current color )
+  var: pressed
+  var: color  ( 0-3 ) 3 color!
+  var: curcol ( current color )
 
   : hover? mouse:x mouse:y left top width height hover_rect? ;
 
@@ -281,8 +279,8 @@ PRIVATE
   : press
     pressed IF RET THEN yes pressed!
     dot
-    0     [ color curcol! ] ;CASE
-    color [ 0     curcol! ] ;CASE
+    0     [ color curcol! ] ;case
+    color [ 0     curcol! ] ;case
     drop color curcol!
   ;
 
@@ -315,7 +313,7 @@ PRIVATE
   ( ----- tools ----- )
   right padding + as: tool_x
   top as: tool_y
-  0 tool_x tool_y "reset" [ drop reset ] txtbtn:create drop
+  0 tool_x tool_y " reset" [ drop reset ] txtbtn:create drop
 
 PUBLIC
 
@@ -341,8 +339,8 @@ PRIVATE
 
 PUBLIC
 
-  0 left top "save" [ drop save ] txtbtn:create drop
-  0 left 36 + top "reset all" [ drop reset_all ] txtbtn:create drop
+  0 left top " save" [ drop save ] txtbtn:create drop
+  0 left 36 + top " reset all" [ drop reset_all ] txtbtn:create drop
 
 END
 

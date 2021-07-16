@@ -15,13 +15,13 @@ PRIVATE
   16 as: steps
   steps allot as: seq
   steps allot as: lifes
-  val: idx ( current playing )
-  val: playing
-  val: dur ( frames per step )
+  var: idx ( current playing )
+  var: playing
+  var: dur ( frames per step )
   10 dur!
-  val: swing ( frames to delay )
+  var: swing ( frames to delay )
   1 swing!
-  val: freq 440 freq!
+  var: freq 440 freq!
 
   : at  ( i -- v ) seq + b@ ;
   : at! ( v i -- ) seq + b! ;
@@ -33,7 +33,7 @@ PRIVATE
 
   ( ----- sequencer ----- )
 
-  val: elapsed
+  var: elapsed
 
   : swinged idx 2 mod IF 0 ELSE swing THEN dur + ;
 
@@ -50,7 +50,7 @@ PRIVATE
 
   : update
     playing not IF RET THEN
-    elapsed dup inc elapsed! not [ trigger ] ;IF
+    elapsed dup inc elapsed! not [ trigger ] ;when
     detrigger
     elapsed swinged >= IF 0 elapsed! next THEN
   ;
@@ -63,13 +63,13 @@ PRIVATE
 
   ( ----- draw ----- )
 
-  val: ox  val: oy
+  var: ox  var: oy
   4 as: rows  4 as: cols  4 as: pad
   8 as: w  8 as: h
-  val: dx  val: dy  val: row  val: col
-  val: cur ( current drawing idx )
+  var: dx  var: dy  var: row  var: col
+  var: cur ( current drawing idx )
 
-  val: pressed  val: mval  val: mx  val: my  val: mi
+  var: pressed  var: mval  var: mx  var: my  var: mi
   : width  w cols * pad cols * + ;
   : height h rows * pad rows * + ;
   : hover? mouse:x mouse:y ox oy width height hover_rect? ;
@@ -152,12 +152,12 @@ PRIVATE
     COMPONENT op
   END
 
-  val: id
+  var: id
   
   40 as: swidth
   8  as: sheight
   4  as: pad
-  val: ox val: oy
+  var: ox var: oy
   7 3 * as: lwidth
 
   : run ( v id -- ) 2dup >val dup callback >r ;
@@ -167,13 +167,13 @@ PRIVATE
   : slider_pos ( ox oy -- sx sy ) [ lwidth + pad + ] dip ;
 
   : new_slider ( x y min max label callback -- id )
-    sliders entity:new [ "Too many params" panic ] unless id!
+    sliders entity:new [ " Too many params" panic ] unless id!
     id >callback
     id >label
 
     slider:new
       id   slider:param!
-      &run slider:callback!
+      ' run slider:callback!
       swidth sheight slider:size!
       pushdown slider:range!
       ( ox oy sid )
@@ -195,22 +195,22 @@ PRIVATE
     sliders [ id! draw_label draw_num ] entity:each
   ;
 
-  10  10 440 880 "FRQ" [ drop seq:freq! ] new_slider drop
-  110 10 0   7   "ALG" [ drop fm:algo!  ] new_slider drop
+  10  10 440 880 " FRQ" [ drop seq:freq! ] new_slider drop
+  110 10 0   7   " ALG" [ drop fm:algo!  ] new_slider drop
 
-  val: p
+  var: p
   : op! op fm:operator! ;
   : --- ( x y -- x y+ x y ) dup 12 + swap >r over r> ;
   : oparams ( x y op -- ) p!
-    --- 0   3   "WAV" [ op! fm:wave!      ] new_slider p swap >op
-    --- 0   255 "ATK" [ op! fm:attack!    ] new_slider p swap >op
-    --- 0   255 "DCY" [ op! fm:decay!     ] new_slider p swap >op
-    --- 0   255 "SUS" [ op! fm:sustain!   ] new_slider p swap >op
-    --- 0   255 "REL" [ op! fm:release!   ] new_slider p swap >op
-    --- 0   17  "MOD" [ op! fm:mod_ratio! ] new_slider p swap >op
-    --- 0   255 " FB" [ op! fm:fb_ratio!  ] new_slider p swap >op
-    --- 0   255 "AFQ" [ op! fm:amp_freq!  ] new_slider p swap >op
-    --- 0   255 " FM" [ op! fm:fm_level!  ] new_slider p swap >op
+    --- 0   3   " WAV" [ op! fm:wave!      ] new_slider p swap >op
+    --- 0   255 " ATK" [ op! fm:attack!    ] new_slider p swap >op
+    --- 0   255 " DCY" [ op! fm:decay!     ] new_slider p swap >op
+    --- 0   255 " SUS" [ op! fm:sustain!   ] new_slider p swap >op
+    --- 0   255 " REL" [ op! fm:release!   ] new_slider p swap >op
+    --- 0   17  " MOD" [ op! fm:mod_ratio! ] new_slider p swap >op
+    --- 0   255 "  FB" [ op! fm:fb_ratio!  ] new_slider p swap >op
+    --- 0   255 " AFQ" [ op! fm:amp_freq!  ] new_slider p swap >op
+    --- 0   255 "  FM" [ op! fm:fm_level!  ] new_slider p swap >op
     2drop
   ;
 
@@ -225,8 +225,8 @@ END
 
 
   10 140 seq:pos!
-0 60 140 "play" [ seq:play ] txtbtn:create drop
-0 60 150 "stop" [ seq:stop ] txtbtn:create drop
+0 60 140 " play" [ seq:play ] txtbtn:create drop
+0 60 150 " stop" [ seq:stop ] txtbtn:create drop
 
 
 [
