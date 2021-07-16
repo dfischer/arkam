@@ -43,6 +43,17 @@ Check with `make meta-check && make meta-test`.
 Finally install new forth.ark with `make meta-install`.
 
 
+## Screenshot
+
+[sprited](tools/sprited.f)
+
+![Sprited](misc/ss_sprited.png)
+
+
+[fmparams](example/fmparams.f)
+
+![fmparams](misc/ss_sprited.png)
+
 
 ## LICENSE
 
