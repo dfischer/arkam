@@ -59,23 +59,24 @@ clean:
 	$(RM) -f bin/* out/*
 
 
+
 .PHONY: sarkam-scratch
-sarkam-scratch: bin sarkam bin/forth.ark
-	./bin/sarkam bin/forth.ark test/sarkam-scratch.f
+sarkam-scratch: bin sarkam
+	./bin/sarkam forth.ark test/sarkam-scratch.f
 
 
 
 .PHONY: sprited
 out/tmp.spr: lib/basic.spr
 	cp lib/basic.spr out/tmp.spr
-sprited: bin sarkam bin/forth.ark out/tmp.spr
-	./bin/sarkam bin/forth.ark tools/sprited.f out/tmp.spr
+sprited: bin sarkam out/tmp.spr
+	./bin/sarkam forth.ark tools/sprited.f out/tmp.spr
 
 
 
 .PHONY: fmparams
-fmparams: bin sarkam bin/forth.ark
-	./bin/sarkam bin/forth.ark example/fmparams.f
+fmparams: bin sarkam
+	./bin/sarkam forth.ark example/fmparams.f
 
 
 
