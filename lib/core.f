@@ -915,15 +915,15 @@ PRIVATE
     >path
     find [ no ] ;when
     here path s:put here:align!
-    req allot 2dup name!
+    req allot tuck name!
     no over fin!
-    dup required over next! required!
+    required over next! required!
     yes
   ;
 
   : start ( fname -- )
     create [ ( noop ) ] ;unless
-    required @ >r path include r> yes swap fin!
+    required >r path include r> yes swap fin!
   ;
 
 
