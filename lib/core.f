@@ -867,6 +867,79 @@ X: " <IMMED>
 
 
 
+( ===== Require ===== )
+
+PRIVATE
+
+  var: len
+  var: path
+  [ len IF RET THEN 256 dup len! allot path! ] >init
+
+  0 var> required
+
+  : next  @ ;
+  : next! ! ;
+  : name  cell + @ ;
+  : name! cell + ! ;
+  : fin  2 cells + @ ;
+  : fin! 2 cells + ! ;
+  : req 3 cells ;
+
+  : >path ( fname -- )
+    dup file:exists? [ epr " : not found" panic ] ;unless
+    path len file:fullpath [ path epr " : not found" panic ] ;unless
+  ;
+
+  : check_circular ( req -- )
+    "  | " epr path eprn
+    fin [
+      required [
+        0 [ STOP ] ;case
+        "  | " epr dup name eprn
+        next GO
+      ] while
+      " Circular dependency detected" panic
+    ] unless
+  ;
+
+  : find ( -- yes:found | req no )
+    required [
+      0 [ no STOP ] ;case
+      dup name path s= [ yes STOP ] ;when
+      next GO
+    ] while
+    [ check_circular yes ] [ no ] if
+  ;
+
+  : create ( fname -- found? )
+    >path
+    find [ no ] ;when
+    here path s:put here:align!
+    req allot 2dup name!
+    no over fin!
+    dup required over next! required!
+    yes
+  ;
+
+  : start ( fname -- )
+    create [ ( noop ) ] ;unless
+    required @ >r path include r> yes swap fin!
+  ;
+
+
+PUBLIC
+
+  : require ( fname -- ) start ;
+
+  : require: ( fname: -- )
+    forth:read [ " Source name required" panic ] ;unless
+    require
+  ;
+
+END
+
+
+
 ( ===== Syntax ===== )
 
 : _: ( name -- q )
