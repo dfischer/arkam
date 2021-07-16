@@ -1,4 +1,26 @@
-# ===== Forth Core =====
+# ======================
+#      Forth Core
+# ======================
+#
+# lib/meta.f compiles this to Forth base image file.
+#
+# === Run mode
+# You can
+#   - define and use constant words defined by `as:`
+#   - define variables with `var:` and `var>`
+#   - run meta words defined by `M:` in meta.f
+#   - put literals (ex. -123, 0xFF)
+# You can't
+#   - run cross-words defined by `:` or `X:`
+#
+# === Compile mode
+# You can
+#   - compile cross-words defined by `:`
+#   - compile constant words defined by `as:`
+#   - compile variables defined by `var:` and `var>`
+#   - run meta words defined in meta.f
+# You can't
+#   - run immediate cross-words defined by `:` or `X:` with `<IMMED>`
 
 
 

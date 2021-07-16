@@ -1,11 +1,26 @@
-( for debug )
-no var> verbose
-
-
-
-# Naming and Abbrev
+# =========================
+#    Forth Meta Compiler
+# ========================
+#
+# This compiles lib/core.f to Forth base image file.
+#
+# === Naming and Abbrev
 # x -- cross, works on target image
 # m -- meta, works on metacompiler (this code)
+#
+# === Summary
+# 1. Create cross-dictionary and define helper words
+# 2. Define meta-words that can be called in metacompile phase
+#   - Primitives (ex. dup, swap, !, @, >r)
+#   - Syntax (ex. :, ;, IF, [, PRIVATE)
+# 3. Hide all words except meta-words
+# 4. Start metacompile by including lib/core.f
+# 5. Patch some addresses and save image
+
+
+
+( for debug )
+no var> verbose
 
 
 
