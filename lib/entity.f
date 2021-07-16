@@ -1,7 +1,5 @@
 ( ===== Entity Component System ===== )
 
-require: lib/core.f
-
 
 PRIVATE
 
@@ -29,7 +27,7 @@ PRIVATE
     [ alives dup ] [ size @ ] biq
     [ ( start current n )
       0 [ 2drop no STOP ] ;CASE
-      over b@ [ &inc &dec bi* GO ] ;IF
+      over b@ [ ' inc ' dec bi* GO ] ;IF
       drop yes over b! swap - yes STOP
     ] while
   ;
@@ -51,7 +49,7 @@ PRIVATE
 
   : handle_get ( cs state -- )
     ( run )    [ ( id cs -- v ) get ]
-    ( compile )[ ( xt -- ) LIT, &get , ]
+    ( compile )[ ( xt -- ) LIT, ' get , ]
     forth:handle_mode
   ;
 
@@ -59,12 +57,12 @@ PRIVATE
     # ( id -- v )
     getter forth:create
     forth:latest forth:xt!
-    &handle_get forth:latest forth:handler!
+    ' handle_get forth:latest forth:handler!
   ;
 
   : handle_set ( cs state -- )
     ( run )    [ ( v id cs -- ) set ]
-    ( compile )[ ( cs -- ) LIT, &set , ]
+    ( compile )[ ( cs -- ) LIT, ' set , ]
     forth:handle_mode
   ;
 
@@ -72,7 +70,7 @@ PRIVATE
     # ( v id -- )
     setter forth:create
     forth:latest forth:xt!
-    &handle_set forth:latest forth:handler!
+    ' handle_set forth:latest forth:handler!
   ;
 
 PUBLIC

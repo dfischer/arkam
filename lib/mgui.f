@@ -1,4 +1,3 @@
-require: lib/core.f
 require: lib/sarkam.f
 require: lib/basic_sprite.f
 require: lib/entity.f
@@ -25,9 +24,9 @@ PRIVATE
     COMPONENT dcallback
   END
   
-  ( current button ) val: id
-  ( draw origin ) val: dx  val: dy
-  ( mouse ) val: mx  val: my  val: mp
+  ( current button ) var: id
+  ( draw origin ) var: dx  var: dy
+  ( mouse ) var: mx  var: my  var: mp
   
   : hover? mx my id x id y id width id height hover_rect? ;
   
@@ -139,7 +138,7 @@ PRIVATE
     COMPONENT barpos ( x )
   END
 
-  val: id  ( current )
+  var: id  ( current )
 
   : v>barpos id vmin - id width * id vrange / id width dec min ; # pre:id
 
@@ -194,7 +193,7 @@ PUBLIC
   # range: 0 <= v <= max
   #
   # example:
-  #  val: freq
+  #  var: freq
   #  slider:new
   #    [ drop freq! ] slider:callback!
   #    200 8   slider:size!
@@ -255,7 +254,7 @@ PUBLIC
   ;
 
   : slider:draw_all
-    slider &draw entity:each
+    slider ' draw entity:each
   ;
 
 END

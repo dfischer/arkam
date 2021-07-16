@@ -26,8 +26,8 @@
 
 ( ----- sprite ----- )
 
-8  const: sprite:width
-64 const: sprite:size
+8  as: sprite:width
+64 as: sprite:size
 
 : sprite:i!   20 ppu:query ; ( i -- )
 : sprite:load 21 ppu:query ; ( addr -- )

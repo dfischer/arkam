@@ -1,4 +1,3 @@
-require: lib/core.f
 require: lib/ppu.f
 
 loadfile: lib/basic.spr as: basic.spr

@@ -1,5 +1,3 @@
-require: lib/core.f
-
 PRIVATE
 
   : query 4 io ;

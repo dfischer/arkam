@@ -1,8 +1,6 @@
-require: lib/core.f
 require: lib/ppu.f
 require: lib/mouse.f
 require: lib/emu.f
-require: lib/app.f
 require: lib/basic_sprite.f
 
 basic.spr:load
@@ -24,11 +22,11 @@ PRIVATE
 
   # bresenham's algorithm
   
-  val: x0  val: y0
-  val: x1  val: y1
-  val: dx  val: dy
-  val: sx  val: sy
-  val: e1  val: e2
+  var: x0  var: y0
+  var: x1  var: y1
+  var: dx  var: dy
+  var: sx  var: sy
+  var: e1  var: e2
   
   : CHECK
     x0 x1 != IF RET THEN
@@ -69,7 +67,7 @@ END
 
 PRIVATE
 
-  val: x  val: y  val: w  val: h
+  var: x  var: y  var: w  var: h
 
 PUBLIC
 
@@ -87,7 +85,7 @@ END
 
 PRIVATE
 
-  val: x  val: y  val: w  val: h
+  var: x  var: y  var: w  var: h
 
 PUBLIC
 
@@ -107,8 +105,8 @@ END
 PRIVATE
 
   # bresenham's algorithm
-  val: x   val: y   val: r
-  val: cx  val: cy  val: d  val: dh  val: dd
+  var: x   var: y   var: r
+  var: cx  var: cy  var: d  var: dh  var: dd
 
   : loop
     cx cy > IF RET THEN
@@ -151,7 +149,7 @@ END
 
 PRIVATE
 
-  val: dx  val: dy  val: w  val: h
+  var: dx  var: dy  var: w  var: h
 
 PUBLIC
 
@@ -181,7 +179,7 @@ PRIVATE
   #   [ some_draw ] draw_loop:register!
   #   draw_loop
 
-  val: callback
+  var: callback
 
   : draw
     ppu:0clear
@@ -201,18 +199,18 @@ END
 
 ( ===== mouse ===== )
 
-val: mouse:x
-val: mouse:y
-val: mouse:lx
-val: mouse:ly
-val: mouse:lp
-val: mouse:rx
-val: mouse:ry
-val: mouse:rp
+var: mouse:x
+var: mouse:y
+var: mouse:lx
+var: mouse:ly
+var: mouse:lp
+var: mouse:rx
+var: mouse:ry
+var: mouse:rp
 
-&mouse:x &mouse:y mouse:pos!
-&mouse:lx &mouse:ly &mouse:lp mouse:left!
-&mouse:rx &mouse:ry &mouse:rp mouse:right!
+var' mouse:x var' mouse:y mouse:pos!
+var' mouse:lx var' mouse:ly var' mouse:lp mouse:left!
+var' mouse:rx var' mouse:ry var' mouse:rp mouse:right!
 
 
 
@@ -223,8 +221,8 @@ val: mouse:rp
 
 PRIVATE
 
-  val: x   val: y
-  val: ox  val: s
+  var: x   var: y
+  var: ox  var: s
 
   7 as: w
   9 as: h
@@ -260,7 +258,7 @@ PRIVATE
 
   11 as: max ( i32: max "-2147483648" )
   max 1 + allot as: buf
-  val: n  val: p  val: nega  val: q  val: r  val: x  val: y  val: base
+  var: n  var: p  var: nega  var: q  var: r  var: x  var: y  var: base
 
   : init buf max + p! ;
   : check buf p > IF "too big num" panic THEN ;
@@ -303,7 +301,7 @@ PRIVATE
 
   16 as: base
   3 allot as: buf
-  val: x  val: y
+  var: x  var: y
 
 PUBLIC
 
