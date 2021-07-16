@@ -430,6 +430,57 @@ END
   ] >stderr
 ;
 
+: ff ( n -- ) 0xFF and 16 /mod swap >hex putc >hex putc ;
+
+
+PRIVATE
+  16 as: bpl ( bytes per line )
+  var: adr
+  var: len
+  var: base
+  var: lines
+  var: rest
+
+  : ascii ( n -- )
+    dup 32  < [ drop CHAR: . putc ] ;when
+    dup 126 > [ drop CHAR: . putc ] ;when
+    putc
+  ;
+
+  : where
+    base 24 >> ff
+    base 16 >> ff
+    base  8 >> ff
+    base       ff
+  ;
+
+  : bytes ( n -- )
+    [ base + b@ ff space ] for
+  ;
+
+  : text ( n -- )
+    [ base + b@ ascii ] for
+  ;
+
+PUBLIC
+  : dump ( adr len ) len! adr!
+    len bpl / lines!
+    lines [ bpl * adr + base!
+      where " | " pr
+      bpl bytes
+      bpl text
+      cr
+    ] for
+    len bpl mod 0 [ ( noop ) ] ;case rest!
+    lines inc bpl * adr + base!
+    where " | " pr
+    rest bytes
+    bpl rest - [ "    " pr ] times
+    rest text
+    cr
+  ;
+END
+
 
 
 ( ===== Memory and String ===== )
