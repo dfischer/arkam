@@ -891,8 +891,8 @@ PRIVATE
   ;
 
   : check_circular ( req -- )
-    "  | " epr path eprn
     fin [
+      "  | " epr path eprn
       required [
         0 [ STOP ] ;case
         "  | " epr dup name eprn
