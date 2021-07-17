@@ -560,8 +560,8 @@ END
   ] while
 ;
 
-: s:put ( s -- )
-  [ b, ] s:each 0 b,
+: s:put ( s -- adr )
+  here >r [ b, ] s:each 0 b, r>
 ;
 
 : s:copy ( src dst )
@@ -717,7 +717,7 @@ var: forth:mode
 : forth:immed? @ flag_immed and ; # &entry -- ?
 
 : forth:create ( name -- )
-  here:align! here >r s:put here:align! r> ( &name )
+  here:align! s:put here:align! ( &name )
   ( latest ) here forth:latest , forth:latest!
   ( &name  ) ,
   ( &code  ) here cell + ,
@@ -1006,7 +1006,7 @@ PRIVATE
   : create ( fname -- found? )
     >path
     find [ no ] ;when
-    here path s:put here:align!
+    path s:put here:align!
     req allot tuck name!
     no over fin!
     required over next! required!
