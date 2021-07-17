@@ -79,13 +79,16 @@ fmparams: bin sarkam
 	./bin/sarkam forth.ark example/fmparams.f
 
 
+bin/file2c.ark: bin/arkam forth.ark tools/file2c.f
+	./bin/arkam forth.ark tools/file2c.f
+
 
 .PHONY: forth
-forth: arkam bin/forth
+forth: arkam bin/forth bin/file2c.ark
 	./bin/forth
 
-out/forth.ark.h: forth.ark bin/text2c
-	./bin/text2c -b forth forth.ark out/forth.ark.h
+out/forth.ark.h: bin/arkam forth.ark bin/file2c.ark
+	./bin/arkam bin/file2c.ark -b forth forth.ark out/forth.ark.h
 
 
 
@@ -131,10 +134,6 @@ bin/forth: $(FORTH_DEPS) out/forth.ark.h
 TEST_DEPS := $(call DEPS, src/test.c)
 bin/test_arkam: $(TEST_DEPS)
 	$(CC) -o bin/test_arkam $(TEST_DEPS) $(CFLAGS) $(LDFLAGS)
-
-
-bin/text2c: src/text2c.c
-	$(CC) -o bin/text2c src/text2c.c $(CFLAGS) $(LDFLAGS)
 
 
 

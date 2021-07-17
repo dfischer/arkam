@@ -316,11 +316,13 @@ END
 
 # port 1:stdout 2:stderr
 : stdio:ready? -1 1 io ; # -- ?
-: putc          0 1 io ; # c --
-: getc          1 1 io ; # -- c
-: stdio:port    2 1 io ; # -- p
-: stdio:port!   3 1 io ; # p --
+: (putc)          0 1 io ; # c --
+: (getc)          1 1 io ; # -- c
+: stdio:port      2 1 io ; # -- p
+: stdio:port!     3 1 io ; # p --
 
+defer: putc  ' (putc) -> putc
+defer: getc  ' (getc) -> getc
 
 1 as: stdout
 2 as: stderr
@@ -1168,41 +1170,6 @@ END
 
 
 
-( ===== Turnkey Image ===== )
-
-PRIVATE
-
-  var: id
-  defer: main
-  : set_boot! ( adr )
-    -> main
-    [ init:run main bye ] 0x04 !
-  ;
-
-PUBLIC
-
-  : save_image ( fname -- )
-    " wb" file:open! id!
-    # zero clear 0x00-0x03
-    0 here ! here 4 id file:write!
-    # write current image
-    0x04 here id file:write!
-    id file:close!
-  ;
-
-  : turnkey ( fname adr -- )
-    set_boot! save_image
-  ;
-
-  : turnkey: ( adr fname: -- )
-    forth:read [ " Image name required" panic ] ;unless
-    swap turnkey
-  ;
-
-END
-
-
-
 ( ===== Struct ===== )
 
 PRIVATE
@@ -1456,6 +1423,44 @@ PUBLIC
     opt:argi cli:argc >= [ no ] ;when
     opt:argi read buf yes
     opt:argi inc opt:argi!
+  ;
+
+END
+
+
+
+( ===== Turnkey Image ===== )
+
+PRIVATE
+
+  var: id
+  defer: main
+  : set_boot! ( adr )
+    -> main
+    [ # Decrement argi: bin/arkam forth.ark app.f => bin/arkam app.ark
+      opt:argi dec opt:argi!
+      main bye
+    ] 0x04 !
+  ;
+
+PUBLIC
+
+  : save_image ( fname -- )
+    " wb" file:open! id!
+    # zero clear 0x00-0x03
+    0 here ! here 4 id file:write!
+    # write current image
+    0x04 here id file:write!
+    id file:close!
+  ;
+
+  : turnkey ( fname adr -- )
+    set_boot! save_image
+  ;
+
+  : turnkey: ( adr fname: -- )
+    forth:read [ " Image name required" panic ] ;unless
+    swap turnkey
   ;
 
 END
