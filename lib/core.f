@@ -1077,6 +1077,8 @@ X: THEN <IMMED> here swap ! ;                    # &back --
 
 X: AGAIN <IMMED> JMP, forth:latest forth:code , ;
 
+X: RECUR <IMMED> forth:latest forth:code , ;
+
 
 : doconst ( v -- )
   # will be used for patching const
