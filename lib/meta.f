@@ -549,7 +549,7 @@ PRIVATE
 
 PUBLIC
 
-  link M-as: M-init:link
+  link as: init:link
 
   M: >init <run_only>
     xhere link x@ x, link x!
