@@ -396,23 +396,26 @@ PRIVATE
     q 0 = IF RET THEN q n! AGAIN
   ;
   : check_min ( minimum number )
-    n 0 = IF " 0" pr space rdrop RET THEN
+    n 0 = IF " 0" rdrop RET THEN
     n dup neg != IF RET THEN ( 0x80000000 * -1 = 0x80000000 )
-    10 base = IF " -2147483648" pr space rdrop RET THEN
-    16 base = IF " -80000000"   pr space rdrop RET THEN
+    10 base = IF " -2147483648" rdrop RET THEN
+    16 base = IF " -80000000"   rdrop RET THEN
     " ?: invalid base" panic
-  ;
-
-  : go ( n -- )
-    n! check_min check_sign init read put_sign i pr space
   ;
 
   [ buf IF RET THEN max 1 + allot buf! ] >init
  
 PUBLIC
 
-  : ?    dup 10 base! go ;
-  : ?hex dup 16 base! go ;
+  : n>s ( n base -- buf )
+    base! n! check_min check_sign init read put_sign i
+  ;
+
+  : n>dec ( n -- buf ) 10 n>s ;
+  : n>hex ( n -- buf ) 16 n>s ;
+
+  : ?    dup n>dec pr space ;
+  : ?hex dup n>hex pr space ;
 
 END
 
@@ -944,6 +947,13 @@ X: " <IMMED>
 
 : panic" <IMMED>
   ' " call forth:mode [ ' panic , ] [ panic ] if
+;
+
+
+: ." <IMMED>
+  forth:mode [ here ] unless
+  ' " call
+  forth:mode [ ' prn , ] [ prn here! ] if
 ;
 
 
