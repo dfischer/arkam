@@ -645,17 +645,18 @@ END
 PRIVATE
   : query    8 io ;
 PUBLIC
-  : file:ready?  -1 query ; # -- ?
-  : file:open     0 query ; # path mode -- id ok | ng
-  : file:close    1 query ; # id -- ?
-  : file:read     2 query ; # buf len id -- ?
-  : file:write    3 query ; # buf len id -- ?
-  : file:seek     4 query ; # id offset origin -- ?
-  : file:exists?  5 query ; # path -- ?
-  : file:getc     6 query ; # id -- c | 0
-  : file:peek     7 query ; # id -- c | 0
-  : file:fullpath 8 query ; # path buf max -- ?
-  : file:size     9 query ; # id -- n
+  : file:ready?  -1  query ; # -- ?
+  : file:open     0  query ; # path mode -- id ok | ng
+  : file:close    1  query ; # id -- ?
+  : file:read     2  query ; # buf len id -- ?
+  : file:write    3  query ; # buf len id -- ?
+  : file:seek     4  query ; # id offset origin -- ?
+  : file:exists?  5  query ; # path -- ?
+  : file:getc     6  query ; # id -- c | 0
+  : file:putc     7  query ; # c id --
+  : file:peek     8  query ; # id -- c | 0
+  : file:fullpath 9  query ; # path buf max -- ?
+  : file:size     10 query ; # id -- n
   ( --- defensive --- )
   : file:open!  file:open [ " Can't open " epr eprn die ] unless ; # path mode -- id
   : file:close! file:close drop ; # id --

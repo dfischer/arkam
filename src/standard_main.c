@@ -209,7 +209,19 @@ Code handleFILE(VM* vm, Cell op) {
       return ARK_OK;
     }
 
-  case 7: // peek ( id -- c | 0 )
+  case 7: // putc ( c id -- )
+    {
+      if (!ark_has_ds_items(vm, 1)) Raise(DS_UNDERFLOW);
+      Cell id = Pop();
+      FILE* file = fetch_file(id);
+      if (!file) die("invalid file id: %d", id);
+
+      Cell c = Pop();
+      fputc(c, file);
+      return ARK_OK;
+    }
+
+  case 8: // peek ( id -- c | 0 )
     {
       if (!ark_has_ds_items(vm, 1)) Raise(DS_UNDERFLOW);
       Cell id = Pop();
@@ -222,7 +234,7 @@ Code handleFILE(VM* vm, Cell op) {
       return ARK_OK;      
     }
 
-  case 8: // full_path ( &path &buf size -- ? )
+  case 9: // full_path ( &path &buf size -- ? )
     {
       if (!ark_has_ds_items(vm, 3)) Raise(DS_UNDERFLOW);
       Cell max = Pop();
@@ -246,7 +258,7 @@ Code handleFILE(VM* vm, Cell op) {
       return ARK_OK;
     }
 
-  case 9: // size ( id -- n )
+  case 10: // size ( id -- n )
     {
       if (!ark_has_ds_items(vm, 1)) Raise(DS_UNDERFLOW);
       Cell id = Pop();
