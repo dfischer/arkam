@@ -43,8 +43,8 @@ arkam: bin/arkam
 
 
 
-.PHONY: sarkam
-sarkam: bin/sarkam
+.PHONY: sarkvm
+sarkvm: bin/sarkvm
 
 
 
@@ -60,23 +60,23 @@ clean:
 
 
 
-.PHONY: sarkam-scratch
-sarkam-scratch: bin sarkam
-	./bin/sarkam forth.ark test/sarkam-scratch.f
+.PHONY: sarkvm-scratch
+sarkvm-scratch: bin sarkvm
+	./bin/sarkvm forth.ark test/sarkvm-scratch.f
 
 
 
 .PHONY: sprited
 out/tmp.spr: lib/basic.spr
 	cp lib/basic.spr out/tmp.spr
-sprited: bin sarkam out/tmp.spr
-	./bin/sarkam forth.ark tools/sprited.f out/tmp.spr
+sprited: bin sarkvm out/tmp.spr
+	./bin/sarkvm forth.ark tools/sprited.f out/tmp.spr
 
 
 
 .PHONY: fmparams
-fmparams: bin sarkam
-	./bin/sarkam forth.ark example/fmparams.f
+fmparams: bin sarkvm
+	./bin/sarkvm forth.ark example/fmparams.f
 
 
 bin/file2c.ark: bin/arkvm forth.ark tools/file2c.f
@@ -112,17 +112,17 @@ out/%.d: src/%.c
 DEPS = $(patsubst src/%.h, out/%.o, $(shell $(CC) -MM $(1) | sed 's/^.*: //;s/\\$$//' | tr '\n' ' '))
 
 
-ARKVM_DEPS := $(call DEPS, src/vm_console.c)
+ARKVM_DEPS := $(call DEPS, src/arkvm_console_main.c)
 bin/arkvm: LDFLAGS += -lm
 bin/arkvm: $(ARKVM_DEPS)
 	$(CC) -o bin/arkvm $(ARKVM_DEPS) $(CFLAGS) $(LDFLAGS)
 
 
-SARKAM_DEPS := $(call DEPS, src/sdl_main.c)
-bin/sarkam: CFLAGS  += -g `sdl2-config --cflags`
-bin/sarkam: LDFLAGS += `sdl2-config --libs` -lm
-bin/sarkam: $(SARKAM_DEPS)
-	$(CC) -o bin/sarkam $(SARKAM_DEPS) $(CFLAGS) $(LDFLAGS)
+SARKVM_DEPS := $(call DEPS, src/arkvm_sdl.c)
+bin/sarkvm: CFLAGS  += -g `sdl2-config --cflags`
+bin/sarkvm: LDFLAGS += `sdl2-config --libs` -lm
+bin/sarkvm: $(SARKVM_DEPS)
+	$(CC) -o bin/sarkvm $(SARKVM_DEPS) $(CFLAGS) $(LDFLAGS)
 
 
 ARKAM_DEPS := $(call DEPS, src/arkam_console.c)

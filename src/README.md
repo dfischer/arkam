@@ -15,7 +15,7 @@ The rest of all are also examples of its usage.
 
 ### ArkVM (console)
 
-[arkvm_console.c](arkvm_console.c) uses Arkam Core and produces a simple VM that runs an image on console.
+[arkvm_console_main.c](arkvm_console_main.c) uses Arkam Core and produces a simple VM that runs an image on console.
 
 
 
