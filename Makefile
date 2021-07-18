@@ -90,6 +90,10 @@ arkam: bin/arkam
 out/forth.ark.h: bin/arkvm forth.ark bin/file2c.ark
 	./bin/arkvm bin/file2c.ark -b forth forth.ark out/forth.ark.h
 
+.PHONY: sarkam
+sarkam: bin/sarkam
+	./bin/sarkam
+
 
 
 # ===== Prepare =====
@@ -129,6 +133,13 @@ ARKAM_DEPS := $(call DEPS, src/arkam_console.c)
 bin/arkam: LDFLAGS += -lm
 bin/arkam: $(ARKAM_DEPS) out/forth.ark.h
 	$(CC) -o bin/arkam $(ARKAM_DEPS) $(CFLAGS) $(LDFLAGS)
+
+
+SARKAM_DEPS := $(call DEPS, src/arkam_sdl.c)
+bin/sarkam: CFLAGS  += -g `sdl2-config --cflags`
+bin/sarkam: LDFLAGS += `sdl2-config --libs` -lm
+bin/sarkam: $(SARKAM_DEPS) out/forth.ark.h
+	$(CC) -o bin/sarkam $(SARKAM_DEPS) $(CFLAGS) $(LDFLAGS)
 
 
 TEST_DEPS := $(call DEPS, src/test.c)
