@@ -3,9 +3,9 @@
 
 ## Arkam
 
-### Arkam Core
+### ArkVM Core
 
-The core of VM is consisted from two files [arkam.h](arkam.h) and [arkam.c](arkam.c).
+The core of VM is consisted from two files [arkvm.h](arkvm.h) and [arkvm.c](arkvm.c).
 
 It should be used as a library.
 
@@ -13,9 +13,9 @@ The rest of all are also examples of its usage.
 
 
 
-### Arkam VM (console)
+### ArkVM (console)
 
-[console_main.c](console_main.c) uses Arkam Core and produces a simple VM that runs an image on console.
+[arkvm_console.c](arkvm_console.c) uses Arkam Core and produces a simple VM that runs an image on console.
 
 
 

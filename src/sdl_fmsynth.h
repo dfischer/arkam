@@ -1,7 +1,7 @@
 #if !defined(__SDL_FMSYNTH_H__)
 #define __SDL_FMSYNTH_H__
 
-#include "arkam.h"
+#include "arkvm.h"
 #include "shorthands.h"
 #include <stdint.h>
 #include <math.h>

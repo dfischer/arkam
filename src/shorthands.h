@@ -2,7 +2,7 @@
 #define __ARKAM_SHORTHANDS__
 
 
-#include "arkam.h"
+#include "arkvm.h"
 #include <assert.h>
 
 

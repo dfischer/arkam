@@ -1,4 +1,4 @@
-#include "arkam.h"
+#include "arkvm.h"
 #include "standard_main.h"
 #include "sdl_fmsynth.h"
 #include <assert.h>

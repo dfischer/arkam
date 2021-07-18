@@ -1,7 +1,7 @@
 #if !defined(__ARKAM_STANDARD_MAIN__)
 #define __ARKAM_STANDARD_MAIN__
 
-#include "arkam.h"
+#include "arkvm.h"
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>

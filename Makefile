@@ -11,20 +11,20 @@ LDFLAGS =
 
 
 .PHONY: meta
-out/forth1.ark: bin/arkam forth.ark lib/meta.f lib/core.f
-	./bin/arkam forth.ark lib/meta.f out/forth1.ark
+out/forth1.ark: bin/arkvm forth.ark lib/meta.f lib/core.f
+	./bin/arkvm forth.ark lib/meta.f out/forth1.ark
 meta: out/forth1.ark
-	./bin/arkam out/forth1.ark --quit
+	./bin/arkvm out/forth1.ark --quit
 
 
 .PHONY: meta-check
 out/forth2.ark: out/forth1.ark
-	./bin/arkam out/forth1.ark lib/meta.f out/forth2.ark
+	./bin/arkvm out/forth1.ark lib/meta.f out/forth2.ark
 meta-check: out/forth2.ark
 	diff out/forth1.ark out/forth2.ark
 
 .PHONY: meta-test
-meta-test: out/forth1.ark bin/test_arkam
+meta-test: out/forth1.ark bin/test_arkvm
 	./test/run.sh out/forth1.ark
 
 
@@ -35,7 +35,7 @@ meta-install: meta meta-check meta-test
 
 
 .PHONY: all
-all: bin out bin/arkam bin/forth
+all: bin out bin/arkam bin/arkvm
 
 
 .PHONY: arkam
@@ -49,7 +49,7 @@ sarkam: bin/sarkam
 
 
 .PHONY: test
-test: arkam bin/forth bin/test_arkam forth.ark
+test: arkvm bin/forth bin/test_arkvm forth.ark
 	./test/run.sh forth.ark
 
 
@@ -79,16 +79,16 @@ fmparams: bin sarkam
 	./bin/sarkam forth.ark example/fmparams.f
 
 
-bin/file2c.ark: bin/arkam forth.ark tools/file2c.f
-	./bin/arkam forth.ark tools/file2c.f
+bin/file2c.ark: bin/arkvm forth.ark tools/file2c.f
+	./bin/arkvm forth.ark tools/file2c.f
 
 
-.PHONY: forth
-forth: arkam bin/forth bin/file2c.ark
-	./bin/forth
+.PHONY: arkam
+arkam: bin/arkam
+	./bin/arkam
 
-out/forth.ark.h: bin/arkam forth.ark bin/file2c.ark
-	./bin/arkam bin/file2c.ark -b forth forth.ark out/forth.ark.h
+out/forth.ark.h: bin/arkvm forth.ark bin/file2c.ark
+	./bin/arkvm bin/file2c.ark -b forth forth.ark out/forth.ark.h
 
 
 
@@ -112,10 +112,10 @@ out/%.d: src/%.c
 DEPS = $(patsubst src/%.h, out/%.o, $(shell $(CC) -MM $(1) | sed 's/^.*: //;s/\\$$//' | tr '\n' ' '))
 
 
-ARKAM_DEPS := $(call DEPS, src/console_main.c)
-bin/arkam: LDFLAGS += -lm
-bin/arkam: $(ARKAM_DEPS)
-	$(CC) -o bin/arkam $(ARKAM_DEPS) $(CFLAGS) $(LDFLAGS)
+ARKVM_DEPS := $(call DEPS, src/vm_console.c)
+bin/arkvm: LDFLAGS += -lm
+bin/arkvm: $(ARKVM_DEPS)
+	$(CC) -o bin/arkvm $(ARKVM_DEPS) $(CFLAGS) $(LDFLAGS)
 
 
 SARKAM_DEPS := $(call DEPS, src/sdl_main.c)
@@ -125,15 +125,15 @@ bin/sarkam: $(SARKAM_DEPS)
 	$(CC) -o bin/sarkam $(SARKAM_DEPS) $(CFLAGS) $(LDFLAGS)
 
 
-FORTH_DEPS := $(call DEPS, src/forth_main.c)
-bin/forth: LDFLAGS += -lm
-bin/forth: $(FORTH_DEPS) out/forth.ark.h
-	$(CC) -o bin/forth $(FORTH_DEPS) $(CFLAGS) $(LDFLAGS)
+ARKAM_DEPS := $(call DEPS, src/arkam_console.c)
+bin/arkam: LDFLAGS += -lm
+bin/arkam: $(ARKAM_DEPS) out/forth.ark.h
+	$(CC) -o bin/arkam $(ARKAM_DEPS) $(CFLAGS) $(LDFLAGS)
 
 
 TEST_DEPS := $(call DEPS, src/test.c)
-bin/test_arkam: $(TEST_DEPS)
-	$(CC) -o bin/test_arkam $(TEST_DEPS) $(CFLAGS) $(LDFLAGS)
+bin/test_arkvm: $(TEST_DEPS)
+	$(CC) -o bin/test_arkvm $(TEST_DEPS) $(CFLAGS) $(LDFLAGS)
 
 
 
