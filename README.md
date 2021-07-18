@@ -1,4 +1,4 @@
-# Arkam - Stack VM
+# Arkam - Stack VM and Forth
 
 ![Arkam](misc/logo.png)
 
@@ -6,14 +6,6 @@ Purposes
 
 - Build small cli tools
 - Sound/Graphic tinkering environment
-
-
-
-# Status
-
-- 2021-07-15 arkam-forth is now metacompiled
-- 2021-07-04 switched to forth from sol
-- 2021-05-06 start
 
 
 
@@ -27,8 +19,10 @@ Purposes
 
 ## Tools
 
-- arkam: console vm
-- sarkam: sdl vm with fm synthesizer
+- arkvm: console vm
+- arkam: with forth
+- sarkvm: sdl vm with fm synthesizer
+- sarkam: with forth
 
 
 
