@@ -118,7 +118,7 @@ bin/arkvm: $(ARKVM_DEPS)
 	$(CC) -o bin/arkvm $(ARKVM_DEPS) $(CFLAGS) $(LDFLAGS)
 
 
-SARKVM_DEPS := $(call DEPS, src/arkvm_sdl.c)
+SARKVM_DEPS := $(call DEPS, src/arkvm_sdl_main.c)
 bin/sarkvm: CFLAGS  += -g `sdl2-config --cflags`
 bin/sarkvm: LDFLAGS += `sdl2-config --libs` -lm
 bin/sarkvm: $(SARKVM_DEPS)

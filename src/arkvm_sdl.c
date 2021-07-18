@@ -1,24 +1,31 @@
-#include "arkvm.h"
-#include "standard_main.h"
-#include "sdl_fmsynth.h"
-#include <assert.h>
-#include <string.h>
-#include <errno.h>
-#include <stdarg.h>
-#include <getopt.h>
-#include <SDL2/SDL.h>
+#include "arkvm_sdl.h"
+
+
+#ifdef __GNUC__
+#  define DEBUG_AID __attribute__ ((unused))
+#else
+#  define DEBUG_AID
+#endif
+
 
 typedef ArkamVM   VM;
 typedef ArkamCode Code;
 
 
-Cell zoom = 2;
+static Cell zoom = 2;
 #define WIDTH  256
 #define HEIGHT 192
 
-Cell poll_step      = 5000;
-Cell req_poll       = 1;
-const double FPS_MS = 1000.0f / 60.0f;
+static Cell poll_step      = 5000;
+static Cell req_poll       = 1;
+static const double FPS_MS = 1000.0f / 60.0f;
+
+
+/* ===== Setter ===== */
+
+void set_zoom(int z) {
+  zoom = z;
+}
 
 
 /* ===== Graceful Shutdown ===== */
@@ -65,7 +72,7 @@ typedef struct PPU {
 PPU* ppu;
 
 
-void init_sdl(PPU* ppu) {
+static void init_sdl(PPU* ppu) {
   if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     die("Can't initialize SDL: %s", SDL_GetError());
     
@@ -91,7 +98,7 @@ void init_sdl(PPU* ppu) {
   SDL_ShowCursor(SDL_ENABLE);
 }
 
-PPU* new_ppu(Cell width, Cell height) {
+static PPU* new_ppu(Cell width, Cell height) {
   PPU* ppu = calloc(sizeof(PPU), 1);
   if (!ppu) die("Can't create ppu");
 
@@ -116,7 +123,7 @@ PPU* new_ppu(Cell width, Cell height) {
 }
 
 
-void draw_ppu(PPU* ppu) {
+static void draw_ppu(PPU* ppu) {
   // render on-screen buffer to out buffer
   Cell pixels = ppu->pixels;
   for (int i = 0; i < pixels; i++) {
@@ -128,7 +135,7 @@ void draw_ppu(PPU* ppu) {
   }
 }
 
-void render_ppu(PPU* ppu) {
+static void render_ppu(PPU* ppu) {
   // render out buffer to window
   draw_ppu(ppu);
   Cell bytes_of_line = ppu->width * sizeof(Cell);
@@ -139,7 +146,7 @@ void render_ppu(PPU* ppu) {
 }
 
 
-Code handlePPU(VM* vm, Cell op) {
+static Code handlePPU(VM* vm, Cell op) {
   switch (op) {
   case 0: /* set palette color ( color i -- ) */
     {
@@ -295,7 +302,7 @@ Code handlePPU(VM* vm, Cell op) {
   }
 }
 
-void setup_ppu(VM* vm, Cell width, Cell height) {
+static void setup_ppu(VM* vm, Cell width, Cell height) {
   ppu = new_ppu(width, height);
   vm->io_handlers[ARK_DEVICE_VIDEO] = handlePPU;  
 }
@@ -313,12 +320,12 @@ typedef struct Mouse {
 Mouse* mouse;
 
 
-Mouse* new_mouse() {
+static Mouse* new_mouse() {
   Mouse* m = calloc(sizeof(Mouse), 1);
   return m;
 }
 
-Code handleMOUSE(VM* vm, Cell op) {
+static Code handleMOUSE(VM* vm, Cell op) {
   switch (op) {
   case 0: /* addr pos ( &x &y -- ) */
     {
@@ -347,12 +354,12 @@ Code handleMOUSE(VM* vm, Cell op) {
   }
 }
 
-Cell clamp(Cell n, Cell min, Cell max) {
+static Cell clamp(Cell n, Cell min, Cell max) {
   // min <= n < max
   return n < min ? min : (n > max ? max : n);
 }
 
-void handle_mouse_event(VM* vm, SDL_Event* ev) {
+static void handle_mouse_event(VM* vm, SDL_Event* ev) {
   Cell x = clamp(ev->motion.x / zoom, 0, ppu->width - 1);
   Cell y = clamp(ev->motion.y / zoom, 0, ppu->height - 1);
 
@@ -380,7 +387,7 @@ void handle_mouse_event(VM* vm, SDL_Event* ev) {
   }
 }
 
-void setup_mouse(VM* vm) {
+static void setup_mouse(VM* vm) {
   mouse = new_mouse();
   vm->io_handlers[ARK_DEVICE_MOUSE] = handleMOUSE;
 }
@@ -388,7 +395,7 @@ void setup_mouse(VM* vm) {
 
 /* ===== Audio ===== */
 
-void dbg_draw_env(PPU* ppu, double* table, int ox, int oy, int width, int height) {
+DEBUG_AID static void dbg_draw_env(PPU* ppu, double* table, int ox, int oy, int width, int height) {
   const int pixel = 3;
 
   double step = FM_ENV_TABLE_SIZE / (double)width;
@@ -406,7 +413,7 @@ void dbg_draw_env(PPU* ppu, double* table, int ox, int oy, int width, int height
 }
 
 
-void dbg_draw_envs(PPU* ppu) {
+DEBUG_AID static void dbg_draw_envs(PPU* ppu) {
   dbg_draw_env(ppu, fm_env_table_ed, 8,   8,  100, 48);
   dbg_draw_env(ppu, fm_env_table_eu, 120, 8,  100, 48);
   dbg_draw_env(ppu, fm_env_table_ld, 8,   96, 100, 48);
@@ -414,7 +421,7 @@ void dbg_draw_envs(PPU* ppu) {
 }
 
 
-void setup_audio(VM* vm) {
+static void setup_audio(VM* vm) {
   setup_fmsynth(vm);
   vm->io_handlers[ARK_DEVICE_AUDIO] = handleFMSYNTH;
 }
@@ -423,9 +430,9 @@ void setup_audio(VM* vm) {
 
 /* ===== Keyboard ===== */
 
-Cell key_handler_addr = 0;
+static Cell key_handler_addr = 0;
 
-Code handleKEY(VM* vm, Cell op) {
+static Code handleKEY(VM* vm, Cell op) {
   switch (op) {
   case 0: /* handler ( addr -- ) */
     {
@@ -438,7 +445,7 @@ Code handleKEY(VM* vm, Cell op) {
   }
 }
 
-void setup_keyboard(VM* vm) {
+static void setup_keyboard(VM* vm) {
   SDL_StartTextInput();
   vm->io_handlers[ARK_DEVICE_KEY] = handleKEY;
 }
@@ -449,10 +456,10 @@ void setup_keyboard(VM* vm) {
 
 #define MAX_GAMEPAD 32
 SDL_Joystick* gamepads[MAX_GAMEPAD];
-Cell gamepad_handler_addr = 0;
+static Cell gamepad_handler_addr = 0;
 
 
-Code handlePAD(VM* vm, Cell op) {
+static Code handlePAD(VM* vm, Cell op) {
   switch (op) {
   case 0: /* refresh_pads ( -- n ) */
     {
@@ -476,7 +483,7 @@ Code handlePAD(VM* vm, Cell op) {
 }
 
 
-void handle_gamepad_event(VM* vm, SDL_Event* ev) {
+static void handle_gamepad_event(VM* vm, SDL_Event* ev) {
   if (!gamepad_handler_addr) return;
   SDL_JoyButtonEvent je = ev->jbutton;
   Cell pad = je.which;
@@ -498,14 +505,14 @@ void handle_gamepad_event(VM* vm, SDL_Event* ev) {
 }
 
 
-void handle_gamepad_added(VM* vm, SDL_Event* ev) {
+static void handle_gamepad_added(VM* vm, SDL_Event* ev) {
   Cell pad = ev->jdevice.which;
   if (pad >= MAX_GAMEPAD) return;
   gamepads[pad] = SDL_JoystickOpen(pad);
 }
 
 
-void handle_gamepad_removed(VM* vm, SDL_Event* ev) {
+static void handle_gamepad_removed(VM* vm, SDL_Event* ev) {
   Cell pad = ev->jdevice.which;
   if (pad >= MAX_GAMEPAD) return;
   SDL_JoystickClose(gamepads[pad]);
@@ -513,7 +520,7 @@ void handle_gamepad_removed(VM* vm, SDL_Event* ev) {
 }
 
 
-void setup_pad(VM* vm) {
+static void setup_pad(VM* vm) {
   int pads = SDL_NumJoysticks();
 
   for (int i = 0; i< MAX_GAMEPAD; i++) {
@@ -531,7 +538,7 @@ void setup_pad(VM* vm) {
 
 /* ===== EMU ===== */
 
-Code handleEMU(VM* vm, Cell op) {
+static Code handleEMU(VM* vm, Cell op) {
   switch (op) {
   case 0: /* set title ( s -- ) */
     {
@@ -570,7 +577,7 @@ Code handleEMU(VM* vm, Cell op) {
   }
 }
 
-void setup_emu(VM* vm) {
+static void setup_emu(VM* vm) {
   vm->io_handlers[ARK_DEVICE_EMU] = handleEMU;
 }
 
@@ -580,7 +587,7 @@ void setup_emu(VM* vm) {
 #define SDL_SCANCODE_MASK (1<<30);
 
 
-void poll_sdl_event(VM* vm, PPU* ppu) {
+static void poll_sdl_event(VM* vm, PPU* ppu) {
   SDL_Event event;
   
   while (SDL_PollEvent(&event) != 0) {
@@ -635,7 +642,7 @@ void poll_sdl_event(VM* vm, PPU* ppu) {
 }
 
 
-Code run(VM* vm) {
+Code sdl_run(VM* vm) {
   Code code = ARK_OK;
 
   Uint64 previous = SDL_GetPerformanceCounter();
@@ -663,70 +670,12 @@ Code run(VM* vm) {
 }
 
 
-void usage() {
-  fprintf(stderr, "Usage: arkam IMAGE\n");
-  exit(1);
-}
-
-
-int handle_opts(int argc, char* argv[]) {
-  const char* optstr = "hz";
-
-  struct option long_opts[] =
-    { { "help",  no_argument,       NULL, 'h' },
-      { "zoom",  required_argument, NULL, 'z' },
-    };
-
-  opterr = 0; // disable logging error
-  int c;
-  int long_index;
-  while ((c = getopt_long(argc, argv, optstr, long_opts, &long_index)) != -1) {
-    switch (c) {
-    case 'h':
-      usage();
-    case 'z':
-      {
-        char* invalid = NULL;
-        zoom = strtol(optarg, &invalid, 10);
-        if (zoom == 0) die("Invalid zoom: %s", optarg);
-        break;
-      }
-    case '?':
-      fprintf(stderr, "Unknown option: %c\n", optopt);
-      usage();
-    }
-  }
-
-  return optind;
-}
-
-
-int main(int argc, char* argv[]) {
-  int argi     = handle_opts(argc, argv);
-  int restc    = argc - argi;
-  int image_i  = argi;
-  if (restc < 1) usage();  
-  int app_argi = argi;
-  int app_argc = restc;
-  char* image_name = argv[image_i];
-
-  VM* vm = setup_arkam_vm(image_name);
-
+void setup_sdlvm(VM* vm, int argc, char* argv[]) {
   setup_ppu(vm, WIDTH, HEIGHT);
   setup_mouse(vm);
   setup_audio(vm);
   setup_keyboard(vm);
   setup_pad(vm);
   setup_emu(vm);
-  setup_app(vm, app_argc, argv + app_argi);
-
-  Code code = ark_get(vm, ARK_ADDR_START);
-  guard_err(vm, code);
-  vm->ip = vm->result;
-
-  code = run(vm);
-  guard_err(vm, code);
-
-  ark_free_vm(vm);
-  return 0;
+  setup_app(vm, argc, argv);
 }
