@@ -38,6 +38,23 @@ meta-install: meta meta-check meta-test
 all: bin out bin/arkam bin/arkvm
 
 
+.PHONY: install
+install: bin out bin/arkam bin/arkvm
+	cp bin/arkam ~/bin/arkam
+	cp bin/arkvm ~/bin/arkvm
+
+
+.PHONY: install-sdl
+install-sdl: bin out bin/sarkam bin/sarkvm
+	cp bin/sarkam ~/bin/sarkam
+	cp bin/sarkvm ~/bin/sarkvm
+
+
+.PHONY: install-all
+install-all: install install-sdl
+
+
+
 .PHONY: arkam
 arkam: bin/arkam
 
@@ -60,23 +77,23 @@ clean:
 
 
 
-.PHONY: sarkvm-scratch
-sarkvm-scratch: bin sarkvm
-	./bin/sarkvm forth.ark test/sarkvm-scratch.f
+.PHONY: sarkam-scratch
+sarkam-scratch: bin sarkam
+	./bin/sarkam test/sarkam-scratch.f
 
 
 
 .PHONY: sprited
 out/tmp.spr: lib/basic.spr
 	cp lib/basic.spr out/tmp.spr
-sprited: bin sarkvm out/tmp.spr
-	./bin/sarkvm forth.ark tools/sprited.f out/tmp.spr
+sprited: bin sarkam out/tmp.spr
+	./bin/sarkam tools/sprited.f out/tmp.spr
 
 
 
 .PHONY: fmparams
-fmparams: bin sarkvm
-	./bin/sarkvm forth.ark example/fmparams.f
+fmparams: bin sarkam
+	./bin/sarkam example/fmparams.f
 
 
 bin/file2c.ark: bin/arkvm forth.ark tools/file2c.f
@@ -85,14 +102,13 @@ bin/file2c.ark: bin/arkvm forth.ark tools/file2c.f
 
 .PHONY: arkam
 arkam: bin/arkam
-	./bin/arkam
+
 
 out/forth.ark.h: bin/arkvm forth.ark bin/file2c.ark
 	./bin/arkvm bin/file2c.ark -b forth forth.ark out/forth.ark.h
 
 .PHONY: sarkam
 sarkam: bin/sarkam
-	./bin/sarkam
 
 
 
