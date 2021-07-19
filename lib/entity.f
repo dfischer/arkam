@@ -96,8 +96,8 @@ PUBLIC
 
 ( ----- shorthands ----- )
 
-: ENTITY ( n name: -- es q ) ecs:new_es dup as: [ drop ] ;
-: COMPONENT ( es q name: -- es q ) over components: ;
+: ENTITY: ( n name: -- es q ) ecs:new_es dup as: [ drop ] ;
+: COMPONENT: ( es q name: -- es q ) over components: ;
 
 
 END

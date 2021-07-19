@@ -4,6 +4,9 @@ require: lib/entity.f
 require: lib/mgui.f
 require: lib/fm.f
 
+
+init:run
+
 fm:deluxe_color 4 [ ppu:palette_color! ] for
 
 0 fm:voice!
@@ -141,15 +144,15 @@ END
 PRIVATE
   32 as: max
 
-  max ENTITY sliders
-    COMPONENT callback
-    COMPONENT val
-    COMPONENT vx
-    COMPONENT vy
-    COMPONENT label
-    COMPONENT lx
-    COMPONENT ly
-    COMPONENT op
+  max ENTITY: sliders
+    COMPONENT: callback
+    COMPONENT: val
+    COMPONENT: vx
+    COMPONENT: vy
+    COMPONENT: label
+    COMPONENT: lx
+    COMPONENT: ly
+    COMPONENT: op
   END
 
   var: id

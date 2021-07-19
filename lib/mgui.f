@@ -10,18 +10,18 @@ PRIVATE
 
   128 as: max
   
-  max ENTITY btn
-    COMPONENT show
-    COMPONENT callback
-    COMPONENT param
-    COMPONENT pressed
-    COMPONENT x
-    COMPONENT y
-    COMPONENT width
-    COMPONENT height
+  max ENTITY: btn
+    COMPONENT: show
+    COMPONENT: callback
+    COMPONENT: param
+    COMPONENT: pressed
+    COMPONENT: x
+    COMPONENT: y
+    COMPONENT: width
+    COMPONENT: height
     ( draw )
-    COMPONENT dparam
-    COMPONENT dcallback
+    COMPONENT: dparam
+    COMPONENT: dcallback
   END
   
   ( current button ) var: id
@@ -122,20 +122,20 @@ PRIVATE
   3 as: border_color
   1 as: bar_color
 
-  max_sliders ENTITY slider
-    COMPONENT vmax
-    COMPONENT vmin
-    COMPONENT vrange
-    COMPONENT pressed
-    COMPONENT width
-    COMPONENT height
-    COMPONENT x
-    COMPONENT y
-    COMPONENT right
-    COMPONENT v
-    COMPONENT callback ( v param -- )
-    COMPONENT param
-    COMPONENT barpos ( x )
+  max_sliders ENTITY: slider
+    COMPONENT: vmax
+    COMPONENT: vmin
+    COMPONENT: vrange
+    COMPONENT: pressed
+    COMPONENT: width
+    COMPONENT: height
+    COMPONENT: x
+    COMPONENT: y
+    COMPONENT: right
+    COMPONENT: v
+    COMPONENT: callback ( v param -- )
+    COMPONENT: param
+    COMPONENT: barpos ( x )
   END
 
   var: id  ( current )

@@ -1,5 +1,7 @@
 require: lib/mgui.f
 
+init:run
+
 
 256           as: spr_max
 8             as: spr_w
