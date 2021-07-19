@@ -696,37 +696,44 @@ var: forth:mode
 
 0x01 as: flag_immed
 0x02 as: flag_hidden
-0x03 as: flags
 
 : forth:latest  0x0C @ ;
 : forth:latest! 0x0C ! ;
 
 # Dictionary
 # | next:30 | hidden:1 | immed:1  tagged 32bit pointer
+# | flags
 # | &name
 # | &code
 # | code...
 
-: forth:next  @ flags off ; # &entry -- &entry
-: forth:next! !           ; # &next &entry --
+: forth:next  @ ; # &entry -- &entry
+: forth:next! ! ; # &next &entry --
 
-: forth:name  cell + @    ; # &entry -- &name
-: forth:name! cell + !    ; # &name -- &entry
+: forth:flags  cell + @ ;
+: forth:flags! cell + ! ;
+: forth:flag_on!  ( &entry flag ) swap cell + dup >r @ swap on  r> ! ;
+: forth:flag_off! ( &entry flag ) swap cell + dup >r @ swap off r> ! ;
 
-: forth:code  2 cells + @ ; # &entry -- &code
-: forth:code! 2 cells + ! ; # &code &entry --
+: forth:hide! flag_hidden forth:flag_on!  ; # &entry --
+: forth:show! flag_hidden forth:flag_off! ; # &entry --
+: forth:hidden? forth:flags flag_hidden and ; # &entry -- ?
 
-: forth:hide! flag_hidden on!  ; # &entry --
-: forth:show! flag_hidden off! ; # &entry --
-: forth:hidden? @ flag_hidden and ; # &entry -- ?
+: forth:immed!     flag_immed forth:flag_on!  ; # &entry --
+: forth:non-immed! flag_immed forth:flag_off! ; # &entry --
+: forth:immed? forth:flags flag_immed and ; # &entry -- ?
 
-: forth:immed!     flag_immed on!  ; # &entry --
-: forth:non-immed! flag_immed off! ; # &entry --
-: forth:immed? @ flag_immed and ; # &entry -- ?
+: forth:name  2 cells + @    ; # &entry -- &name
+: forth:name! 2 cells + !    ; # &name -- &entry
+
+: forth:code  3 cells + @ ; # &entry -- &code
+: forth:code! 3 cells + ! ; # &code &entry --
+
 
 : forth:create ( name -- )
   here:align! s:put here:align! ( &name )
   ( latest ) here forth:latest , forth:latest!
+  ( flags  ) 0 ,
   ( &name  ) ,
   ( &code  ) here cell + ,
 ;

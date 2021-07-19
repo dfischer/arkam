@@ -139,35 +139,38 @@ END
 # Cross Dictionary
 #  | name ...
 #  | ( 0alined )
-#  | next | hidden? | immed? ( least 2 bit )
+#  | next
+#  | flags
 #  | &name
 #  | xt(&code)
 #  |-----
 #  | code ...
-
+#
+# flags:
 0x01 as: immed_flag
 0x02 as: hidden_flag
-0x03 as: flags
+
 
 : xlatest  adr_xlatest x@ ;
 : xlatest! adr_xlatest x! ;
 
-: xon!  over x@ swap on  swap x! ;
-: xoff! over x@ swap off swap x! ;
-
-: x:hide!   hidden_flag xon!  ;    # xword --
-: x:show!   hidden_flag xoff! ;    # xword --
-: x:hidden? x@ hidden_flag and ;  # xword -- ?
-: x:immed!  immed_flag xon! ;      # xword --
-
 : xnext! x! ;
-: xnext  x@ flags off ;
+: xnext  x@ ;
 
-: xname! cell + x! ;
-: xname  cell + x@ ;
+: xflags! cell + x! ;
+: xflags  cell + x@ ;
+: xon!  over xflags swap on  swap xflags! ;
+: xoff! over xflags swap off swap xflags! ;
+: x:hide!   hidden_flag xon!       ;  # xword --
+: x:show!   hidden_flag xoff!      ;  # xword --
+: x:hidden? xflags hidden_flag and ;  # xword -- ?
+: x:immed!  immed_flag xon!        ;  # xword --
 
-: xxt!   2 cells + x! ;
-: xxt    2 cells + x@ ;
+: xname! 2 cells + x! ;
+: xname  2 cells + x@ ;
+
+: xxt!   3 cells + x! ;
+: xxt    3 cells + x@ ;
 
 : x:find ( name -- xword yes | name no )
   xlatest [ ( name xword )
@@ -179,9 +182,10 @@ END
 
 : x:create ( name -- xword )
   xhere:align! xhere swap x:sput ( &name )
-  ( next ) xhere:align! xhere xlatest x, xlatest!
-  ( name ) x,
-  ( xt   ) xhere cell + x,
+  ( next  ) xhere:align! xhere xlatest x, xlatest!
+  ( flags ) 0 x,
+  ( name  ) x,
+  ( xt    ) xhere cell + x,
   xlatest
 ;
 
