@@ -24,8 +24,8 @@ extern double fm_env_table_ld[FM_ENV_TABLE_SIZE]; // lately down
 extern double fm_env_table_lu[FM_ENV_TABLE_SIZE]; // lately up
 
 
-ArkamCode handleFMSYNTH(ArkamVM* vm, Cell op);
-void setup_fmsynth(ArkamVM* vm);
+ArkCode handleFMSYNTH(ArkVM* vm, Cell op);
+void setup_fmsynth(ArkVM* vm);
 
 
 #endif

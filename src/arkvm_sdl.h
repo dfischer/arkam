@@ -9,5 +9,5 @@
 #include <SDL2/SDL.h>
 
 void set_zoom(int z);
-void setup_sdlvm(ArkamVM* vm, int argc, char* argv[]);
-ArkamCode sdl_run(ArkamVM* vm);
+void setup_sdlvm(ArkVM* vm, int argc, char* argv[]);
+ArkCode sdl_run(ArkVM* vm);

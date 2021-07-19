@@ -66,7 +66,7 @@ sarkvm: bin/sarkvm
 
 
 .PHONY: test
-test: arkvm bin/forth bin/test_arkvm forth.ark
+test: bin/arkvm bin/test_arkvm forth.ark
 	./test/run.sh forth.ark
 
 

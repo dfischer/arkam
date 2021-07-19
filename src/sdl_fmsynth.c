@@ -12,8 +12,8 @@
 
 /* ===== Shorthands ===== */
 
-typedef ArkamVM   VM;
-typedef ArkamCode Code;
+typedef ArkVM   VM;
+typedef ArkCode Code;
 
 
 #define WAVE_TABLE_SIZE FM_WAVE_TABLE_SIZE

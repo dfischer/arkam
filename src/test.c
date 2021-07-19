@@ -39,7 +39,7 @@ void put(VM* vm, Cell* here, Cell v) {
 
 #define PutI(here, inst) (Put(here, (ARK_INST_##inst << 1) | 0x01))
 
-void run(VM* vm, Cell start, ArkamCode expect) {
+void run(VM* vm, Cell start, ArkCode expect) {
   if (start & 0x01) DIE("Unaligned start point: %d");
   vm->ip = start;
   Code code = ark_run(vm);
@@ -53,7 +53,7 @@ void run(VM* vm, Cell start, ArkamCode expect) {
 // =============================================================================
 
 void test_memory_access(Opts* opts) {
-  ArkamVM* vm = ark_new_vm(opts);
+  ArkVM* vm = ark_new_vm(opts);
   // valid access
   
   assert(ark_set(vm, 0x04, 123) == ARK_OK);
@@ -82,7 +82,7 @@ void test_data_stack(Opts* opts) {
   Cell dcells = 16;
   opts->dstack_cells = dcells;
   
-  ArkamVM* vm = ark_new_vm(opts);
+  ArkVM* vm = ark_new_vm(opts);
   int code = ARK_OK;
 
   // Push to fill
@@ -116,7 +116,7 @@ void test_return_stack(Opts* opts) {
   Cell rcells = 16;
   opts->rstack_cells = rcells;
   
-  ArkamVM* vm = ark_new_vm(opts);
+  ArkVM* vm = ark_new_vm(opts);
   int code = ARK_OK;
 
   // Push to fill
@@ -847,7 +847,7 @@ void test_run_rp(VM* vm) {
   Cell inst_count = ARK_INSTRUCTION_COUNT;                                 \
   Opts opts = { .memory_cells = 4, .dstack_cells = 4, .rstack_cells = 4 }; \
   opts.memory_cells = inst_count * 4;                                      \
-  ArkamVM* vm = ark_new_vm(&opts);                                         \
+  ArkVM* vm = ark_new_vm(&opts);                                         \
   test_run_##name(vm);                                                     \
   ark_free_vm(vm);                                                         \
   printf("done\n");                                                        \

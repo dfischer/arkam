@@ -404,7 +404,7 @@ void read_image(VM* vm, char* fname) {
 VM* create_default() {
   stdio_port = stdout;
   
-  ArkamVMOptions opts;
+  ArkVMOptions opts;
   ark_set_default_options(&opts);
   
   VM* vm = ark_new_vm(&opts);

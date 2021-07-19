@@ -15,9 +15,9 @@
 #define Pop()     (force_pop(vm))
 #define Push(v)   (force_push(vm, (v)))
 #define Raise(err_name) { vm->err = ARK_ERR_##err_name; return ARK_ERR; }
-typedef ArkamVM        VM;
-typedef ArkamVMOptions Opts;
-typedef ArkamCode      Code;
+typedef ArkVM        VM;
+typedef ArkVMOptions Opts;
+typedef ArkCode      Code;
 
 
 Cell force_get(VM* vm, Cell i);

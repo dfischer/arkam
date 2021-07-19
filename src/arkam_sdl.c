@@ -1,8 +1,8 @@
 #include "arkvm_sdl.h"
 #include <forth.ark.h>
 
-typedef ArkamVM   VM;
-typedef ArkamCode Code;
+typedef ArkVM   VM;
+typedef ArkCode Code;
 
 
 int main(int argc, char* argv[]) {

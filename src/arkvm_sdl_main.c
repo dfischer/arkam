@@ -1,7 +1,7 @@
 #include "arkvm_sdl.h"
 
-typedef ArkamVM   VM;
-typedef ArkamCode Code;
+typedef ArkVM   VM;
+typedef ArkCode Code;
 
 
 void usage() {

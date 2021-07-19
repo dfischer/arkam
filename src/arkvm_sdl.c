@@ -8,8 +8,8 @@
 #endif
 
 
-typedef ArkamVM   VM;
-typedef ArkamCode Code;
+typedef ArkVM   VM;
+typedef ArkCode Code;
 
 
 static Cell zoom = 2;

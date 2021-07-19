@@ -33,8 +33,8 @@ DebugAid void debug_print(char* filename, int line, char* fmt, ...) {
 // =============================================================================
 // some defs require declaration of (VM* vm) and use (int code)
 
-typedef ArkamVM VM;
-typedef ArkamCode Code;
+typedef ArkVM VM;
+typedef ArkCode Code;
 #define Cells(n)        ((n)*sizeof(Cell))
 #define Set(i, v)       (*(Cell*)(vm->mem + (i)) = (v))
 #define Get(i)          (*(Cell*)(vm->mem + (i)))
@@ -565,7 +565,7 @@ Private Code instIO(VM* vm) {
 
   // handler
   if (dev >= 0 && dev < ARK_DEVICES_COUNT) {
-    ArkamDeviceHandler handler = vm->io_handlers[dev];
+    ArkDeviceHandler handler = vm->io_handlers[dev];
 
     if (op == IO_READY_QUERY) {
       Push(handler == NULL ? 0 : -1); return ARK_OK;
@@ -789,13 +789,13 @@ Public Code ark_run(VM* vm) {
 // VM setup
 // =============================================================================
 
-Public void ark_set_default_options(ArkamVMOptions* opts) {
+Public void ark_set_default_options(ArkVMOptions* opts) {
   opts->memory_cells = ARK_DEFAULT_MEM_CELLS;
   opts->dstack_cells = ARK_DEFAULT_DS_CELLS;
   opts->rstack_cells = ARK_DEFAULT_RS_CELLS;
 }
 
-Public VM* ark_new_vm(ArkamVMOptions* opts) {
+Public VM* ark_new_vm(ArkVMOptions* opts) {
   VM* vm = calloc(sizeof(VM), 1);
 
   Cell msize  = opts->memory_cells;

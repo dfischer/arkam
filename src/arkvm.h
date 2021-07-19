@@ -1,5 +1,5 @@
-#if !defined(__ARKAM_H__)
-#define __ARKAM_H__
+#if !defined(__ARKVM_H__)
+#define __ARKVM_H__
 
 #include <stdio.h>
 #include <stdint.h>
@@ -38,7 +38,7 @@ typedef uint8_t  Byte;
 
 
 /* ===== Notes =====
-   - Many functions which requires ArkamVM* and returns ArkamCode set
+   - Many functions which requires ArkVM* and returns ArkCode set
      result data to vm->result or error to vm->err.
      ex. ark_pop(vm)
           returns ARK_OK  and set popped value to vm->result
@@ -46,7 +46,7 @@ typedef uint8_t  Byte;
 */
 
 
-typedef struct ArkamVM ArkamVM;
+typedef struct ArkVM ArkVM;
 
 
 // Result code
@@ -54,7 +54,7 @@ typedef enum
   { ARK_OK,
     ARK_ERR,
     ARK_HALT
-  } ArkamCode;
+  } ArkCode;
 
 
 // Error code
@@ -142,13 +142,13 @@ typedef enum
     ARK_DEVICE_EMU      = 11, /* Emulator Operation */
     ARK_DEVICE_APP      = 12, /* Application process */
     ARK_DEVICES_COUNT
-  } ArkamDevice;
+  } ArkDevice;
 
 
-typedef ArkamCode (*ArkamDeviceHandler)(ArkamVM* vm, Cell op);
+typedef ArkCode (*ArkDeviceHandler)(ArkVM* vm, Cell op);
 
 
-struct ArkamVM {
+struct ArkVM {
   Byte* mem;     // entire memory
   Cell  cells;   // entire memory cells
   Cell  ds_size; // data stack size(cells)
@@ -160,7 +160,7 @@ struct ArkamVM {
   Cell  rp;      // return stack pointer
   Cell  result;
   Cell  err;
-  ArkamDeviceHandler io_handlers[ARK_DEVICES_COUNT];
+  ArkDeviceHandler io_handlers[ARK_DEVICES_COUNT];
 };
 
 
@@ -168,34 +168,34 @@ typedef struct ArakamVMOptions {
   Cell memory_cells;
   Cell dstack_cells;
   Cell rstack_cells;
-} ArkamVMOptions;
+} ArkVMOptions;
 
 
 // VM
-void     ark_set_default_options (ArkamVMOptions* opts);
-ArkamVM* ark_new_vm              (ArkamVMOptions* opts);
-void     ark_free_vm             (ArkamVM* vm);
+void     ark_set_default_options (ArkVMOptions* opts);
+ArkVM* ark_new_vm              (ArkVMOptions* opts);
+void     ark_free_vm             (ArkVM* vm);
 
 
 // Run
-ArkamCode ark_step   (ArkamVM* vm);
-ArkamCode ark_run    (ArkamVM* vm);
+ArkCode ark_step   (ArkVM* vm);
+ArkCode ark_run    (ArkVM* vm);
 
 
 // Memory Operations
-ArkamCode ark_get   (ArkamVM* vm, Cell i);
-ArkamCode ark_set   (ArkamVM* vm, Cell i, Cell v);
-ArkamCode ark_push  (ArkamVM* vm, Cell v);
-ArkamCode ark_pop   (ArkamVM* vm);
-ArkamCode ark_rpush (ArkamVM* vm, Cell v);
-ArkamCode ark_rpop  (ArkamVM* vm);
+ArkCode ark_get   (ArkVM* vm, Cell i);
+ArkCode ark_set   (ArkVM* vm, Cell i, Cell v);
+ArkCode ark_push  (ArkVM* vm, Cell v);
+ArkCode ark_pop   (ArkVM* vm);
+ArkCode ark_rpush (ArkVM* vm, Cell v);
+ArkCode ark_rpop  (ArkVM* vm);
 
 
 // Checking
-int ark_valid_addr(ArkamVM* vm, Cell i);
-int ark_has_ds_items(ArkamVM* vm, Cell n);
-int ark_has_ds_spaces(ArkamVM* vm, Cell n);
-ArkamCode ark_pop_valid_addr(ArkamVM* vm);
+int ark_valid_addr(ArkVM* vm, Cell i);
+int ark_has_ds_items(ArkVM* vm, Cell n);
+int ark_has_ds_spaces(ArkVM* vm, Cell n);
+ArkCode ark_pop_valid_addr(ArkVM* vm);
 
 
 // Error
