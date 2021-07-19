@@ -1,6 +1,5 @@
 # Backlog
 
-- rename ArkamVM to ArkVM, ArkamCode to ArkCode, etc...
 - edit [src/README.md](src/README.md)
 - rename APP I/O appropriately
 - add Glossary
