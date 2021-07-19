@@ -4,8 +4,8 @@
 
 Purposes
 
-- Build small cli tools
 - Sound/Graphic tinkering environment
+- Forth experimentations
 
 
 
