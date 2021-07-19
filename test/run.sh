@@ -15,7 +15,7 @@ cd $PROJ
 
 echo "# ===== test_arkam ====="
 
-./bin/test_arkam || exit 1
+./bin/test_arkvm || exit 1
 
 
 echo "===== Forth ($FORTH_IMG) ====="
@@ -23,6 +23,6 @@ echo "===== Forth ($FORTH_IMG) ====="
 for src in test/forth/*.f
 do
     echo -n "$src .."
-    ./bin/arkam $FORTH_IMG $src || exit 1
+    ./bin/arkvm $FORTH_IMG $src || exit 1
     echo "ok"
 done

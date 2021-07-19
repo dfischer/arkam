@@ -97,6 +97,12 @@ ng as: STOP
 ; 
 
 
+: within? ( n min max -- min<=n<max? )
+  >r over > IF rdrop drop no RET THEN
+  r> <
+;
+
+
 
 ( ===== Bitwise ===== )
 

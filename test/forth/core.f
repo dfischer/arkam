@@ -84,6 +84,16 @@ MARKER: <NUM>
   ok
 ] CHECK
 
+" within?" [
+  0 1 4 within? not ASSERT" within lt"
+  4 1 4 within? not ASSERT" within gt"
+
+  1 1 4 within? ASSERT" within min limit"
+  2 1 4 within? ASSERT" within mid"
+  3 1 4 within? ASSERT" within max limit"
+  ok
+] CHECK
+
 <NUM>
 
 
