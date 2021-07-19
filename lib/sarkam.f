@@ -3,7 +3,7 @@ require: lib/mouse.f
 require: lib/emu.f
 require: lib/basic_sprite.f
 
-basic.spr:load
+[ basic.spr:load ] >init
 
 
 
@@ -208,9 +208,11 @@ var: mouse:rx
 var: mouse:ry
 var: mouse:rp
 
-var' mouse:x var' mouse:y mouse:pos!
-var' mouse:lx var' mouse:ly var' mouse:lp mouse:left!
-var' mouse:rx var' mouse:ry var' mouse:rp mouse:right!
+[
+  var' mouse:x var' mouse:y mouse:pos!
+  var' mouse:lx var' mouse:ly var' mouse:lp mouse:left!
+  var' mouse:rx var' mouse:ry var' mouse:rp mouse:right!
+] >init
 
 
 

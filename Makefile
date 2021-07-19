@@ -78,8 +78,10 @@ clean:
 
 
 .PHONY: sarkam-scratch
-sarkam-scratch: bin sarkam
-	./bin/sarkam test/sarkam-scratch.f
+sarkam-scratch: bin sarkam out/sarkam-scratch.ark
+	./bin/sarkvm out/sarkam-scratch.ark
+out/sarkam-scratch.ark:
+	./bin/arkam test/sarkam-scratch.f
 
 
 
