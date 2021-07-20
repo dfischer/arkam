@@ -1242,6 +1242,19 @@ END
   rdrop
 ;
 
+: clean? ( q -- )
+    >r sp r> swap >r call sp r> =
+;
+
+: CLEAN ( q s -- )
+    >r clean? r> swap [ drop ] [ panic ] if
+;
+
+: CLEAN" ( q name: -- ) <IMMED>
+    ' " call
+    forth:mode [ ' CLEAN , ] [ CLEAN ] if
+;
+
 
 
 ( ===== Marker ===== )

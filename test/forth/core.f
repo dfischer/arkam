@@ -6,6 +6,9 @@ ok ASSERT" ASSERT\""
 
 " CHECK" [ ok ] CHECK
 
+[ ] CLEAN" clean 0-0"
+1 [ drop 0 ] CLEAN" clean 1-1"
+
 <TEST-TOOLS>
 
 
