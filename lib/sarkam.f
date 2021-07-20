@@ -21,19 +21,19 @@ require: lib/basic_sprite.f
 PRIVATE
 
   # bresenham's algorithm
-  
+
   var: x0  var: y0
   var: x1  var: y1
   var: dx  var: dy
   var: sx  var: sy
   var: e1  var: e2
-  
+
   : CHECK
     x0 x1 != IF RET THEN
     y0 y1 != IF RET THEN
     rdrop ( exit loop )
   ;
-  
+
   : loop
     x0 y0 plot
     CHECK
@@ -48,7 +48,7 @@ PRIVATE
     THEN
     AGAIN
   ;
-  
+
 PUBLIC
 
   : line ( x0 y0 x1 y1 -- )
@@ -60,7 +60,7 @@ PUBLIC
     dx dy - e1!
     loop
   ;
-  
+
 END
 
 
@@ -160,7 +160,7 @@ PUBLIC
     # x1 < x0         => dx < 0
     # x1 > x0 + w - 1 => w - dx < 1
     # y1 < y0 + h     => dy - h < 0
-  
+
     h! w! >r swap r> - dy! - dx!
     dx     0 < IF no RET THEN
     dy     0 < IF no RET THEN
@@ -289,7 +289,7 @@ PRIVATE
     put_sign
     x y p put_text
   ;
-  
+
 PUBLIC
 
   : put_dec ( n x y -- ) 10 base! run ;

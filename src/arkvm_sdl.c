@@ -75,7 +75,7 @@ PPU* ppu;
 static void init_sdl(PPU* ppu) {
   if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     die("Can't initialize SDL: %s", SDL_GetError());
-    
+
   ppu->window = SDL_CreateWindow("Arkam",
                                  SDL_WINDOWPOS_CENTERED,
                                  SDL_WINDOWPOS_CENTERED,
@@ -83,7 +83,7 @@ static void init_sdl(PPU* ppu) {
                                  ppu->height * zoom,
                                  0
                                  );
-  
+
   ppu->renderer = SDL_CreateRenderer(ppu->window, -1, 0);
   if (!ppu->renderer) die("Can't create renderer: %s", SDL_GetError());
 
@@ -105,7 +105,7 @@ static PPU* new_ppu(Cell width, Cell height) {
   ppu->width  = width;
   ppu->height = height;
   Cell pixels = ppu->pixels = width * height;
-  
+
 
   if (!(ppu->fg  = calloc(sizeof(Byte), pixels))) die("Can't create ppu-fg");
   if (!(ppu->bg  = calloc(sizeof(Byte), pixels))) die("Can't create ppu-bg");
@@ -210,7 +210,7 @@ static Code handlePPU(VM* vm, Cell op) {
       Cell i = Pop();
       if (i < 0 || i >= ppu->pixels)  die("Invalid index i: %d", i);
       ppu->bg[i] = Color;
-      return ARK_OK;      
+      return ARK_OK;
     }
 
   case 13: /* switch */
@@ -297,14 +297,14 @@ static Code handlePPU(VM* vm, Cell op) {
       }
       return ARK_OK;
     }
-    
+
   default: Raise(IO_UNKNOWN_OP);
   }
 }
 
 static void setup_ppu(VM* vm, Cell width, Cell height) {
   ppu = new_ppu(width, height);
-  vm->io_handlers[ARK_DEVICE_VIDEO] = handlePPU;  
+  vm->io_handlers[ARK_DEVICE_VIDEO] = handlePPU;
 }
 
 
@@ -331,7 +331,7 @@ static Code handleMOUSE(VM* vm, Cell op) {
     {
       if (!ark_has_ds_items(vm, 2)) Raise(DS_UNDERFLOW);
       PopValid(&(mouse->y));
-      PopValid(&(mouse->x));      
+      PopValid(&(mouse->x));
       return ARK_OK;
     }
   case 1: /* addr left ( &x &y &press -- ) */
@@ -348,7 +348,7 @@ static Code handleMOUSE(VM* vm, Cell op) {
       PopValid(&(mouse->rpress));
       PopValid(&(mouse->ry));
       PopValid(&(mouse->rx));
-      return ARK_OK;      
+      return ARK_OK;
     }
   default: Raise(IO_UNKNOWN_OP);
   }
@@ -378,7 +378,7 @@ static void handle_mouse_event(VM* vm, SDL_Event* ev) {
   case SDL_MOUSEBUTTONDOWN:
     if (cx) Set(cx, x);
     if (cy) Set(cy, y);
-    if (cp) Set(cp, -1);    
+    if (cp) Set(cp, -1);
     return;
   case SDL_MOUSEMOTION:
     if (mouse->x) Set(mouse->x, x);
@@ -417,7 +417,7 @@ DEBUG_AID static void dbg_draw_envs(PPU* ppu) {
   dbg_draw_env(ppu, fm_env_table_ed, 8,   8,  100, 48);
   dbg_draw_env(ppu, fm_env_table_eu, 120, 8,  100, 48);
   dbg_draw_env(ppu, fm_env_table_ld, 8,   96, 100, 48);
-  dbg_draw_env(ppu, fm_env_table_lu, 120, 96, 100, 48);  
+  dbg_draw_env(ppu, fm_env_table_lu, 120, 96, 100, 48);
 }
 
 
@@ -489,13 +489,13 @@ static void handle_gamepad_event(VM* vm, SDL_Event* ev) {
   Cell pad = je.which;
   if (pad >= MAX_GAMEPAD) return;
   if (!ark_has_ds_spaces(vm, 3)) die("DS Overflow");
-  
+
   Cell button = je.button;
   Cell state = je.state == SDL_PRESSED ? -1 : 0;
   Push(state);
   Push(button);
   Push(pad);
-  
+
   Cell old_ip = vm->ip;
   Cell code = ARK_OK;
   vm->ip = gamepad_handler_addr;
@@ -589,10 +589,10 @@ static void setup_emu(VM* vm) {
 
 static void poll_sdl_event(VM* vm, PPU* ppu) {
   SDL_Event event;
-  
+
   while (SDL_PollEvent(&event) != 0) {
     switch(event.type) {
-      
+
     case SDL_QUIT:
       quit(0);
       break;
@@ -601,14 +601,14 @@ static void poll_sdl_event(VM* vm, PPU* ppu) {
       if (event.window.event == SDL_WINDOWEVENT_EXPOSED) render_ppu(ppu);
       break;
 
-      
+
     case SDL_MOUSEBUTTONUP:
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEMOTION:
       handle_mouse_event(vm, &event);
       break;
 
-      
+
     case SDL_KEYDOWN:
     case SDL_KEYUP:
       {
@@ -626,7 +626,7 @@ static void poll_sdl_event(VM* vm, PPU* ppu) {
         break;
       }
 
-      
+
     case SDL_JOYBUTTONUP:
     case SDL_JOYBUTTONDOWN:
       handle_gamepad_event(vm, &event);
@@ -665,7 +665,7 @@ Code sdl_run(VM* vm) {
     previous = current;
     SDL_Delay(clamp(FPS_MS - elapsed, 0, FPS_MS));
   }
- 
+
   return code;
 }
 

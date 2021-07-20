@@ -1,7 +1,7 @@
 PRIVATE
 
   : query 4 io ;
-  : param! 4 query ;  
+  : param! 4 query ;
 
 PUBLIC
 

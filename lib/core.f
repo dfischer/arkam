@@ -94,7 +94,7 @@ ng as: STOP
   >r 2dup < IF rdrop nip RET THEN # -- min
   drop r> 2dup < IF drop RET THEN # -- n
   nip dec # -- max-1
-; 
+;
 
 
 : within? ( n min max -- min<=n<max? )
@@ -412,7 +412,7 @@ PRIVATE
   ;
 
   [ buf IF RET THEN max 1 + allot buf! ] >init
- 
+
 PUBLIC
 
   : n>s ( n base -- buf )
@@ -627,7 +627,7 @@ PRIVATE # ----- s:each_line! -----
       drop inc GO
     ] while
   ;
-  
+
 PUBLIC
 
   : s:each_line! ( s q -- )
@@ -635,7 +635,7 @@ PUBLIC
       i swap >r call r> r>  GO
     ] while
   ;
-  
+
 END
 
 
@@ -1150,7 +1150,7 @@ X: # <IMMED>
 ;
 
 X: PRIVATE ( -- start closer )
-  forth:latest 
+  forth:latest
   [ forth:latest forth:hide_range ]
 ;
 
@@ -1174,7 +1174,7 @@ PUBLIC
 
   X: init:run
     link @ [
-      0 [ STOP ] ;case 
+      0 [ STOP ] ;case
       dup cell + @ call @ GO
     ] while
   ;
@@ -1198,7 +1198,7 @@ PUBLIC
     LIT, here 0 , RET,
     0 ' close
   ;
-  
+
   : field: ( offset q n -- offset+n q)
     forth:read [ " field name required" panic ] ;unless
     forth:create
@@ -1261,7 +1261,7 @@ PUBLIC
     r> forth:create
     LIT, , LIT, , ' sweep , ( returned from sweep )
   ;
-  
+
   : MARKER: ( name: -- )
     forth:read [ " marker name required" panic ] ;unless
     marker
@@ -1385,13 +1385,13 @@ PUBLIC
     id file:close!
     addr
   ;
-  
+
   : loadfile: ( :path -- addr )
     forth:read [ " file name required" ] ;unless
     loadfile
   ;
 
-  : filesize @ ;      # & -- n 
+  : filesize @ ;      # & -- n
   : filedata cell + ; # & -- &data
 
 END
@@ -1489,7 +1489,7 @@ PRIVATE
   var: buf
   var: show_depth
   var: show_stack
-  
+
   : prompt
     show_stack [ " | " pr ?stack ] when
     show_depth [ sys:depth .. ] when

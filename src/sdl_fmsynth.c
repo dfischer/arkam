@@ -123,13 +123,13 @@ typedef struct FMOp {
   double  fm_level;
   /* ADSR */
   double* atk_env;   // table
-  int     atk_len;   // ms  
+  int     atk_len;   // ms
   double* dcy_env;   // table
   int     dcy_len;   // ms
   double  sus_vol;   // rate(0-1)
   double* rel_env;   // table
   int     rel_len;   // ms
-  
+
   /* ----- status ----- */
   double amp;     // 0-1
   double phase_index; // for sine table
@@ -160,7 +160,7 @@ typedef struct FMOp {
 
 
 
-/* ----- Voice(Channel) ----- 
+/* ----- Voice(Channel) -----
    Currently each channel has only one voice
    so that voices are handled as channels.
 */
@@ -187,7 +187,7 @@ typedef struct FMSynth {
 } FMSynth;
 
 
-  
+
 /* ===== Global Variables ===== */
 
 static SDL_AudioDeviceID audio_id;
@@ -230,7 +230,7 @@ static double byte_to_env_vol(Byte b, double* table) {
   // return 0-1
   const double step = (ENV_TABLE_SIZE-1) / (double)256;
   int i = b * (int)step;
-  return table[i];  
+  return table[i];
 }
 
 
@@ -260,7 +260,7 @@ void set_pan(FMVoice* voc, double pan) {
   const double pi05 = M_PI * 0.5;
   const double pi15 = M_PI * 1.5;
   voc->pan = pan;
-  
+
   double rad = pan * pi05;
   voc->pan_l = cos(rad);
   voc->pan_r = cos(rad+pi15);
@@ -343,7 +343,7 @@ static double mod_ratio(FMOp* op) {
   case FMRatio13:  return 13.0;
   case FMRatio14:  return 14.0;
   case FMRatio15:  return 15.0;
-  case FMRatio16:  return 16.0;    
+  case FMRatio16:  return 16.0;
   case FMRatioD2:  return 0.25;
   case FMRatioD1:  return 0.5;
   default: die("Unknown ratio: %d", op->freq_ratio);
@@ -368,7 +368,7 @@ static void note_on_voice(FMVoice* voice, double freq) {
   case FMAlgo1:
   case FMAlgo2:
   case FMAlgo3:
-  case FMAlgo7: /* 1c 2c 3c 4c */    
+  case FMAlgo7: /* 1c 2c 3c 4c */
     {
       f1 = freq * mod_ratio(op1);
       f2 = freq * mod_ratio(op2);
@@ -403,11 +403,11 @@ static void note_on_voice(FMVoice* voice, double freq) {
   op2->feedback = 0.0;
   op3->feedback = 0.0;
   op4->feedback = 0.0;
-  
+
   op1->next_event = EnvE_NoteOn;
   op2->next_event = EnvE_NoteOn;
   op3->next_event = EnvE_NoteOn;
-  op4->next_event = EnvE_NoteOn;  
+  op4->next_event = EnvE_NoteOn;
 }
 
 
@@ -415,7 +415,7 @@ static void note_off_voice(FMVoice* voice) {
   voice->ops[0].next_event = EnvE_NoteOff;
   voice->ops[1].next_event = EnvE_NoteOff;
   voice->ops[2].next_event = EnvE_NoteOff;
-  voice->ops[3].next_event = EnvE_NoteOff;  
+  voice->ops[3].next_event = EnvE_NoteOff;
 }
 
 
@@ -432,10 +432,10 @@ static double envelope_amp(FMOp* op) {
       op->next_event = EnvE_Next;
       op->freq = op->next_freq;
       op->phase_delta = phase_delta(op->freq);
-      
+
       /* reset index for noise as percussion */
       if (op->wave_table == fm_noise_table) op->phase_index = 0;
-      
+
       calc_ads(op);
       return op->amp;
     }
@@ -445,7 +445,7 @@ static double envelope_amp(FMOp* op) {
       op->amp = op->atk_amp + diff;
       op->atk_rest--;
       op->atk_index += op->atk_step;
-      op->next_event = op->atk_rest > 0 ? EnvE_Continue : EnvE_Next;      
+      op->next_event = op->atk_rest > 0 ? EnvE_Continue : EnvE_Next;
       return op->amp;
     }
   case EnvS_Decay:
@@ -455,7 +455,7 @@ static double envelope_amp(FMOp* op) {
       op->dcy_rest--;
       op->dcy_index += op->dcy_step;
       op->next_event = op->dcy_rest > 0 ? EnvE_Continue : EnvE_Next;
-      return op->amp;      
+      return op->amp;
     }
   case EnvS_SustainInit:
     {
@@ -478,7 +478,7 @@ static double envelope_amp(FMOp* op) {
       op->amp = op->rel_diff * op->rel_env[(int)op->rel_index];
       op->rel_rest--;
       op->rel_index += op->rel_step;
-      op->next_event = op->rel_rest > 0 ? EnvE_Continue : EnvE_Next;      
+      op->next_event = op->rel_rest > 0 ? EnvE_Continue : EnvE_Next;
       return op->amp;
     }
   case EnvS_CrossFreqInit:
@@ -498,7 +498,7 @@ static double envelope_amp(FMOp* op) {
   default:
     die("Invalid state: %d", op->state);
   }
-  
+
   return 0.0f; // do not reach here
 }
 
@@ -510,7 +510,7 @@ static double envelope_amp(FMOp* op) {
 static double advance_sin(FMOp* op, double mod) {
   double amp = envelope_amp(op);
   double sin = amp * op->wave_table[(int)op->phase_index];
-  
+
   /* advance */
   mod = (mod + 1.0) / 2.0 /* -1-1 to 0-1 */ * op->fm_level; // -1-1 to 0-16
   double ampmod = op->phase_delta * amp * op->amp_freq_mod * (double)AMP_FREQ_LEVEL;
@@ -579,7 +579,7 @@ static double generate_sin(FMVoice* voice, FMAlgo algo) {
       double sin4 = advance_sin(op4, sin3 * feedback(op4));
       double sin = (sin2 + sin4) / 2.0 * voice->vol;
       return sin;
-    }    
+    }
   case FMAlgo5:
     {
       double sin1 = advance_sin(op1, feedback(op1));
@@ -606,7 +606,7 @@ static double generate_sin(FMVoice* voice, FMAlgo algo) {
       double sin4 = advance_sin(op4, feedback(op4));
       double sin = (sin1 + sin2 + sin3 + sin4) / 4.0 * voice->vol;
       return sin;
-    }    
+    }
   default: die("Unknown algorithm: %d", voice->algo);
   }
   return 0.0;
@@ -743,7 +743,7 @@ Code handleFMSYNTH(VM* vm, Cell op) {
     }
   case 3: /* stop: -- */
     {
-      FMVoice* voice = &(synth.voices[current_voice]);      
+      FMVoice* voice = &(synth.voices[current_voice]);
       SDL_LockAudioDevice(audio_id);
       note_off_voice(voice);
       SDL_UnlockAudioDevice(audio_id);
@@ -754,7 +754,7 @@ Code handleFMSYNTH(VM* vm, Cell op) {
       if (!ark_has_ds_items(vm, 2)) Raise(DS_UNDERFLOW);
       Cell param = Pop();
       Cell v = Pop();
-      FMVoice* voice = &(synth.voices[current_voice]);      
+      FMVoice* voice = &(synth.voices[current_voice]);
       SDL_LockAudioDevice(audio_id);
       io_set_param(voice, current_operator, param, v);
       SDL_UnlockAudioDevice(audio_id);
@@ -764,14 +764,14 @@ Code handleFMSYNTH(VM* vm, Cell op) {
     {
       if (!ark_has_ds_items(vm, 1)) Raise(DS_UNDERFLOW);
       Cell algo = Pop();
-      FMVoice* voice = &(synth.voices[current_voice]);      
+      FMVoice* voice = &(synth.voices[current_voice]);
       if (algo < 0 || algo >= FMAlgoCount) die("Invalid algo: %d", algo);
       SDL_LockAudioDevice(audio_id);
       voice->algo = algo;
       SDL_UnlockAudioDevice(audio_id);
       return ARK_OK;
     }
-  default: Raise(IO_UNKNOWN_OP);          
+  default: Raise(IO_UNKNOWN_OP);
   }
 }
 
@@ -784,7 +784,7 @@ Code handleFMSYNTH(VM* vm, Cell op) {
 
 static void fm_init_transitions() {
   memset(env_trans, 0, sizeof(env_trans));
-  
+
   Trans(Silence, NoteOn,  AttackInit);
   Trans(Silence, NoteOff, Silence);
 
@@ -802,7 +802,7 @@ static void fm_init_transitions() {
 
   Trans(SustainInit, Next,    Sustain);
   Trans(SustainInit, NoteOn,  CrossFreqInit);
-  Trans(SustainInit, NoteOff, ReleaseInit);  
+  Trans(SustainInit, NoteOff, ReleaseInit);
 
   Trans(Sustain, Next,    ReleaseInit);
   Trans(Sustain, NoteOn,  CrossFreqInit);
@@ -833,7 +833,7 @@ static void init_operator(FMOp* op) {
   op->next_event = EnvE_Continue;
 
   op->wave_table = fm_sine_table;
-  
+
   double freq = 440;
   op->vol = 1.0f;
   op->amp = 0.0f;
@@ -850,12 +850,12 @@ static void init_operator(FMOp* op) {
   /* default adsr */
   op->atk_env = env_table_eu;
   op->atk_len = 10; // ms
-  
+
   op->dcy_env = env_table_ed;
   op->dcy_len = 50;  // ms
-  
+
   op->sus_vol = 0.3;
-  
+
   op->rel_env = env_table_ld;
   op->rel_len = 500; // ms
 }
@@ -879,7 +879,7 @@ static void init_synth(FMSynth* synth) {
   synth->vol = 0.3f;
   synth->ms_env  = env_table_lu;
   synth->vol_env = env_table_eu;
-  
+
   for (int i = 0; i < FM_VOICES; i++) {
     init_voice(&(synth->voices[i]));
   }
@@ -892,7 +892,7 @@ static void init_wave_table() {
     fm_sine_table[i] = sin(2.0 * M_PI * i / (double) WAVE_TABLE_SIZE);
   }
 
-  
+
   /* ----- saw ----- */
   double n = -1.0;
   double step = 2 / (double)WAVE_TABLE_SIZE;
@@ -902,7 +902,7 @@ static void init_wave_table() {
   }
   fm_saw_table[WAVE_TABLE_SIZE-1] = 1.0;
 
-  
+
   /* ----- sq ----- */
   int half = WAVE_TABLE_SIZE / 2;
   for (int i = 0; i < WAVE_TABLE_SIZE; i++) {
@@ -948,9 +948,9 @@ static void init_env_tables() {
 
 void setup_fmsynth(VM* vm) {
   fm_init_transitions();
-  
+
   SDL_AudioSpec spec;
-  
+
   SDL_zero(spec);
   spec.freq = SAMPLE_RATE;
   spec.format = AUDIO_S16;

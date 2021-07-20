@@ -164,7 +164,7 @@ Public Code ark_pop_valid_addr(VM* vm) {
   // If tos is valid addr this pops it to vm->result and returns ARK_OK
   // or remains tos for error detection and set error to vm->err.
   if (!valid_addr(vm, Tos())) Raise(INVALID_ADDR);
-  
+
   vm->result = Pop();
   return ARK_OK;
 }
@@ -176,7 +176,7 @@ Public Code ark_pop_valid_addr(VM* vm) {
 // =============================================================================
 
 /*
-  rp -> | 
+  rp -> |
         | return address
 
  <prologue>
@@ -282,7 +282,7 @@ Private Code instRET(VM* vm) {
 Private Code instDUP(VM* vm) {
   if (!has_ds_spaces(vm, 1)) Raise(DS_OVERFLOW);
   if (!has_ds_items(vm, 1))  Raise(DS_UNDERFLOW);
-  
+
   Push(Tos());
   return ARK_OK;
 }
@@ -332,7 +332,7 @@ Private Code instSUB(VM* vm) {
   Cell b = Pop();
   Cell a = Pop();
   Push(a-b);
-  return ARK_OK;  
+  return ARK_OK;
 }
 
 Private Code instMUL(VM* vm) {
@@ -341,7 +341,7 @@ Private Code instMUL(VM* vm) {
   Cell b = Pop();
   Cell a = Pop();
   Push(a*b);
-  return ARK_OK;  
+  return ARK_OK;
 }
 
 Private Code instDMOD(VM* vm) {
@@ -424,7 +424,7 @@ Private Code instZJMP(VM* vm) {
     vm->ip = next;
     return ARK_OK;
   }
-  
+
   Code code = ark_get(vm, vm->ip); ExpectOK;
   Cell addr = vm->result;
   if (!valid_addr(vm, addr)) Raise(INVALID_ADDR);
@@ -481,7 +481,7 @@ Private Code instBSET(VM* vm) {
 
   Byte v = Pop();
   vm->mem[addr] = v;
-  
+
   return ARK_OK;
 }
 
@@ -570,7 +570,7 @@ Private Code instIO(VM* vm) {
     if (op == IO_READY_QUERY) {
       Push(handler == NULL ? 0 : -1); return ARK_OK;
     }
-    
+
     if (handler == NULL) Raise(IO_NOT_REGISTERED);
     return handler(vm, op);
   }
@@ -598,7 +598,7 @@ Private Code handleSYS(VM* vm, Cell op) {
     /* Deta stack size(cells) */
     Push(vm->ds_size);
     return ARK_OK;
-    
+
   case 3:
     /* Data stack address */
     Push(vm->ds);
@@ -608,7 +608,7 @@ Private Code handleSYS(VM* vm, Cell op) {
     /* Return stack size(cells) */
     Push(vm->rs_size);
     return ARK_OK;
-    
+
   case 5:
     /* Return stack address */
     Push(vm->rs);
@@ -628,7 +628,7 @@ Private Code handleSYS(VM* vm, Cell op) {
     /* Minimum integer(cell) */
     Push(ARK_MIN_INT);
     return ARK_OK;
-    
+
   default: Raise(IO_UNKNOWN_OP);
   }
 }
@@ -689,7 +689,7 @@ Private Code instSETRP(VM* vm) {
   if (!has_ds_items(vm, 1)) Raise(DS_UNDERFLOW);
   Code code = pop_valid_addr(vm); ExpectOK;
   vm->rp = vm->result;
-  return ARK_OK;  
+  return ARK_OK;
 }
 
 
@@ -754,7 +754,7 @@ Public Code ark_step(VM* vm) {
 
   if (!valid_addr(vm, inst)) Raise(INVALID_INST);
   if (inst == 0) Raise(INVALID_INST);
-    
+
   vm->ip += Cells(1);
 
   // use jump table for primitives
@@ -763,7 +763,7 @@ Public Code ark_step(VM* vm) {
     if (inst == ARK_INST_NOOP) return ARK_OK;
     return InstTable[inst](vm);
   }
-  
+
   /* Step into a word
      ip -> | inst (*1)
            | next inst (return to here)

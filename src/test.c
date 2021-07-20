@@ -55,14 +55,14 @@ void run(VM* vm, Cell start, ArkCode expect) {
 void test_memory_access(Opts* opts) {
   ArkVM* vm = ark_new_vm(opts);
   // valid access
-  
+
   assert(ark_set(vm, 0x04, 123) == ARK_OK);
   assert(ark_get(vm, 0x04) == ARK_OK);
   assert(vm->result == 123);
 
   assert(ark_set(vm, Cells(11), 123) == ARK_OK);
   assert(ark_get(vm, Cells(11)) == ARK_OK);
-  assert(vm->result == 123);  
+  assert(vm->result == 123);
 
   // out of range
   assert(ark_set(vm, -1, 123) == ARK_ERR);
@@ -81,7 +81,7 @@ void test_memory_access(Opts* opts) {
 void test_data_stack(Opts* opts) {
   Cell dcells = 16;
   opts->dstack_cells = dcells;
-  
+
   ArkVM* vm = ark_new_vm(opts);
   int code = ARK_OK;
 
@@ -115,7 +115,7 @@ void test_data_stack(Opts* opts) {
 void test_return_stack(Opts* opts) {
   Cell rcells = 16;
   opts->rstack_cells = rcells;
-  
+
   ArkVM* vm = ark_new_vm(opts);
   int code = ARK_OK;
 
@@ -155,7 +155,7 @@ void test_run_call_word(VM* vm) {
   Cell here = foo;
   PutI(here, ADD);
   PutI(here, RET);
- 
+
   // foo halt
   Cell start = here;
   Put(here, foo);
@@ -175,7 +175,7 @@ void test_run_invalid_inst(VM* vm) {
   start = ARK_ADDR_CODE_BEGIN;
   Cell here = start;
   Put(here, -1);
-  Put(here, ARK_HALT);  
+  Put(here, ARK_HALT);
   Run(start, ARK_ERR);
   assert(vm->err == ARK_ERR_INVALID_INST);
 
@@ -385,7 +385,7 @@ void test_run_dmod(VM* vm) {
   assert(vm->err == ARK_ERR_ZERO_DIVISION);
   // keep stack
   assert(Pop() == 0);
-  assert(Pop() == 42);  
+  assert(Pop() == 42);
 }
 
 void test_run_eq(VM* vm) {
@@ -475,7 +475,7 @@ void test_run_gt(VM* vm) {
   PutI(here, GT);
   PutI(here, HALT);
   Run(start, ARK_HALT);
-  assert(Pop() == 0);  
+  assert(Pop() == 0);
 }
 
 void test_run_lt(VM* vm) {
@@ -513,7 +513,7 @@ void test_run_lt(VM* vm) {
   PutI(here, LT);
   PutI(here, HALT);
   Run(start, ARK_HALT);
-  assert(Pop() == -1);  
+  assert(Pop() == -1);
 }
 
 
@@ -672,7 +672,7 @@ void test_run_bitwise_xor(VM* vm) {
   PutI(here, XOR);
   PutI(here, HALT);
   Run(start, ARK_HALT);
-  assert(Pop() == 6);  
+  assert(Pop() == 6);
 }
 
 void test_run_bitwise_lshift(VM* vm) {
@@ -700,7 +700,7 @@ void test_run_bitwise_lshift(VM* vm) {
   PutI(here, HALT);
   Run(start, ARK_HALT);
   UCell x = -3;
-  assert(Pop() == x >> 1);      
+  assert(Pop() == x >> 1);
 }
 
 void test_run_bitwise_ashift(VM* vm) {
@@ -727,7 +727,7 @@ void test_run_bitwise_ashift(VM* vm) {
   PutI(here, ASHIFT);
   PutI(here, HALT);
   Run(start, ARK_HALT);
-  assert(Pop() == -2);        
+  assert(Pop() == -2);
 }
 
 
@@ -841,7 +841,7 @@ void test_run_rp(VM* vm) {
   test_##name(&opts);                                                      \
   printf("done\n");                                                        \
   }
-  
+
 #define do_run_test(name) {                                                \
   printf("test %30s ...", "run " #name);                                   \
   Cell inst_count = ARK_INSTRUCTION_COUNT;                                 \
@@ -858,7 +858,7 @@ int main(int argc, char* argv[]) {
   do_test(memory_access);
   do_test(data_stack);
   do_test(return_stack);
-  
+
   // ----- Run test -----
   do_run_test(call_word);
   do_run_test(invalid_inst);

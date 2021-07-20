@@ -9,7 +9,7 @@ require: lib/entity.f
 PRIVATE
 
   128 as: max
-  
+
   max ENTITY: btn
     COMPONENT: show
     COMPONENT: callback
@@ -23,20 +23,20 @@ PRIVATE
     COMPONENT: dparam
     COMPONENT: dcallback
   END
-  
+
   ( current button ) var: id
   ( draw origin ) var: dx  var: dy
   ( mouse ) var: mx  var: my  var: mp
-  
+
   : hover? mx my id x id y id width id height hover_rect? ;
-  
+
   : clicked? mp IF no ELSE id pressed THEN ;
-  
+
   : click
     no id >pressed
     id param id callback >r
   ;
-  
+
   : handle_click
     hover? not IF no id >pressed RET THEN
     clicked? IF click THEN
@@ -47,7 +47,7 @@ PRIVATE
       dy 1 - dy!
     THEN
   ;
-  
+
   : draw ( id -- )
     id! ( draw-callback can use id )
     id x dx! id y dy!

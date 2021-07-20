@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
   int argi     = handle_opts(argc, argv);
   int restc    = argc - argi;
   int image_i  = argi;
-  if (restc < 1) usage();  
+  if (restc < 1) usage();
   int app_argi = argi;
   int app_argc = restc;
   char* image_name = argv[image_i];
