@@ -18,10 +18,10 @@
 
 
 : THROW ( n -- )
-  ?dup ;0 ( no exception )
-  exc-handler rp!
-  r> exc-handler!
-  r> swap >r sp! r>
+    ?dup ;0 ( no exception )
+    exc-handler rp!
+    r> exc-handler!
+    r> swap >r sp! r>
 ;
 
 
@@ -29,25 +29,25 @@
 ( --- test --- )
 
 : foo
-  ." before foo"
-  " error in foo" THROW
-  ." after foo"
+    ." before foo"
+    " error in foo" THROW
+    ." after foo"
 ;
 
 : bar
-  ." before bar"
-  foo
-  ." after bar"
+    ." before bar"
+    foo
+    ." after bar"
 ;
 
 : baz
-  ." before baz"
-  bar
-  ." after baz"
+    ." before baz"
+    bar
+    ." after baz"
 ;
 
 : main
-  [ baz ] CATCH ?dup IF " Error:" pr prn THEN
+    [ baz ] CATCH ?dup IF " Error:" pr prn THEN
 ;
 
 main
