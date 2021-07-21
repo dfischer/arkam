@@ -505,6 +505,22 @@ M: ' <IMMED>
 ;
 
 
+M: POSTPONE: <IMMED>
+  forth:mode [ panic" Do not use POSTPONE: in run mode" ] ;unless
+  forth:read [ panic" Word name required" ] ;unless
+  x:find [ epr panic"  ?" ] ;unless
+  xxt x,
+;
+
+
+M: COMPILE: <IMMED>
+  forth:mode [ panic" Do not use COMPILE: in run mode" ] ;unless
+  POSTPONE: M-'
+  " ," x:find [ panic" comma(,) is not defined yet in cross-env" ] ;unless
+  xxt x,
+;
+
+
 M: var> <run_only>
   forth:read [ panic" Var name required" ] ;unless
   30 s:check [ epr panic" : too long var name" ] ;unless

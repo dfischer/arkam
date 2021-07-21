@@ -906,13 +906,13 @@ X: ' <IMMED>
   forth:mode [ LIT, , ] when
 ;
 
-: POSTPONE: <IMMED>
+X: POSTPONE: <IMMED>
   forth:read_find ;0
   forth:code
   forth:mode [ , ] [ call ] if
 ;
 
-: COMPILE: <IMMED>
+X: COMPILE: <IMMED>
   forth:read_find ;0
   forth:code LIT, , ' , ,
 ;
@@ -962,14 +962,14 @@ X: " <IMMED>
 
 
 : panic" <IMMED>
-  ' " call forth:mode [ ' panic , ] [ panic ] if
+  POSTPONE: " forth:mode [ COMPILE: panic ] [ panic ] if
 ;
 
 
 : ." <IMMED>
   forth:mode [ here ] unless
-  ' " call
-  forth:mode [ ' prn , ] [ prn here! ] if
+  POSTPONE: "
+  forth:mode [ COMPILE: prn ] [ prn here! ] if
 ;
 
 
@@ -1220,7 +1220,7 @@ END
 ;
 
 : ASSERT" <IMMED>
-  ' " call forth:mode [ ' ASSERT , ] [ ASSERT ] if
+  POSTPONE: " forth:mode [ ' ASSERT , ] [ ASSERT ] if
 ;
 
 : CHECK ( s q -- ) # q: -- ok?
@@ -1251,7 +1251,7 @@ END
 ;
 
 : CLEAN" ( q name: -- ) <IMMED>
-    ' " call
+    POSTPONE: "
     forth:mode [ ' CLEAN , ] [ CLEAN ] if
 ;
 
@@ -1310,7 +1310,7 @@ X: var: 0 ' var> call ;
 X: -> <IMMED>
   forth:read_find [ " Word name required" panic ] ;unless
   forth:code
-  forth:mode [ LIT, , ' 2nd! , ] [ 2nd! ] if
+  forth:mode [ LIT, , COMPILE: 2nd! ] [ 2nd! ] if
 ;
 
 
