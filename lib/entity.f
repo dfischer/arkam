@@ -39,7 +39,7 @@ PRIVATE
         es alives elatest + ecur!
 
         [   erest [ no STOP ] ;unless
-            ecur @ [
+            ecur b@ [
                 ecur inc esize mod ecur!
                 erest dec erest! GO
             ] ;when
