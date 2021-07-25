@@ -4,7 +4,8 @@
 PRIVATE
 
   # entities:
-  #   | count
+  #   | size
+  #   | latest created ( index )
   #   | alive flags ... ( count bytes )
   #
   # components:
@@ -13,6 +14,7 @@ PRIVATE
 
   STRUCT entities
     cell field: size
+    cell field: latest
     0    field: alives
   END
 
@@ -23,14 +25,29 @@ PRIVATE
 
   ( --- entity --- )
 
-  : new ( es -- id yes | no )
-    [ alives dup ] [ size @ ] biq
-    [ ( start current n )
-      0 [ 2drop no STOP ] ;case
-      over b@ [ ' inc ' dec bi* GO ] ;when
-      drop yes over b! swap - yes STOP
-    ] while
-  ;
+  PRIVATE
+      var: es
+      var: esize
+      var: elatest
+      var: ecur
+      var: erest
+      : cur>id es alives - ;
+  PUBLIC
+      : new ( es -- id yes | no ) es!
+        es size @ dup esize! erest!
+        es latest @ elatest!
+        es alives elatest + ecur!
+
+        [   erest [ no STOP ] ;unless
+            ecur @ [
+                ecur inc esize mod ecur!
+                erest dec erest! GO
+            ] ;when
+            ecur inc cur>id esize mod es latest !
+            yes ecur b! ecur cur>id yes STOP
+        ] while
+      ;
+  END
 
 
   ( --- name buffer --- )
@@ -62,7 +79,7 @@ PRIVATE
 PUBLIC
 
 : ecs:new_es ( n -- es )
-  here swap dup , allot drop here:align! ;
+  here swap dup , 0 , allot drop here:align! ;
 
 : entities: ( n name: -- ) ecs:new_es as: ;
 
