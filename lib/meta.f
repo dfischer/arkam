@@ -200,6 +200,19 @@ END
 ;
 
 
+0 var> meta_latest
+
+: meta:push ( word -- ) here meta_latest , meta_latest! , ;
+
+: meta:find ( s -- word yes | no )
+  meta_latest [
+    0 [ drop no STOP ] ;case
+    2dup cell + @ forth:name s= [ nip cell + @ yes STOP ] ;when
+    @ GO
+  ] while
+;
+
+
 " M-                " as: meta_buf
 meta_buf 2 +          as: meta_name
 meta_name s:len       as: meta_len
@@ -210,9 +223,13 @@ meta_name s:len       as: meta_len
   meta_buf
 ;
 
+var: m_close
+
 : M:
   forth:read [ panic" Meta word name required" ] ;unless
   name>meta _:
+  ( closer ) m_close!
+  [ m_close call forth:latest meta:push ]
 ;
 
 : <run_only> <IMMED>
@@ -220,6 +237,27 @@ meta_name s:len       as: meta_len
   LIT, forth:latest forth:name 2 + ,
   [ forth:mode [ " Do not compile: " epr panic ] [ drop ] if ] ,
 ;
+
+: meta:create_cross ( name -- )
+  x:create drop
+  yes forth:mode!
+  xlatest x:hide!
+  [ xRET, xlatest x:show! no forth:mode! ]
+;
+
+: meta:create ( name -- )
+  dup x:create m:create
+  xlatest x:hide!
+  forth:latest  forth:hide!
+  yes forth:mode!
+  [
+    xRET,
+    xlatest x:show!
+    forth:latest forth:show!
+    no forth:mode!
+  ]
+;
+
 
 
 ( for const )
@@ -268,6 +306,7 @@ var: const_link
     " prim " epr meta_name epr
     "  code " epr over .. forth:latest forth:code cell + @ .
   ] when
+  forth:latest meta:push
 ;
 
 : compile_only [ panic" compile only!" ] ;
@@ -394,30 +433,9 @@ END
 
 ( ===== Meta Syntax Word ===== )
 
-M: X: ( -- q ) <run_only>
-  # No meta-word will be created.
-  # used for words that conflicts meta-word
-  # ex. : ; IF [ <IMMED>
-  forth:mode [ panic" Do not call X: in compile mode" ] ;when
-  forth:read [ panic" X-Word name required" ] ;unless
-  x:create drop
-  yes forth:mode!
-  xlatest x:hide!
-  [ xRET, xlatest x:show! no forth:mode! ]
-;
-
 M: : <run_only>
   forth:read [ panic" Word name required" ] ;unless
-  dup x:create m:create
-  xlatest x:hide!
-  forth:latest  forth:hide!
-  yes forth:mode!
-  [
-    xRET,
-    xlatest x:show!
-    forth:latest forth:show!
-    no forth:mode!
-  ]
+  dup meta:find [ drop meta:create_cross ] [ meta:create ] if
 ;
 
 M: ; <IMMED> ( q -- ) >r ;
@@ -561,6 +579,8 @@ M: " <IMMED>
   forth:mode [ xhere swap x! xLIT, x, ] when
 ;
 
+M: ( <IMMED> POSTPONE: ( ;
+M: # <IMMED> POSTPONE: # ;
 
 
 PRIVATE

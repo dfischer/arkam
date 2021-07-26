@@ -11,7 +11,7 @@
 #   - run meta words defined by `M:` in meta.f
 #   - put literals (ex. -123, 0xFF)
 # You can't
-#   - run cross-words defined by `:` or `X:`
+#   - run cross-words defined here
 #
 # === Compile mode
 # You can
@@ -20,7 +20,7 @@
 #   - compile variables defined by `var:` and `var>`
 #   - run meta words defined in meta.f
 # You can't
-#   - run immediate cross-words defined by `:` or `X:` with `<IMMED>`
+#   - run immediate cross-words defined here
 
 
 
@@ -900,19 +900,19 @@ END
   forth:mode [ LIT, , ] when
 ;
 
-X: ' <IMMED>
+: ' <IMMED>
   forth:read_find ;0
   forth:code
   forth:mode [ LIT, , ] when
 ;
 
-X: POSTPONE: <IMMED>
+: POSTPONE: <IMMED>
   forth:read_find ;0
   forth:code
   forth:mode [ , ] [ call ] if
 ;
 
-X: COMPILE: <IMMED>
+: COMPILE: <IMMED>
   forth:read_find ;0
   forth:code LIT, , ' , ,
 ;
@@ -934,7 +934,7 @@ X: COMPILE: <IMMED>
 ;
 
 
-X: CHAR: <IMMED>
+: CHAR: <IMMED>
   forth:read [ " A character required" panic ] ;unless
   dup b@ dup CHAR: \\ = [ drop inc
     [ [ inc ] [ b@ ] biq ] c:escaped
@@ -944,7 +944,7 @@ X: CHAR: <IMMED>
 ;
 
 
-X: " <IMMED>
+: " <IMMED>
   forth:mode [ JMP, here 0 , here swap ] [ here ] if
   [ forth:take
     0  [ " Unclosed string" panic STOP ] ;case
@@ -1060,19 +1060,19 @@ END
   ]
 ;
 
-X: : ( name: -- q )
+: : ( name: -- q )
   forth:read [ " Word name required" panic ] unless
   _:
 ;
 
-X: ; <IMMED> ( q -- ) >r ;
+: ; <IMMED> ( q -- ) >r ;
 
 
-X: <IMMED> <IMMED> forth:latest forth:immed! ;
+: <IMMED> <IMMED> forth:latest forth:immed! ;
 
 
 
-X: [ <IMMED> ( -- &q &back mode close | &q mode close )
+: [ <IMMED> ( -- &q &back mode close | &q mode close )
   forth:mode [ JMP, here 0 , here swap ] [ here:align! here ] if
   forth:mode forth:compile_mode forth:mode!
   [
@@ -1082,18 +1082,18 @@ X: [ <IMMED> ( -- &q &back mode close | &q mode close )
   ]
 ;
 
-X: ] <IMMED> ( q -- ) >r ;
+: ] <IMMED> ( q -- ) >r ;
 
 : [do <IMMED> forth:mode 0 forth:mode! [ forth:mode! ] ;
 
 
-X: IF   <IMMED> ZJMP, here 0 , ;                 # -- &back
-X: ELSE <IMMED> JMP, here swap 0 , here swap ! ; # &back -- &back
-X: THEN <IMMED> here swap ! ;                    # &back --
+: IF   <IMMED> ZJMP, here 0 , ;                 # -- &back
+: ELSE <IMMED> JMP, here swap 0 , here swap ! ; # &back -- &back
+: THEN <IMMED> here swap ! ;                    # &back --
 
-X: AGAIN <IMMED> JMP, forth:latest forth:code , ;
+: AGAIN <IMMED> JMP, forth:latest forth:code , ;
 
-X: RECUR <IMMED> forth:latest forth:code , ;
+: RECUR <IMMED> forth:latest forth:code , ;
 
 
 : doconst ( v -- )
@@ -1101,7 +1101,7 @@ X: RECUR <IMMED> forth:latest forth:code , ;
   forth:mode [ LIT, , ] when
 ;
 
-X: as:
+: as:
   forth:read [ " Const name required" panic ] ;unless
   forth:create
   forth:latest forth:immed!
@@ -1109,19 +1109,19 @@ X: as:
 ;
 
 
-X: defer:
+: defer:
   forth:read [ " Defered name required" panic ] ;unless
   forth:create
   JMP, 0 ,
 ;
 
-X: END <IMMED> ( q -- ) >r ;
+: END <IMMED> ( q -- ) >r ;
 
 
 
 ( ===== Comment ===== )
 
-X: ( <IMMED>
+: ( <IMMED>
   [ forth:take
     0 [ " Unclosed comment" panic STOP ] ;case
     CHAR: ) [ STOP ] ;case
@@ -1130,7 +1130,7 @@ X: ( <IMMED>
 ;
 
 
-X: # <IMMED>
+: # <IMMED>
   [ forth:take
     0  [ STOP ] ;case
     10 [ STOP ] ;case
@@ -1149,12 +1149,12 @@ X: # <IMMED>
   ] while
 ;
 
-X: PRIVATE ( -- start closer )
+: PRIVATE ( -- start closer )
   forth:latest
   [ forth:latest forth:hide_range ]
 ;
 
-X: PUBLIC ( start closer -- start end closer )
+: PUBLIC ( start closer -- start end closer )
   drop forth:latest ' forth:hide_range
 ;
 
@@ -1168,11 +1168,11 @@ PRIVATE
 
 PUBLIC
 
-  X: >init ( xt -- )
+  : >init ( xt -- )
     here link @ , link ! ,
   ;
 
-  X: init:run
+  : init:run
     link @ [
       0 [ STOP ] ;case
       dup cell + @ call @ GO
@@ -1286,7 +1286,7 @@ END
 
 ( ===== Var ===== )
 
-X: var>
+: var>
   forth:read [ " Var name required" panic ] ;unless
   forth:max_len dec s:check [ epr " : too long var name" panic ] ;unless
   dup >r forth:create
@@ -1295,7 +1295,7 @@ X: var>
   LIT, , !, RET,
 ;
 
-X: var: 0 ' var> call ;
+: var: 0 ' var> call ;
 
 : var' <IMMED>
   forth:read [ " Var name required" panic ] ;unless
@@ -1307,7 +1307,7 @@ X: var: 0 ' var> call ;
 
 : 2nd! ( v xt -- ) cell + ! ;
 
-X: -> <IMMED>
+: -> <IMMED>
   forth:read_find [ " Word name required" panic ] ;unless
   forth:code
   forth:mode [ LIT, , COMPILE: 2nd! ] [ 2nd! ] if
@@ -1320,52 +1320,52 @@ X: -> <IMMED>
 : compile_only ( prim -- ) forth:mode [ prim, ] [ " Compile Only" panic ] if ;
 : primitive ( prim q -- ) forth:mode [ drop prim, ] [ nip call ] if ;
 
-X: noop <IMMED> ;
-X: HALT <IMMED> 1 [ HALT ] primitive ;
-X: LIT  <IMMED> 2 compile_only ;
-X: RET  <IMMED> 3 compile_only ;
+: noop <IMMED> ;
+: HALT <IMMED> 1 [ HALT ] primitive ;
+: LIT  <IMMED> 2 compile_only ;
+: RET  <IMMED> 3 compile_only ;
 
-X: dup  <IMMED> 4 [ dup  ] primitive ;
-X: drop <IMMED> 5 [ drop ] primitive ;
-X: swap <IMMED> 6 [ swap ] primitive ;
-X: over <IMMED> 7 [ over ] primitive ;
+: dup  <IMMED> 4 [ dup  ] primitive ;
+: drop <IMMED> 5 [ drop ] primitive ;
+: swap <IMMED> 6 [ swap ] primitive ;
+: over <IMMED> 7 [ over ] primitive ;
 
-X: +    <IMMED> 8  [ +    ] primitive ;
-X: -    <IMMED> 9  [ -    ] primitive ;
-X: *    <IMMED> 10 [ *    ] primitive ;
-X: /mod <IMMED> 11 [ /mod ] primitive ;
+: +    <IMMED> 8  [ +    ] primitive ;
+: -    <IMMED> 9  [ -    ] primitive ;
+: *    <IMMED> 10 [ *    ] primitive ;
+: /mod <IMMED> 11 [ /mod ] primitive ;
 
-X: =  <IMMED> 12 [ =  ] primitive ;
-X: != <IMMED> 13 [ != ] primitive ;
-X: >  <IMMED> 14 [ >  ] primitive ;
-X: <  <IMMED> 15 [ <  ] primitive ;
+: =  <IMMED> 12 [ =  ] primitive ;
+: != <IMMED> 13 [ != ] primitive ;
+: >  <IMMED> 14 [ >  ] primitive ;
+: <  <IMMED> 15 [ <  ] primitive ;
 
-X: JMP  <IMMED> 16 compile_only ;
-X: ZJMP <IMMED> 17 compile_only ;
+: JMP  <IMMED> 16 compile_only ;
+: ZJMP <IMMED> 17 compile_only ;
 
-X: @  <IMMED> 18 [ @  ] primitive ;
-X: !  <IMMED> 19 [ !  ] primitive ;
-X: b@ <IMMED> 20 [ b@ ] primitive ;
-X: b! <IMMED> 21 [ b! ] primitive ;
+: @  <IMMED> 18 [ @  ] primitive ;
+: !  <IMMED> 19 [ !  ] primitive ;
+: b@ <IMMED> 20 [ b@ ] primitive ;
+: b! <IMMED> 21 [ b! ] primitive ;
 
-X: and <IMMED> 22 [ and ] primitive ;
-X: or  <IMMED> 23 [ or  ] primitive ;
-X: inv <IMMED> 24 [ inv ] primitive ;
-X: xor <IMMED> 25 [ xor ] primitive ;
+: and <IMMED> 22 [ and ] primitive ;
+: or  <IMMED> 23 [ or  ] primitive ;
+: inv <IMMED> 24 [ inv ] primitive ;
+: xor <IMMED> 25 [ xor ] primitive ;
 
-X: lsft <IMMED> 26 [ lsft ] primitive ;
-X: asft <IMMED> 27 [ asft ] primitive ;
+: lsft <IMMED> 26 [ lsft ] primitive ;
+: asft <IMMED> 27 [ asft ] primitive ;
 
-X: io <IMMED> 28 [ io ] primitive ;
+: io <IMMED> 28 [ io ] primitive ;
 
-X: >r    <IMMED> 29 compile_only ;
-X: r>    <IMMED> 30 compile_only ;
-X: rdrop <IMMED> 31 compile_only ;
+: >r    <IMMED> 29 compile_only ;
+: r>    <IMMED> 30 compile_only ;
+: rdrop <IMMED> 31 compile_only ;
 
-X: sp  <IMMED> 32 [ sp  ] primitive ;
-X: sp! <IMMED> 33 [ sp! ] primitive ;
-X: rp  <IMMED> 34 [ rp  ] primitive ;
-X: rp! <IMMED> 35 [ rp! ] primitive ;
+: sp  <IMMED> 32 [ sp  ] primitive ;
+: sp! <IMMED> 33 [ sp! ] primitive ;
+: rp  <IMMED> 34 [ rp  ] primitive ;
+: rp! <IMMED> 35 [ rp! ] primitive ;
 
 
 
