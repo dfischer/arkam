@@ -152,8 +152,8 @@ END
 : xcurrent! adr_xcurrent x! ;
 
 : xlexi:new ( name -- adr )
-     xhere swap x:sput   ( name )
-     3 cells xallot swap ( lexi name )
+     xhere swap x:sput       ( name )
+     xhere:align! xhere swap ( lexi name )
      0 x,
      0 x,
      x,
@@ -206,11 +206,18 @@ x-core xcurrent!
 : xxt!   3 cells + x! ;
 : xxt    3 cells + x@ ;
 
+: x:find_in ( name lexi -- xword yes | name no )
+    xlexi:latest [
+        0 [ no STOP ] ;case
+        2dup xname x>t s= [ nip yes STOP ] ;when
+        xnext GO
+    ] while
+;
+
 : x:find ( name -- xword yes | name no )
-  xlatest [ ( name xword )
-    0 [ no STOP ] ;case
-    2dup xname x>t s= [ nip yes STOP ] ;when
-    xnext GO
+  xcontext swap [ over ( lexi name lexi )
+    0 [ nip no STOP ] ;case
+    x:find_in [ nip yes STOP ] [ [ xlexi:next ] dip GO ] if
   ] while
 ;
 

@@ -759,19 +759,26 @@ var: forth:mode
 ;
 
 
-defer: forth:find
-: forth:(find) ( name -- name 0 | normal: &entry 1 | immed: &entry 2 )
-  forth:latest [ # name latest
+: forth:find_in ( name lexi -- name no | word yes )
+  lexi:latest [ ( name latest )
     ( notfound ) 0 [ no STOP ] ;case
     ( hidden   ) dup forth:hidden? [ forth:next GO ] ;when
-    ( found    ) 2dup forth:name s=
-                 [ nip dup forth:immed? IF 2 ELSE 1 THEN STOP ] ;when
+    ( found    ) 2dup forth:name s= [ nip yes STOP ] ;when
     ( next     ) forth:next GO
   ] while
 ;
+
+: forth:(find) ( name -- name no | word yes )
+    context @ swap [ over ( lexi name lexi )
+        0 [ nip no STOP ] ;case
+        forth:find_in [ nip yes STOP ] [ ' lexi:next dip GO ] if
+    ] while
+;
+
+defer: forth:find
 ' forth:(find) -> forth:find
 
-: forth:find! ( name -- normal: &entry 1 | immed: &entry 2 )
+: forth:find! ( name -- word )
   forth:find [ epr "  ?" panic ] ;unless
 ;
 
@@ -857,9 +864,13 @@ PUBLIC
     [ forth:read [ STOP ] ;unless
       forth:find
       ( found )
-      2 [ forth:code call GO ] ;case
-      1 [ forth:code forth:mode IF , ELSE call THEN GO ] ;case
-      2drop
+      [ dup forth:immed? [
+          forth:code call GO
+        ] [
+          forth:code forth:mode IF , ELSE call THEN GO
+        ] if
+      ] ;when
+      drop
       ( dec )
       buf s>dec [ forth:handle_num GO ] ;when
       ( hex )
