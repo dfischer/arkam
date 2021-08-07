@@ -79,6 +79,8 @@ var: xhere
 : x,  xhere x!  xhere cell + xhere! ;
 : bx, xhere bx! xhere inc    xhere! ;
 
+: xallot ( n -- addr ) xhere tuck + xhere! ;
+
 
 
 ( ----- initialize ----- )
