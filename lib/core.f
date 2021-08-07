@@ -711,8 +711,15 @@ var: forth:mode
 0x10 as: context
 0x14 as: current
 
-: forth:latest  0x0C @ ;
-: forth:latest! 0x0C ! ;
+: lexi:next  @ ;
+: lexi:next! ! ;
+: lexi:latest  cell + @ ;
+: lexi:latest! cell + ! ;
+: lexi:name  2 cells + @ ;
+: lexi:name! 2 cells + ! ;
+
+: forth:latest  context @ lexi:latest  ;
+: forth:latest! context @ lexi:latest! ;
 
 # Dictionary
 # | next:30 | hidden:1 | immed:1  tagged 32bit pointer

@@ -186,8 +186,8 @@ x-core xcurrent!
 0x02 as: hidden_flag
 
 
-: xlatest  adr_xlatest x@ ;
-: xlatest! adr_xlatest x! ;
+: xlatest  xcurrent xlexi:latest  ;
+: xlatest! xcurrent xlexi:latest! ;
 
 : xnext! x! ;
 : xnext  x@ ;
