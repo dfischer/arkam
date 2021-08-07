@@ -169,7 +169,6 @@ END
 " core" xlexi:new as: x-core
 x-core xcontext!
 x-core xcurrent!
-#TODO fetch xcurrent and xcontext from core.f
 
 
 # Cross Dictionary
