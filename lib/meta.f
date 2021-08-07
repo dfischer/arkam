@@ -51,7 +51,9 @@ image_max allot as: there
 0x04 as: adr_start
 0x08 as: adr_here
 0x0C as: adr_xlatest
-0x10 as: adr_begin
+0x10 as: adr_xcontext
+0x14 as: adr_xcurrent
+0x18 as: adr_begin
 
 
 ( relative pointer )
@@ -137,6 +139,38 @@ END
 
 
 ( ===== Cross&Meta Dictionary ===== )
+
+# Cross Lexicon
+# | name...
+# |----- ( 0alined )
+# | next
+# | latest
+# | name
+
+: xcontext  adr_xcontext x@ ;
+: xcontext! adr_xcontext x! ;
+: xcurrent  adr_xcurrent x@ ;
+: xcurrent! adr_xcurrent x! ;
+
+: xlexi:new ( name -- adr )
+     xhere swap x:sput   ( name )
+     3 cells xallot swap ( lexi name )
+     0 x,
+     0 x,
+     x,
+;
+
+: xlexi:next    ( lexi -- next ) x@ ;
+: xlexi:next!   ( next lexi -- ) x! ;
+: xlexi:latest  ( lexi -- word ) cell + x@ ;
+: xlexi:latest! ( word lexi -- ) cell + x! ;
+: xlexi:name    ( lexi -- name ) 2 cells + x@ ;
+
+" core" xlexi:new as: x-core
+x-core xcontext!
+x-core xcurrent!
+#TODO fetch xcurrent and xcontext from core.f
+
 
 # Cross Dictionary
 #  | name ...
