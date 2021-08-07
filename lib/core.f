@@ -510,6 +510,15 @@ END
 
 : s:len ( s -- n ) dup s:end swap - ;
 
+: s:hash ( s -- n )
+    # DJB2 algorithm
+    5381 [
+        over b@ ( s hash c )
+        0 [ nip STOP ] ;case
+        over 5 << + + [ inc ] dip GO
+    ] while
+;
+
 : s= ( s1 s2 -- ? )
   [ 2dup [ b@ ] bia over != # s1 s2 c diff?
     ( diff ) [ 3drop no STOP ] ;when
