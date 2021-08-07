@@ -50,10 +50,9 @@ image_max allot as: there
 
 0x04 as: adr_start
 0x08 as: adr_here
-0x0C as: adr_xlatest
-0x10 as: adr_xcontext
-0x14 as: adr_xcurrent
-0x18 as: adr_begin
+0x0C as: adr_xcontext
+0x10 as: adr_xcurrent
+0x14 as: adr_begin
 
 
 ( relative pointer )

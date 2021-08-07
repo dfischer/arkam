@@ -27,10 +27,9 @@
 # ----- Memory Layout -----
 # 0x04 &start
 # 0x08 here
-# 0x0C latest
-# 0x10 context
-# 0x14 current
-# 0x18 begin
+# 0x0C context
+# 0x10 current
+# 0x14 begin
 
 : here    0x08 @ ;
 : here!   0x08 ! ;
@@ -708,8 +707,8 @@ var: forth:mode
 0x01 as: flag_immed
 0x02 as: flag_hidden
 
-0x10 as: context
-0x14 as: current
+0x0C as: context
+0x10 as: current
 
 : lexi:next  @ ;
 : lexi:next! ! ;
