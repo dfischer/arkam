@@ -732,6 +732,7 @@ lexi_core as: core
 
 : context ordersp @ cell - @ ;
 : also ( lexi -- ) ordersp @ ! ordersp @ cell + ordersp ! ;
+: previous ( -- ) ordersp @ cell - ordersp ! ;
 : only order @ ordersp ! core also ;
 : definition context current ! ;
 
