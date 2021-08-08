@@ -256,17 +256,7 @@ xlexi_core xcurrent!
 ;
 
 
-0 var> meta_latest
-
-: meta:push ( word -- ) here meta_latest , meta_latest! , ;
-
-: meta:find ( s -- word yes | no )
-  meta_latest [
-    0 [ drop no STOP ] ;case
-    2dup cell + @ forth:name s= [ nip cell + @ yes STOP ] ;when
-    @ GO
-  ] while
-;
+: meta? ( s -- ? ) META forth:find_in nip ;
 
 : <run_only> <IMMED>
   POSTPONE: <IMMED>
@@ -338,7 +328,6 @@ var: const_link
   >r over prim>code LIT, , r> LIT, , JMP,
   [ forth:mode [ drop x, ] [ nip >r ] if ] ,
   ' inc dip
-  forth:latest meta:push
 ;
 
 : compile_only [ panic" compile only!" ] ;
@@ -480,7 +469,7 @@ xlexi_root as: lexi_root
 
 : : <run_only>
   forth:read [ panic" Word name required" ] ;unless
-  dup meta:find [ drop meta:create_cross ] [ meta:create ] if
+  dup meta? [ meta:create_cross ] [ meta:create ] if
 ;
 
 : ; <IMMED> ( q -- ) >r ;
