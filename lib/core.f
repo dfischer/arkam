@@ -661,9 +661,9 @@ END
 
 
 ( ===== File ===== )
-lexicon: file
+lexicon: <FILE>
 
-only <CORE> also file also definitions
+only <CORE> also <FILE> also definitions
 
 PRIVATE
   : query    8 io ;
@@ -944,7 +944,7 @@ END
 previous definitions
 
 
-file also
+<FILE> also
 : include ( fname -- )
   " r" file:open! dup >r
   [ ( id -- c id ) dup file:getc swap ] forth:run
@@ -1066,7 +1066,7 @@ PRIVATE
   : fin! 2 cells + ! ;
   : req 3 cells ;
 
-  file also
+  <FILE> also
   : >path ( fname -- )
     dup file:exists? [ epr " : not found" panic ] ;unless
     path len file:fullpath [ path epr " : not found" panic ] ;unless
@@ -1466,7 +1466,7 @@ PRIVATE
 
 PUBLIC
 
-  file also
+  <FILE> also
   : loadfile ( path -- addr )
     " rb" file:open! id!
     id file:size size!
@@ -1552,7 +1552,7 @@ PRIVATE
 
 PUBLIC
 
-  file also
+  <FILE> also
   : save_image ( fname -- )
     " wb" file:open! id!
     # zero clear 0x00-0x03

@@ -22,7 +22,7 @@ only definitions core also
   lexicon: CROSS-ROOT
   lexicon: CROSS-CORE
 
-only core also definitions file also
+only core also definitions <FILE> also
 
 
 
