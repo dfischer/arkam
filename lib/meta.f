@@ -275,13 +275,6 @@ meta_name s:len       as: meta_len
 
 var: m_close
 
-: M:
-  forth:read [ panic" Meta word name required" ] ;unless
-  name>meta _:
-  ( closer ) m_close!
-  [ m_close call forth:latest meta:push ]
-;
-
 : <run_only> <IMMED>
   POSTPONE: <IMMED>
   LIT, forth:latest forth:name 2 + ,
@@ -424,9 +417,35 @@ root current !
 ( ##### Meta Words ##### )
 ( ###################### )
 
+only core also definitions
+
+( ----- aux word definitions ----- )
+# meta words can't refer each other because of search order.
+# ex. POSTPONE: '(tick) refers tick in core, not in META.
+# so some shared routines must be defined here.
+
+: aux_tick
+    forth:read [ panic" Word name required" ] ;unless
+    x:find [ epr "  ?" panic ] ;unless
+    xxt
+    forth:mode [ xLIT, x, ] when
+;
+
+: aux_var
+    forth:read [ panic" Var name required" ] ;unless
+    30 s:check [ epr panic" : too long var name" ] ;unless
+    dup >r
+    dup x:create m:create
+    xLIT, xhere swap x, xRET, r>
+    dup " !" s:append!
+    dup x:create m:create
+    xLIT, x, x!, xRET,
+;
+
+
 only
-  core also
   META also definitions
+  core also
 
 
 ( ===== Meta Primitive word ===== )
@@ -487,23 +506,22 @@ END
 xlexi_core as: lexi_core
 xlexi_root as: lexi_root
 
-M: <CORE> xlexi_core xcurrent! ;
-M: <ROOT> xlexi_root xcurrent! ;
+: <CORE> xlexi_core xcurrent! ;
+: <ROOT> xlexi_root xcurrent! ;
 
 
 ( ===== Meta Syntax Words ===== )
 
-M: : <run_only>
+: : <run_only>
   forth:read [ panic" Word name required" ] ;unless
   dup meta:find [ drop meta:create_cross ] [ meta:create ] if
 ;
 
-M: ; <IMMED> ( q -- ) >r ;
+: ; <IMMED> ( q -- ) >r ;
 
-M: <IMMED> <IMMED> xlatest x:immed! ;
+: <IMMED> <IMMED> xlatest x:immed! ;
 
-
-M: as: ( n name: -- ) <run_only>
+: as: ( n name: -- ) <run_only>
   forth:mode [ panic" Do not call as: in compile mode" ] ;when
   forth:read [ panic" Const name required" ] ;unless
   dup
@@ -514,10 +532,10 @@ M: as: ( n name: -- ) <run_only>
   [ forth:mode [ xLIT, x, ] when ] ,
 ;
 
-M: patch_const ( xadr ) <run_only> patch_const ;
+: patch_const ( xadr ) <run_only> patch_const ;
 
 
-M: [ <IMMED>
+: [ <IMMED>
   forth:mode [ xJMP, xhere 0 x, ] when xhere ( &back &q | &q )
   forth:mode yes forth:mode! ( &back &q mode | &q mode )
   [ xRET,
@@ -526,47 +544,47 @@ M: [ <IMMED>
   ]
 ;
 
-M: ] <IMMED> ( q -- ) >r ;
+: ] <IMMED> ( q -- ) >r ;
 
 
-M: IF <IMMED> ( -- &back )
+: IF <IMMED> ( -- &back )
   xZJMP, xhere 0 x,
 ;
 
-M: ELSE <IMMED> ( &back -- &back2 )
+: ELSE <IMMED> ( &back -- &back2 )
   xJMP, xhere 0 x, swap ( &back2 &back )
   xhere swap x!
 ;
 
-M: THEN <IMMED> ( &back -- )
+: THEN <IMMED> ( &back -- )
   xhere swap x!
 ;
 
 
-M: AGAIN <IMMED>
+: AGAIN <IMMED>
   xJMP, xlatest xxt x,
 ;
 
 
-M: PRIVATE ( -- xstart mstart closer ) <run_only>
+: PRIVATE ( -- xstart mstart closer ) <run_only>
   xlatest forth:latest [ forth:latest forth:hide_range xlatest x:hide_range ]
 ;
 
-M: PUBLIC ( xstart mstart closer -- xstart xend mstart mend closer ) <run_only>
+: PUBLIC ( xstart mstart closer -- xstart xend mstart mend closer ) <run_only>
   drop xlatest swap forth:latest [ forth:hide_range x:hide_range ]
 ;
 
-M: END ( closer -- ) <IMMED> >r ;
+: END ( closer -- ) <IMMED> >r ;
 
 
-M: defer: ( name: -- ) <run_only>
+: defer: ( name: -- ) <run_only>
   # JMP actual
   forth:read [ panic" Word name required" ] ;unless
   dup x:create m:create
   xJMP, 0 x,
 ;
 
-M: -> <IMMED> ( v &code -- )
+: -> <IMMED> ( v &code -- )
   forth:read [ panic" Word name required" ] ;unless
   x:find [ epr " ?" panic ] ;unless
   xxt
@@ -575,15 +593,10 @@ M: -> <IMMED> ( v &code -- )
 ;
 
 
-M: ' <IMMED>
-  forth:read [ panic" Word name required" ] ;unless
-  x:find [ epr "  ?" panic ] ;unless
-  xxt
-  forth:mode [ xLIT, x, ] when
-;
+: ' <IMMED> aux_tick ;
 
 
-M: POSTPONE: <IMMED>
+: POSTPONE: <IMMED>
   forth:mode [ panic" Do not use POSTPONE: in run mode" ] ;unless
   forth:read [ panic" Word name required" ] ;unless
   x:find [ epr panic"  ?" ] ;unless
@@ -591,29 +604,20 @@ M: POSTPONE: <IMMED>
 ;
 
 
-M: COMPILE: <IMMED>
+: COMPILE: <IMMED>
   forth:mode [ panic" Do not use COMPILE: in run mode" ] ;unless
-  POSTPONE: M-'
+  aux_tick
   " ," x:find [ panic" comma(,) is not defined yet in cross-env" ] ;unless
   xxt x,
 ;
 
 
-M: var> <run_only>
-  forth:read [ panic" Var name required" ] ;unless
-  30 s:check [ epr panic" : too long var name" ] ;unless
-  dup >r
-  dup x:create m:create
-  xLIT, xhere swap x, xRET, r>
-  dup " !" s:append!
-  dup x:create m:create
-  xLIT, x, x!, xRET,
-;
+: var> <run_only> aux_var ;
 
-M: var: <run_only> 0 POSTPONE: M-var> ;
+: var: <run_only> 0 aux_var ;
 
 
-M: CHAR: <IMMED>
+: CHAR: <IMMED>
   forth:read [ panic" A character required" ] ;unless
   dup b@ dup CHAR: \\ = [ drop inc
     [ [ inc ] [ b@ ] biq ] c:escaped
@@ -623,7 +627,7 @@ M: CHAR: <IMMED>
 ;
 
 
-M: " <IMMED>
+: " <IMMED>
   forth:mode [ xJMP, xhere 0 x, xhere swap ] [ xhere ] if
   [ forth:take
     0  [ panic" Unclosed string" STOP ] ;case
@@ -639,8 +643,8 @@ M: " <IMMED>
   forth:mode [ xhere swap x! xLIT, x, ] when
 ;
 
-M: ( <IMMED> POSTPONE: ( ;
-M: # <IMMED> POSTPONE: # ;
+: ( <IMMED> POSTPONE: ( ;
+: # <IMMED> POSTPONE: # ;
 
 
 PRIVATE
@@ -651,12 +655,12 @@ PUBLIC
 
   link as: init:link
 
-  M: >init <run_only>
+  : >init <run_only>
     xhere link x@ x, link x!
     x,
   ;
 
-  M: init:run <IMMED>
+  : init:run <IMMED>
     " init:run" x:find [ drop panic" Define init:run" ] ;unless
     xxt x,
   ;
@@ -667,14 +671,17 @@ END
 
 ( ----- debug ----- )
 
-M: ?H <IMMED> " HERE" prn ;
+: ?H <IMMED> " HERE" prn ;
 
-M: ?STACK <IMMED> ?stack ;
+: ?STACK <IMMED> ?stack ;
 
 
 
 ( ####################### )
 ( ## Start Metacompile ## )
 ( ####################### )
-only META also CROSS also definitions
+
+only
+  CROSS also definitions
+  META  also ( use meta words first )
 metacompile
