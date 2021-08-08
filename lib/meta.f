@@ -18,6 +18,12 @@
 # 5. Patch some addresses and save image
 
 
+root current !
+  lexicon: META
+  lexicon: CROSS
+only core also definitions
+
+
 
 ( for debug )
 no var> verbose
@@ -340,11 +346,6 @@ var: const_link
 
 
 ( ===== Setup/Finish ===== )
-
-root current !
-  lexicon: META
-  lexicon: CROSS
-only core also definitions
 
 var: m:image_name
 
