@@ -262,9 +262,6 @@ xlexi_core xcurrent!
   ] while
 ;
 
-
-var: m_close
-
 : <run_only> <IMMED>
   POSTPONE: <IMMED>
   LIT, forth:latest forth:name 2 + ,
