@@ -365,6 +365,10 @@ var: const_link
 
 ( ===== Setup/Finish ===== )
 
+root current !
+  lexicon: META
+only core also definitions
+
 var: m:image_name
 
 : m:finish
@@ -391,16 +395,8 @@ var: m:image_name
   ] while drop
 ;
 
-: m:hide ( start -- )
-  # hide words before &start
-  [ 0 [ STOP ] ;case
-    dup forth:hide!
-    forth:next GO
-  ] while
-;
-
 : m:install ( meta_start -- )
-  dup m:hide m:reveal
+  m:reveal
   word' m:finish forth:show!
   word' (        forth:show!
   word' #        forth:show!
@@ -413,9 +409,13 @@ var: m:image_name
 
 : m:start [do LIT, forth:latest , ] m:install ;
 
+
+
+root current !
+
 : metacompile
   opt:read! [ panic" Image name required" ] ;unless -> m:image_name
-  m:start
+  m:start ?words
   " lib/core.f" include
   " doconst" x:find [ panic" doconst definition not found" ] ;unless
   xxt patch_const
@@ -427,6 +427,11 @@ var: m:image_name
 ( ###################### )
 ( ##### Meta Words ##### )
 ( ###################### )
+
+only
+  core also
+  META also definitions
+
 
 ( ===== Meta Primitive word ===== )
 
@@ -675,5 +680,5 @@ M: ?STACK <IMMED> ?stack ;
 ( ####################### )
 ( ## Start Metacompile ## )
 ( ####################### )
-
+only META also definitions
 metacompile
