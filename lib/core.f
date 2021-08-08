@@ -724,6 +724,8 @@ var: forth:mode
 : lexi:name  cell + @ ;
 : lexi:name! cell + ! ;
 
+: lexi:name lexi:name dup [ drop " ???" ] unless ;  # for anonymous lexicon
+
 : lexi:create ( name -- adr )
     s:put lexi:new tuck lexi:name!
 ;
@@ -908,18 +910,28 @@ PUBLIC
 END
 
 
-: forth:each_word ( q -- ) # q: &entry --
-  forth:latest [
+: lexi:each ( q -- ) # q: lexi --
+    ordersp @ cell - [ ( q sp )
+        dup order @ < [ 2drop STOP ] ;when
+        2dup >r >r @ swap call
+        r> r> cell - GO
+    ] while
+;
+
+: forth:each_word ( lexi q -- ) # q: &entry --
+  swap lexi:latest [
     0 [ drop STOP ] ;case
     2dup forth:next >r >r swap call r> r> GO
   ] while
 ;
 
-
-: forth:words
-  [ dup forth:hidden? [ drop ] ;when
-    forth:name pr space
-  ] forth:each_word cr
+: ?words
+  " current: " pr current @ lexi:name prn
+  [ dup " ===== " pr lexi:name pr "  =====" prn
+    [ dup forth:hidden? [ drop ] ;when
+      forth:name pr space
+    ] forth:each_word cr
+  ] lexi:each
 ;
 
 
