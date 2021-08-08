@@ -23,6 +23,7 @@ out/forth2.ark: out/forth1.ark
 meta-check: out/forth2.ark
 	diff out/forth1.ark out/forth2.ark
 
+
 .PHONY: meta-test
 meta-test: out/forth1.ark bin/test_arkvm
 	./test/run.sh out/forth1.ark

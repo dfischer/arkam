@@ -1158,6 +1158,9 @@ END
   LIT, , JMP, ' doconst ,
 ;
 
+: lexicon:
+    lexi:new dup POSTPONE: as: forth:latest forth:name swap lexi:name!
+;
 
 : defer:
   forth:read [ " Defered name required" panic ] ;unless
