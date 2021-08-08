@@ -27,9 +27,10 @@
 # ----- Memory Layout -----
 # 0x04 &start
 # 0x08 here
-# 0x0C context
-# 0x10 current
-# 0x14 begin
+# 0x0C order
+# 0x10 ordersp
+# 0x14 current
+# 0x18 begin
 
 : here    0x08 @ ;
 : here!   0x08 ! ;
@@ -707,18 +708,36 @@ var: forth:mode
 0x01 as: flag_immed
 0x02 as: flag_hidden
 
-0x0C as: context
-0x10 as: current
+0x0C as: order
+0x10 as: ordersp
+0x14 as: current
 
-: lexi:next  @ ;
-: lexi:next! ! ;
-: lexi:latest  cell + @ ;
-: lexi:latest! cell + ! ;
-: lexi:name  2 cells + @ ;
-: lexi:name! 2 cells + ! ;
 
-: forth:latest  context @ lexi:latest  ;
-: forth:latest! context @ lexi:latest! ;
+: lexi:new ( -- adr )
+  here:align! here
+  ( latest ) 0 ,
+  ( name   ) 0 ,
+;
+
+: lexi:latest  @ ;
+: lexi:latest! ! ;
+: lexi:name  cell + @ ;
+: lexi:name! cell + ! ;
+
+: lexi:create ( name -- adr )
+    s:put lexi:new tuck lexi:name!
+;
+
+lexi_core as: core
+
+: context ordersp @ cell - @ ;
+: also ( lexi -- ) ordersp @ ! ordersp @ cell + ordersp ! ;
+: only order @ ordersp ! core also ;
+: definition context current ! ;
+
+
+: forth:latest  current @ lexi:latest  ;
+: forth:latest! current @ lexi:latest! ;
 
 # Dictionary
 # | next:30 | hidden:1 | immed:1  tagged 32bit pointer
@@ -769,9 +788,9 @@ var: forth:mode
 ;
 
 : forth:(find) ( name -- name no | word yes )
-    context @ swap [ over ( lexi name lexi )
-        0 [ nip no STOP ] ;case
-        forth:find_in [ nip yes STOP ] [ ' lexi:next dip GO ] if
+    ordersp @ cell - swap [ ( sp name )
+        over order < [ nip no STOP ] ;when
+        over @ forth:find_in [ nip yes STOP ] [ [ cell - ] dip GO ] if
     ] while
 ;
 

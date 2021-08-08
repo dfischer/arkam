@@ -50,9 +50,10 @@ image_max allot as: there
 
 0x04 as: adr_start
 0x08 as: adr_here
-0x0C as: adr_xcontext
-0x10 as: adr_xcurrent
-0x14 as: adr_begin
+0x0C as: adr_order   ( lexicon order )
+0x10 as: adr_ordersp ( lexicon stack pointer )
+0x14 as: adr_current ( defining lexicon )
+0x18 as: adr_begin
 
 
 ( relative pointer )
@@ -146,27 +147,32 @@ END
 # | latest
 # | name
 
-: xcontext  adr_xcontext x@ ;
-: xcontext! adr_xcontext x! ;
-: xcurrent  adr_xcurrent x@ ;
-: xcurrent! adr_xcurrent x! ;
+: xorder  adr_order x@ ;
+: xorder! adr_order x! ;
+: xordersp  adr_ordersp x@ ;
+: xordersp! adr_ordersp x! ;
+: xcurrent  adr_current x@ ;
+: xcurrent! adr_current x! ;
 
-: xlexi:new ( name -- adr )
+16 cells as: xlexi:size
+xlexi:size xallot xorder!
+xorder xordersp!
+
+: xlexi:create ( name -- adr )
      xhere swap x:sput       ( name )
      xhere:align! xhere swap ( lexi name )
-     0 x,
      0 x,
      x,
 ;
 
-: xlexi:next    ( lexi -- next ) x@ ;
-: xlexi:next!   ( next lexi -- ) x! ;
-: xlexi:latest  ( lexi -- word ) cell + x@ ;
-: xlexi:latest! ( word lexi -- ) cell + x! ;
-: xlexi:name    ( lexi -- name ) 2 cells + x@ ;
+: xlexi:latest  ( lexi -- word ) x@ ;
+: xlexi:latest! ( word lexi -- ) x! ;
+: xlexi:name    ( lexi -- name ) cell + x@ ;
 
-" core" xlexi:new as: x-core
-x-core xcontext!
+: xalso ( lexi -- ) xordersp x! xordersp cell + xordersp! ;
+
+" core" xlexi:create as: x-core
+x-core xalso
 x-core xcurrent!
 
 
@@ -215,9 +221,9 @@ x-core xcurrent!
 ;
 
 : x:find ( name -- xword yes | name no )
-  xcontext swap [ over ( lexi name lexi )
-    0 [ nip no STOP ] ;case
-    x:find_in [ nip yes STOP ] [ [ xlexi:next ] dip GO ] if
+  xordersp cell - swap [ ( sp name )
+      over xorder < [ nip no STOP ] ;when
+      over x@ x:find_in [ nip yes STOP ] [ [ cell - ] dip GO ] if
   ] while
 ;
 
@@ -414,10 +420,12 @@ var: m:image_name
 ;
 
 
+
 ( ###################### )
 ( ##### Meta Words ##### )
 ( ###################### )
 
+x-core as: lexi_core
 
 ( ===== Meta Primitive word ===== )
 

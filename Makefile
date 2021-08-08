@@ -34,6 +34,12 @@ meta-install: meta meta-check meta-test
 	mv out/forth1.ark forth.ark
 
 
+.PHONY: meta-run
+meta-run: meta
+	./bin/arkvm out/forth1.ark
+
+
+
 .PHONY: all
 all: bin out bin/arkam bin/arkvm
 
