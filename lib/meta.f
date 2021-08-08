@@ -407,7 +407,7 @@ var: m:image_name
   word' include: forth:show!
   ' m:handle_num -> forth:handle_num
   verbose [
-    " --Meta Words----- " prn forth:words
+    " --Meta Words----- " prn ?words
   ] when
 ;
 

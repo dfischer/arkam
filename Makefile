@@ -40,6 +40,11 @@ meta-run: meta
 	./bin/arkvm out/forth1.ark
 
 
+.PHONY: meta-time
+meta-time:
+	rm -f out/forth1.ark out/forth2.ark
+	time make meta-check
+
 
 .PHONY: all
 all: bin out bin/arkam bin/arkvm
