@@ -27,8 +27,8 @@
 # ----- Memory Layout -----
 # 0x04 &start
 # 0x08 here
-# 0x0C order
-# 0x10 ordersp
+# 0x0C lexicons
+# 0x10 lexisp
 # 0x14 current
 # 0x18 begin
 
@@ -709,8 +709,8 @@ var: forth:mode
 0x01 as: flag_immed
 0x02 as: flag_hidden
 
-0x0C as: order
-0x10 as: ordersp
+0x0C as: lexicons
+0x10 as: lexisp
 0x14 as: current
 
 
@@ -736,10 +736,10 @@ var: forth:mode
 <ROOT>
 lexi_core as: core
 lexi_root as: root
-: context ordersp @ cell - @ ;
-: also ( lexi -- ) ordersp @ ! ordersp @ cell + ordersp ! ;
-: previous ( -- ) ordersp @ cell - ordersp ! ;
-: only order @ ordersp ! root also ;
+: context lexisp @ cell - @ ;
+: also ( lexi -- ) lexisp @ ! lexisp @ cell + lexisp ! ;
+: previous ( -- ) lexisp @ cell - lexisp ! ;
+: only lexicons @ lexisp ! root also ;
 : definitions context current ! ;
 <CORE>
 
@@ -795,8 +795,8 @@ lexi_root as: root
 ;
 
 : forth:(find) ( name -- name no | word yes )
-    ordersp @ cell - swap [ ( sp name )
-        over order @ < [ nip no STOP ] ;when
+    lexisp @ cell - swap [ ( sp name )
+        over lexicons @ < [ nip no STOP ] ;when
         over @ forth:find_in [ nip yes STOP ] [ [ cell - ] dip GO ] if
     ] while
 ;
@@ -915,8 +915,8 @@ END
 
 
 : lexi:each ( q -- ) # q: lexi --
-    ordersp @ cell - [ ( q sp )
-        dup order @ < [ 2drop STOP ] ;when
+    lexisp @ cell - [ ( q sp )
+        dup lexicons @ < [ 2drop STOP ] ;when
         2dup >r >r @ swap call
         r> r> cell - GO
     ] while
