@@ -17,11 +17,12 @@
 # 4. Start metacompile by including lib/core.f
 # 5. Patch some addresses and save image
 
-
-root current !
+only definitions core also
   lexicon: META
-  lexicon: CROSS
-only core also definitions
+  lexicon: CROSS-ROOT
+  lexicon: CROSS-CORE
+
+only core also definitions file also
 
 
 
@@ -176,6 +177,8 @@ xlexis xlexisp!
 : xlexi:name    ( lexi -- name ) cell + x@ ;
 
 : xalso ( lexi -- ) xlexisp x! xlexisp cell + xlexisp! ;
+: xprevious ( -- ) xlexisp cell - xlexisp! ;
+: xdefinitions ( -- ) xlexisp cell - x@ xcurrent! ;
 
 " core" xlexi:create as: xlexi_core
 " root" xlexi:create as: xlexi_root
@@ -184,6 +187,7 @@ xlexi_root xalso
 xlexi_core xalso
 xlexi_core xcurrent!
 
+: xonly ( -- ) xlexis xlexisp! xlexi_root xalso ;
 
 # Cross Dictionary
 #  | name ...
@@ -360,7 +364,8 @@ root current !
   ( install )
   ' m:handle_num -> forth:handle_num
   only
-    CROSS also definitions
+    CROSS-ROOT also
+    CROSS-CORE also definitions
     META  also ( use meta words first )
   ( start  ) " lib/core.f" include
   ( finish ) m:finish
@@ -397,10 +402,23 @@ only core also definitions
     xLIT, x, x!, xRET,
 ;
 
+: ;aux_compile ( name -- )
+    forth:mode [ rdrop x:find [ epr panic"  ?" ] ;unless xxt x, ] ;when
+    drop
+;
+
+
+( ----- meta words order ----- )
+# META < root < core
+# overwrite
+#   core: IF, :(colon), etc...
+#   root: only, also, etc...
 
 only
   META also definitions
+  root also
   core also
+
 
 
 ( ===== Meta Primitive word ===== )
@@ -461,8 +479,9 @@ END
 xlexi_core as: lexi_core
 xlexi_root as: lexi_root
 
-: <CORE> xlexi_core xcurrent! ;
-: <ROOT> xlexi_root xcurrent! ;
+: <CORE> xlexi_core CROSS-CORE ;
+: <ROOT> xlexi_root CROSS-ROOT ;
+
 
 
 ( ===== Meta Syntax Words ===== )
@@ -623,6 +642,46 @@ PUBLIC
 END
 
 
+( ----- lexicon ----- )
+
+: lexicon: <run_only>
+    # meta:  ( -- xlexi mlexi )
+    # cross: ( -- xlexi )
+    forth:read [ panic" lexicon name required" ] ;unless
+    >r i lexi:create i xlexi:create ( mlexi xlexi )
+    ( cross ) i x:create drop xLIT, dup x, xJMP, const_link, xlatest x:immed!
+    ( meta )
+    r> forth:create POSTPONE: <IMMED>
+    ( mlexi xlexi ) LIT, , LIT, , JMP, [ forth:mode [ drop xLIT, x, ] when ] ,
+;
+
+: definitions ( -- ) <IMMED>
+    " definitions" ;aux_compile
+    previous definitions META also
+    xdefinitions
+;
+
+: also ( xlexi mlexi -- ) <IMMED>
+    " also" ;aux_compile
+    previous also META also
+    xalso
+;
+
+: only ( -- ) <IMMED>
+    # meta:  root CROSS-ROOT META
+    # cross: root
+    " only" ;aux_compile
+    only CROSS-ROOT also META also
+    xonly
+;
+
+: previous <IMMED>
+    " previous" ;aux_compile
+    previous previous META also
+    xprevious
+;
+
+
 
 ( ----- debug ----- )
 
@@ -630,6 +689,7 @@ END
 
 : ?STACK <IMMED> ?stack ;
 
+: ?WORDS <IMMED> cr ?words ;
 
 
 ( ####################### )

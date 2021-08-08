@@ -316,9 +316,9 @@ PUBLIC
   : sys:ds0! sys:ds_base cell - sp! ;
 END
 
-<ROOT>
+<ROOT> also definitions
 : bye 0 HALT ;
-<CORE>
+previous definitions
 
 
 ( ===== Stdio ===== )
@@ -661,6 +661,9 @@ END
 
 
 ( ===== File ===== )
+lexicon: file
+
+only <CORE> also file also definitions
 
 PRIVATE
   : query    8 io ;
@@ -687,7 +690,7 @@ END
 
 
 ( ===== CLI ===== )
-
+only <CORE> also definitions
 : cli:query 12 io ;
 : cli:argc    0 cli:query ; # -- n
 : cli:get_arg 1 cli:query ; # buf i len -- ?
@@ -733,7 +736,7 @@ var: forth:mode
 
 
 
-<ROOT>
+<ROOT> also definitions
 lexi_core as: core
 lexi_root as: root
 : context lexisp @ cell - @ ;
@@ -741,7 +744,7 @@ lexi_root as: root
 : previous ( -- ) lexisp @ cell - lexisp ! ;
 : only lexicons @ lexisp ! root also ;
 : definitions context current ! ;
-<CORE>
+previous definitions
 
 : forth:latest  current @ lexi:latest  ;
 : forth:latest! current @ lexi:latest! ;
@@ -929,7 +932,7 @@ END
   ] while
 ;
 
-<ROOT>
+<ROOT> also definitions
 : ?words
   " current: " pr current @ lexi:name prn
   [ dup " ===== " pr lexi:name pr "  =====" prn
@@ -938,14 +941,16 @@ END
     ] forth:each_word cr
   ] lexi:each
 ;
-<CORE>
+previous definitions
 
 
+file also
 : include ( fname -- )
   " r" file:open! dup >r
   [ ( id -- c id ) dup file:getc swap ] forth:run
   r> file:close!
 ;
+previous
 
 : include:
   forth:read [ " File name required" panic ] ;unless
@@ -1061,10 +1066,12 @@ PRIVATE
   : fin! 2 cells + ! ;
   : req 3 cells ;
 
+  file also
   : >path ( fname -- )
     dup file:exists? [ epr " : not found" panic ] ;unless
     path len file:fullpath [ path epr " : not found" panic ] ;unless
   ;
+  previous
 
   : check_circular ( req -- )
     fin [
@@ -1459,6 +1466,7 @@ PRIVATE
 
 PUBLIC
 
+  file also
   : loadfile ( path -- addr )
     " rb" file:open! id!
     id file:size size!
@@ -1470,6 +1478,7 @@ PUBLIC
     id file:close!
     addr
   ;
+  previous
 
   : loadfile: ( :path -- addr )
     forth:read [ " file name required" ] ;unless
@@ -1543,6 +1552,7 @@ PRIVATE
 
 PUBLIC
 
+  file also
   : save_image ( fname -- )
     " wb" file:open! id!
     # zero clear 0x00-0x03
@@ -1551,6 +1561,7 @@ PUBLIC
     0x04 here id file:write!
     id file:close!
   ;
+  previous
 
   : turnkey ( fname adr -- )
     set_boot! save_image
