@@ -367,6 +367,7 @@ var: const_link
 
 root current !
   lexicon: META
+  lexicon: CROSS
 only core also definitions
 
 var: m:image_name
@@ -385,17 +386,14 @@ var: m:image_name
 
 : m:reveal ( start -- )
   # reveal M-foo to foo
-  forth:latest [
-    0    [ STOP ] ;case
-    over [ STOP ] ;case
+  META [
     dup forth:name " M-" s:start? [
-      dup forth:name 2 + over forth:name!
-    ] when
-    forth:next GO
-  ] while drop
+      dup forth:name 2 + swap forth:name!
+    ] [ drop ] if
+  ] forth:each_word
 ;
 
-: m:install ( meta_start -- )
+: m:install ( -- )
   m:reveal
   word' m:finish forth:show!
   word' (        forth:show!
@@ -407,15 +405,13 @@ var: m:image_name
   ] when
 ;
 
-: m:start [do LIT, forth:latest , ] m:install ;
-
 
 
 root current !
 
 : metacompile
   opt:read! [ panic" Image name required" ] ;unless -> m:image_name
-  m:start ?words
+  m:install
   " lib/core.f" include
   " doconst" x:find [ panic" doconst definition not found" ] ;unless
   xxt patch_const
@@ -680,5 +676,5 @@ M: ?STACK <IMMED> ?stack ;
 ( ####################### )
 ( ## Start Metacompile ## )
 ( ####################### )
-only META also definitions
+only META also CROSS also definitions
 metacompile
