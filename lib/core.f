@@ -316,8 +316,9 @@ PUBLIC
   : sys:ds0! sys:ds_base cell - sp! ;
 END
 
+<ROOT>
 : bye 0 HALT ;
-
+<CORE>
 
 
 ( ===== Stdio ===== )
@@ -731,15 +732,15 @@ var: forth:mode
 ;
 
 
-lexi_root as: root
 
 <ROOT>
 lexi_core as: core
+lexi_root as: root
 : context ordersp @ cell - @ ;
 : also ( lexi -- ) ordersp @ ! ordersp @ cell + ordersp ! ;
 : previous ( -- ) ordersp @ cell - ordersp ! ;
 : only order @ ordersp ! root also ;
-: definition context current ! ;
+: definitions context current ! ;
 <CORE>
 
 : forth:latest  current @ lexi:latest  ;
