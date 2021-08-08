@@ -263,16 +263,6 @@ xlexi_core xcurrent!
 ;
 
 
-" M-                " as: meta_buf
-meta_buf 2 +          as: meta_name
-meta_name s:len       as: meta_len
-
-: name>meta ( s -- buf )
-  meta_len s:check [ epr panic" : too long" ] ;unless
-  meta_name s:copy
-  meta_buf
-;
-
 var: m_close
 
 : <run_only> <IMMED>
@@ -340,15 +330,11 @@ var: const_link
 : PRIM: ( n closer q name: -- n+ )
   # : name <IMMED> LIT code LIT q JMP handler
   forth:read [ panic" Primitive name required" ] ;unless
-  name>meta forth:create
+  forth:create
   POSTPONE: <IMMED>
   >r over prim>code LIT, , r> LIT, , JMP,
   [ forth:mode [ drop x, ] [ nip >r ] if ] ,
   ' inc dip
-  verbose [
-    " prim " epr meta_name epr
-    "  code " epr over .. forth:latest forth:code cell + @ .
-  ] when
   forth:latest meta:push
 ;
 
@@ -366,8 +352,11 @@ only core also definitions
 var: m:image_name
 
 : m:finish
+  ( const )
+    " doconst" x:find [ panic" doconst definition not found" ] ;unless
+    xxt patch_const
+    const_done [ panic" do patch_const" ] ;unless
   m:image_name [ panic" No image name" ] ;unless
-  const_done [ panic" do patch_const" ] ;unless
   xlatest xxt entrypoint!
   verbose [ " Turnkey: " epr xlatest xname x>t eprn ] when
   m:image_name save
@@ -377,38 +366,17 @@ var: m:image_name
   forth:mode [ xLIT, x, ] [ ( n -- n ) ] if
 ;
 
-: m:reveal ( start -- )
-  # reveal M-foo to foo
-  META [
-    dup forth:name " M-" s:start? [
-      dup forth:name 2 + swap forth:name!
-    ] [ drop ] if
-  ] forth:each_word
-;
-
-: m:install ( -- )
-  m:reveal
-  word' m:finish forth:show!
-  word' (        forth:show!
-  word' #        forth:show!
-  word' include: forth:show!
-  ' m:handle_num -> forth:handle_num
-  verbose [
-    " --Meta Words----- " prn ?words
-  ] when
-;
-
-
-
 root current !
 
 : metacompile
   opt:read! [ panic" Image name required" ] ;unless -> m:image_name
-  m:install
-  " lib/core.f" include
-  " doconst" x:find [ panic" doconst definition not found" ] ;unless
-  xxt patch_const
-  m:finish
+  ( install )
+  ' m:handle_num -> forth:handle_num
+  only
+    CROSS also definitions
+    META  also ( use meta words first )
+  ( start  ) " lib/core.f" include
+  ( finish ) m:finish
 ;
 
 
@@ -681,7 +649,4 @@ END
 ( ## Start Metacompile ## )
 ( ####################### )
 
-only
-  CROSS also definitions
-  META  also ( use meta words first )
 metacompile
