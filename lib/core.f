@@ -730,14 +730,17 @@ var: forth:mode
     s:put lexi:new tuck lexi:name!
 ;
 
-lexi_core as: core
 
+lexi_root as: root
+
+<ROOT>
+lexi_core as: core
 : context ordersp @ cell - @ ;
 : also ( lexi -- ) ordersp @ ! ordersp @ cell + ordersp ! ;
 : previous ( -- ) ordersp @ cell - ordersp ! ;
-: only order @ ordersp ! core also ;
+: only order @ ordersp ! root also ;
 : definition context current ! ;
-
+<CORE>
 
 : forth:latest  current @ lexi:latest  ;
 : forth:latest! current @ lexi:latest! ;
@@ -792,7 +795,7 @@ lexi_core as: core
 
 : forth:(find) ( name -- name no | word yes )
     ordersp @ cell - swap [ ( sp name )
-        over order < [ nip no STOP ] ;when
+        over order @ < [ nip no STOP ] ;when
         over @ forth:find_in [ nip yes STOP ] [ [ cell - ] dip GO ] if
     ] while
 ;
@@ -925,6 +928,7 @@ END
   ] while
 ;
 
+<ROOT>
 : ?words
   " current: " pr current @ lexi:name prn
   [ dup " ===== " pr lexi:name pr "  =====" prn
@@ -933,6 +937,7 @@ END
     ] forth:each_word cr
   ] lexi:each
 ;
+<CORE>
 
 
 : include ( fname -- )

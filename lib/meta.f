@@ -171,9 +171,12 @@ xorder xordersp!
 
 : xalso ( lexi -- ) xordersp x! xordersp cell + xordersp! ;
 
-" core" xlexi:create as: x-core
-x-core xalso
-x-core xcurrent!
+" core" xlexi:create as: xlexi_core
+" root" xlexi:create as: xlexi_root
+
+xlexi_root xalso
+xlexi_core xalso
+xlexi_core xcurrent!
 
 
 # Cross Dictionary
@@ -425,8 +428,6 @@ var: m:image_name
 ( ##### Meta Words ##### )
 ( ###################### )
 
-x-core as: lexi_core
-
 ( ===== Meta Primitive word ===== )
 
 PRIMITIVES
@@ -480,7 +481,16 @@ END
 
 
 
-( ===== Meta Syntax Word ===== )
+( ===== Meta Lexicon Words ===== )
+
+xlexi_core as: lexi_core
+xlexi_root as: lexi_root
+
+M: <CORE> xlexi_core xcurrent! ;
+M: <ROOT> xlexi_root xcurrent! ;
+
+
+( ===== Meta Syntax Words ===== )
 
 M: : <run_only>
   forth:read [ panic" Word name required" ] ;unless
