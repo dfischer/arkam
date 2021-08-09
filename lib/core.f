@@ -761,7 +761,6 @@ lexi_root as: [root]
 : context lexisp @ cell - @ ;
 : also ( lexi -- ) lexisp @ ! lexisp @ cell + lexisp ! ;
 : previous ( -- ) lexisp @ cell - lexisp ! ;
-: only lexicons @ lexisp ! [root] also ;
 
 
 

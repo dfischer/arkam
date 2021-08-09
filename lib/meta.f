@@ -691,14 +691,6 @@ END
     xalso
 ;
 
-: only ( -- ) <IMMED>
-    # meta:  root CROSS-ROOT META
-    # cross: root
-    " only" ;aux_compile
-    only CROSS-ROOT also META also
-    xonly
-;
-
 : previous <IMMED>
     " previous" ;aux_compile
     previous previous META also
