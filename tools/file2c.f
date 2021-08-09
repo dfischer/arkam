@@ -1,4 +1,4 @@
-only [core] also definitions [file] also
+LEXI [file] REFER [core] EDIT
 
 : usage
   panic" Usage: file2c [-b] VARNAME SRC [OUT]"

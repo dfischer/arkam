@@ -22,7 +22,7 @@
 # You can't
 #   - run immediate cross-words defined here
 
-only [core] also definitions
+LEXI REFER [core] EDIT
 
 
 
@@ -320,12 +320,15 @@ SHOW
   : sys:ds0! sys:ds_base cell - sp! ;
 END
 
-[root] also definitions
+
+LEXI REFER [root] EDIT
 : bye 0 HALT ;
-previous definitions
+
 
 
 ( ===== Stdio ===== )
+
+LEXI REFER [core] EDIT
 
 # port 1:stdout 2:stderr
 : stdio:ready? -1 1 io ; # -- ?
@@ -665,9 +668,11 @@ END
 
 
 ( ===== File ===== )
-lexicon: [file]
 
-only [core] also [file] also definitions
+LEXI REFER [core] EDIT
+lexicon: [file]
+LEXI [file] REFER [file] EDIT
+
 
 COVER
   : query    8 io ;
@@ -694,7 +699,8 @@ END
 
 
 ( ===== CLI ===== )
-only [core] also definitions
+
+LEXI REFER [core] EDIT
 
 : cli:query 12 io ;
 : cli:argc    0 cli:query ; # -- n
@@ -708,7 +714,8 @@ only [core] also definitions
 
 ( ===== Forth ===== )
 
-only [core] also definitions
+LEXI REFER [core] EDIT
+
 lexicon: [forth]
 
 
@@ -716,7 +723,7 @@ var: forth:mode
 : forth:mode! forth:mode! ;
 
 
-[forth] also definitions
+[forth] ALSO [forth] EDIT
 
 1 as: forth:compile_mode
 0 as: forth:run_mode
@@ -747,19 +754,17 @@ var: forth:mode
 
 
 
-only [core] also [root] also definitions [forth] also
+LEXI [forth] REFER [root] EDIT
 
 lexi_core as: [core]
 lexi_root as: [root]
-: context lexisp @ cell - @ ;
-: also ( lexi -- ) lexisp @ ! lexisp @ cell + lexisp ! ;
-: previous ( -- ) lexisp @ cell - lexisp ! ;
-: only lexicons @ lexisp ! [root] also ;
-: definitions context current ! ;
+: PREVIOUS ( -- ) lexisp @ cell - lexisp ! ;
+: EDIT ( lexi -- ) current ! ;
+: ALSO ( lexi -- ) lexisp @ ! lexisp @ cell + lexisp ! ;
 
 
 
-only [core] also [forth] also definitions
+LEXI [forth] REFER [forth] EDIT
 
 : forth:latest  current @ lexi:latest  ;
 : forth:latest! current @ lexi:latest! ;
@@ -794,7 +799,7 @@ only [core] also [forth] also definitions
 : forth:code! 3 cells + ! ; # &code &entry --
 
 
-only [core] also definitions [forth] also
+LEXI [forth] REFER [core] EDIT
 
 : forth:create ( name -- )
   here:align! s:put here:align! ( &name )
@@ -805,7 +810,7 @@ only [core] also definitions [forth] also
 ;
 
 
-only [core] also [forth] also definitions
+LEXI [forth] REFER [forth] EDIT
 
 : forth:find_in ( name lexi -- name no | word yes )
   lexi:latest [ ( name latest )
@@ -824,7 +829,7 @@ only [core] also [forth] also definitions
 ;
 
 
-only [core] also definitions [forth] also
+LEXI [forth] REFER [core] EDIT
 
 defer: forth:find
 ' forth:(find) -> forth:find
@@ -834,12 +839,14 @@ defer: forth:find
 ;
 
 
-only [core] also [forth] also definitions
+LEXI [forth] REFER [forth] EDIT
 
 : prim>code 1 << 1 or ;
 : prim, prim>code , ;
 
-only [core] also definitions [forth] also
+
+LEXI [forth] REFER [core] EDIT
+
 : LIT,   2 prim, ;
 : RET,   3 prim, ;
 : +,     8 prim, ;
@@ -851,7 +858,7 @@ only [core] also definitions [forth] also
 
 ( ----- stream ----- )
 
-only [core] also [forth] also definitions
+LEXI [forth] REFER [forth] EDIT
 
 COVER
 
@@ -902,22 +909,22 @@ SHOW
 
   [ buf IF RET THEN len allot buf! ] >init
 
-[core] also definitions
+[core] ALSO [core] EDIT
   defer: forth:notfound ( name -- )
   ' notfound -> forth:notfound
-previous SHOW
+PREVIOUS SHOW
 
   : forth:stream  stream  ;
   : forth:stream! stream! ;
   : forth:source  source  ;
   : forth:source! source! ;
 
-[core] also definitions
+[core] ALSO [core] EDIT
   : forth:take    take ;
   : forth:read ( -- buf yes | no )
     read dup b@ IF yes ELSE drop no THEN
   ;
-previous SHOW
+PREVIOUS SHOW
 
   defer: forth:handle_num
   ' handle_num -> forth:handle_num
@@ -969,15 +976,15 @@ END
 
 ( ===== Root ===== )
 
-only definitions [core] also [forth] also
+LEXI [forth] REFER [root] EDIT
 
-: get-lexicons ( -- 0 lexi ... )
+: CONTEXT ( -- 0 lexi ... )
     0 [ ( no-op ) ] lexi:each
 ;
 
-: set-lexicons ( 0 lexi ... -- )
-    only previous ( empty )
-    [ ?dup [ also GO ] [ STOP ] if ] while
+: ORDER ( 0 lexi ... -- )
+    lexicons @ lexisp !
+    [ ?dup [ ALSO GO ] [ STOP ] if ] while
 ;
 
 : ?words
@@ -990,24 +997,21 @@ only definitions [core] also [forth] also
 ;
 
 : LEXI ( -- 0 ) 0 ;
-: REFER ( lexicons -- ) [core] [root] set-lexicons ;
-: ORDER ( lexicons -- ) set-lexicons ;
-: EDIT ( lexi -- ) current ! ;
-: ALSO ( lexi -- ) also ;
+: REFER ( lexicons -- ) [core] [root] ORDER ;
 
 
 
 ( ===== Include ===== )
 
-only [core] also definitions [forth] also
+LEXI [forth] REFER [core] EDIT
 
-[file] also
+[file] ALSO
 : include ( fname -- )
   " r" file:open! dup >r
   [ ( id -- c id ) dup file:getc swap ] forth:run
   r> file:close!
 ;
-previous
+PREVIOUS
 
 : include:
   forth:read [ " File name required" panic ] ;unless
@@ -1018,8 +1022,7 @@ previous
 
 ( ===== Forth Utils ===== )
 
-only [core] also definitions [forth] also
-
+LEXI [forth] REFER [core] EDIT
 
 : ;0 ( ? -- ) IF ELSE rdrop THEN ;
 
@@ -1055,7 +1058,7 @@ only [core] also definitions [forth] also
 
 ( ===== String ===== )
 
-only [core] also definitions [forth] also
+LEXI [forth] REFER [core] EDIT
 
 : c:escaped ( qtake -- c ok | ng )
   dup >r call r> swap
@@ -1112,6 +1115,8 @@ only [core] also definitions [forth] also
 
 ( ===== Require ===== )
 
+LEXI REFER [core] EDIT
+
 COVER
 
   var: len
@@ -1128,12 +1133,12 @@ COVER
   : fin! 2 cells + ! ;
   : req 3 cells ;
 
-  [file] also
+  [file] ALSO
   : >path ( fname -- )
     dup file:exists? [ epr " : not found" panic ] ;unless
     path len file:fullpath [ path epr " : not found" panic ] ;unless
   ;
-  previous
+  PREVIOUS
 
   : check_circular ( req -- )
     fin [
@@ -1187,7 +1192,7 @@ END
 
 ( ===== Syntax ===== )
 
-only [core] also definitions [forth] also
+LEXI [forth] REFER [core] EDIT
 
 : _: ( name -- q )
   forth:create
@@ -1264,7 +1269,7 @@ only [core] also definitions [forth] also
 
 ( ===== Comment ===== )
 
-only definitions [core] also
+LEXI REFER [root] EDIT
 
 : ( <IMMED>
   [ forth:take
@@ -1287,7 +1292,7 @@ only definitions [core] also
 
 ( ===== COVER SHOW/HIDE with lexicon ===== )
 
-only [core] also definitions [forth] also
+LEXI [forth] REFER [core] EDIT
 
 COVER
 
@@ -1303,8 +1308,8 @@ SHOW
         private public
         lexi:new  private!
         current @ public!
-        private also definitions
-        [ previous SHOW public! private! ]
+        private dup ALSO EDIT
+        [ PREVIOUS SHOW public! private! ]
     ;
 
 END
@@ -1313,7 +1318,7 @@ END
 
 ( ===== Initializer ===== )
 
-only [core] also definitions
+LEXI REFER [core] EDIT
 
 COVER
 
@@ -1338,7 +1343,7 @@ END
 
 ( ===== Struct ===== )
 
-only [core] also definitions [forth] also
+LEXI [forth] REFER [core] EDIT
 
 COVER
 
@@ -1369,6 +1374,8 @@ END
 
 
 ( ===== Test ===== )
+
+LEXI REFER [core] EDIT
 
 : ASSERT ( v s )
   swap IF drop ELSE " Assertion failed: " epr panic THEN
@@ -1414,7 +1421,7 @@ END
 
 ( ===== Marker ===== )
 
-only [core] also definitions [forth] also
+LEXI [forth] REFER [core] EDIT
 
 COVER
 
@@ -1443,7 +1450,7 @@ END
 
 ( ===== Var ===== )
 
-only [core] also definitions [forth] also
+LEXI [forth] REFER [core] EDIT
 
 : var>
   forth:read [ " Var name required" panic ] ;unless
@@ -1476,7 +1483,7 @@ only [core] also definitions [forth] also
 
 ( ===== Primitives ===== )
 
-only [core] also definitions [forth] also
+LEXI [forth] REFER [core] EDIT
 
 : compile_only ( prim -- ) forth:mode [ prim, ] [ " Compile Only" panic ] if ;
 : primitive ( prim q -- ) forth:mode [ drop prim, ] [ nip call ] if ;
@@ -1532,7 +1539,7 @@ only [core] also definitions [forth] also
 
 ( ===== Loadfile ===== )
 
-only [core] also definitions
+LEXI REFER [core] EDIT
 
 # loadfile ( path -- addr )
 # loadfile: ( :path -- addr )
@@ -1550,7 +1557,7 @@ COVER
 
 SHOW
 
-  [file] also
+  [file] ALSO
   : loadfile ( path -- addr )
     " rb" file:open! id!
     id file:size size!
@@ -1562,7 +1569,7 @@ SHOW
     id file:close!
     addr
   ;
-  previous
+  PREVIOUS
 
   : loadfile: ( :path -- addr )
     forth:read [ " file name required" ] ;unless
@@ -1578,7 +1585,7 @@ END
 
 ( ===== CLI Option ===== )
 
-only [core] also definitions
+LEXI REFER [core] EDIT
 
 COVER
 
@@ -1624,7 +1631,7 @@ END
 
 ( ===== Turnkey Image ===== )
 
-only [core] also definitions [file] also [forth] also
+LEXI [forth] [file] REFER [core] EDIT
 
 COVER
 
@@ -1664,11 +1671,10 @@ END
 
 ( ===== REPL ===== )
 
-only [core] also definitions
+LEXI REFER [core] EDIT
 lexicon: [repl]
 
-[forth] also [repl] also definitions
-
+LEXI [repl] [forth] REFER [repl] EDIT
 lexicon: [user]
 
 COVER
@@ -1703,9 +1709,9 @@ SHOW
 END
 
 
-only [core] also definitions
 
-[repl] also
+LEXI [repl] REFER [core] EDIT
+
 : main
   init:run
   opt:parse_all
@@ -1718,4 +1724,5 @@ only [core] also definitions
   bye
 ;
 
-only [core] also definitions
+
+LEXI REFER [core] EDIT

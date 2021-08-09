@@ -342,7 +342,7 @@ var: m:image_name
   m:image_name [ panic" No image name" ] ;unless
 
   ( set entrypoint )
-  CROSS-CORE also
+  CROSS-CORE ALSO
   " main" x:find [ panic" word 'main' required in [core]" ] ;unless xxt entrypoint!
 
   m:image_name save
@@ -398,6 +398,14 @@ var: m:image_name
     drop
 ;
 
+: aux_order ( 0 xlexi mlexi .. )
+    LEXI ORDER
+    xonly xprevious
+    [ ?dup [ STOP ] ;unless ALSO xalso GO ] while
+    META ALSO
+;
+
+
 ( ----- COVER SHOW/HIDE ----- )
 
 COVER
@@ -419,13 +427,13 @@ SHOW
             lexi:new  private!
             current @ public!
             ( META -> private META )
-            previous private also definitions META also
+            PREVIOUS private dup ALSO EDIT META ALSO
         ( cross )
             xlexi:new xprivate!
             xcurrent  xpublic!
             xprivate xalso xdefinitions
         ( close )
-            [ previous previous META also xprevious aux_SHOW
+            [ PREVIOUS PREVIOUS META ALSO xprevious aux_SHOW
               xpublic! xprivate! public! private! ]
     ;
 
@@ -501,12 +509,15 @@ END
 xlexi_core as: lexi_core
 xlexi_root as: lexi_root
 
+: [CORE] xlexi_core CROSS-CORE ;
+: [ROOT] xlexi_root CROSS-ROOT ;
+
 : [core] <IMMED> ( -- xcore mcore )
-  forth:mode [ xLIT, lexi_core x, ] [ xlexi_core CROSS-CORE ] if
+  forth:mode [ xLIT, lexi_core x, ] [ [CORE] ] if
 ;
 
 : [root] <IMMED> ( -- xcore mcore )
-  forth:mode [ xLIT, lexi_root x, ] [ xlexi_root CROSS-ROOT ] if
+  forth:mode [ xLIT, lexi_root x, ] [ [ROOT] ] if
 ;
 
 
@@ -674,30 +685,32 @@ END
     ( mlexi xlexi ) LIT, , LIT, , JMP, [ forth:mode [ drop xLIT, x, ] when ] ,
 ;
 
-: definitions ( -- ) <IMMED>
-    " definitions" ;aux_compile
-    previous definitions META also
-    xdefinitions
-;
-
-: also ( xlexi mlexi -- ) <IMMED>
-    " also" ;aux_compile
-    previous also META also
-    xalso
-;
-
-: only ( -- ) <IMMED>
-    # meta:  root CROSS-ROOT META
-    # cross: root
-    " only" ;aux_compile
-    only CROSS-ROOT also META also
-    xonly
-;
-
-: previous <IMMED>
-    " previous" ;aux_compile
-    previous previous META also
+: PREVIOUS <IMMED>
+    " PREVIOUS" ;aux_compile
+    PREVIOUS PREVIOUS META ALSO
     xprevious
+;
+
+: LEXI <IMMED>
+    " LEXI" ;aux_compile 0
+;
+
+: REFER <IMMED>
+    " REFER" ;aux_compile [CORE] [ROOT] aux_order
+;
+
+: ORDER <IMMED>
+    " ORDER" ;aux_compile aux_order
+;
+
+: EDIT <IMMED>
+    " EDIT" ;aux_compile current ! xcurrent!
+;
+
+: ALSO <IMMED>
+    " ALSO" ;aux_compile
+    PREVIOUS ALSO META ALSO
+    xalso
 ;
 
 : COVER <IMMED> " COVER" ;aux_compile aux_COVER ;
