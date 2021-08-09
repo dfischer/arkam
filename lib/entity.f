@@ -1,7 +1,7 @@
 ( ===== Entity Component System ===== )
 
 
-PRIVATE
+COVER
 
   # entities:
   #   | size
@@ -25,14 +25,14 @@ PRIVATE
 
   ( --- entity --- )
 
-  PRIVATE
+  COVER
       var: es
       var: esize
       var: elatest
       var: ecur
       var: erest
       : cur>id es alives - ;
-  PUBLIC
+  SHOW
       : new ( es -- id yes | no ) es!
         es size @ dup esize! erest!
         es latest @ elatest!
@@ -76,7 +76,7 @@ PRIVATE
     LIT, , JMP, [ forth:mode [ LIT, , COMPILE: set ] [ set ] if ] ,
   ;
 
-PUBLIC
+SHOW
 
 : ecs:new_es ( n -- es )
   here swap dup , 0 , allot drop here:align! ;

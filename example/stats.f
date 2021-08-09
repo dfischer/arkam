@@ -1,6 +1,6 @@
 [forth] also
 
-PRIVATE
+COVER
 
     var: all
     var: hidden
@@ -30,13 +30,15 @@ PRIVATE
     : desc ( n s ) swap .. pr space ;
     : len ( n -- ) .. " chars" pr ;
 
-PUBLIC
+SHOW
+
     : stats
         count
         all " words" desc all-len len cr
         |> public " public" desc public-len len cr
         |> hidden " hidden" desc hidden-len len cr
     ;
+
 END
 
 only [core] also [user] also

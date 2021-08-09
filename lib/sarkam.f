@@ -18,7 +18,7 @@ require: lib/basic_sprite.f
 
 
 
-PRIVATE
+COVER
 
   # bresenham's algorithm
 
@@ -49,7 +49,7 @@ PRIVATE
     AGAIN
   ;
 
-PUBLIC
+SHOW
 
   : line ( x0 y0 x1 y1 -- )
     y1! x1! y0! x0!
@@ -65,11 +65,11 @@ END
 
 
 
-PRIVATE
+COVER
 
   var: x  var: y  var: w  var: h
 
-PUBLIC
+SHOW
 
   : rect ( x y w h )
     1 - h! 1 - w! y! x!
@@ -83,11 +83,11 @@ END
 
 
 
-PRIVATE
+COVER
 
   var: x  var: y  var: w  var: h
 
-PUBLIC
+SHOW
 
   : fill_rect ( x y w h )
     h! w! y! x!
@@ -102,7 +102,7 @@ END
 
 
 
-PRIVATE
+COVER
 
   # bresenham's algorithm
   var: x   var: y   var: r
@@ -131,7 +131,7 @@ PRIVATE
     cx 1 + cx!
     AGAIN ;
 
-PUBLIC
+SHOW
 
   : circle ( r x y -- )
     y! x! r!
@@ -147,11 +147,11 @@ END
 
 
 
-PRIVATE
+COVER
 
   var: dx  var: dy  var: w  var: h
 
-PUBLIC
+SHOW
 
   : hover_rect? ( x1 y1 x0 y0 w h -- yes | no )
     # point(x1 y1) on rect(x0 y0 w h) ?
@@ -174,7 +174,7 @@ END
 
 ( ===== draw loop ===== )
 
-PRIVATE
+COVER
   # usage:
   #   [ some_draw ] draw_loop:register!
   #   draw_loop
@@ -187,7 +187,7 @@ PRIVATE
     ppu:switch!
   ;
 
-PUBLIC
+SHOW
 
   : draw_loop:register ( q -- ) callback! ;
 
@@ -221,7 +221,7 @@ var: mouse:rp
 # basic_sprite.f should load character sprite
 # at same ascii code
 
-PRIVATE
+COVER
 
   var: x   var: y
   var: ox  var: s
@@ -246,7 +246,7 @@ PRIVATE
     ] while
   ;
 
-PUBLIC
+SHOW
 
   w as: put_text:w
 
@@ -256,7 +256,7 @@ END
 
 
 
-PRIVATE
+COVER
 
   11 as: max ( i32: max " -2147483648" )
   max 1 + allot as: buf
@@ -290,7 +290,7 @@ PRIVATE
     x y p put_text
   ;
 
-PUBLIC
+SHOW
 
   : put_dec ( n x y -- ) 10 base! run ;
   : put_hex ( n x y -- ) 16 base! run ;
@@ -299,13 +299,13 @@ END
 
 
 
-PRIVATE
+COVER
 
   16 as: base
   3 allot as: buf
   var: x  var: y
 
-PUBLIC
+SHOW
 
   : put_ff ( n x y -- )
     y! x!

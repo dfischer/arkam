@@ -1,9 +1,9 @@
-PRIVATE
+COVER
 
   : query 4 io ;
   : param! 4 query ;
 
-PUBLIC
+SHOW
 
   : fm:voice!     0 query ; # i --
   : fm:operator!  1 query ; # i --

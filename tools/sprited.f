@@ -21,13 +21,13 @@ spr/line lines * as: spr/screen
 
 spr_max spr_size * as: spr_bytes
 
-PRIVATE
+COVER
 
   256     as: len
   len dec as: max
   var: id
 
-PUBLIC
+SHOW
 
   len allot as: fname
   opt:read! [ panic" filename required" ] unless
@@ -101,7 +101,7 @@ padding 3 * as: gui_top
 
 ( ===== showcase ===== )
 
-PRIVATE
+COVER
 
   spr_max lines / as: max_lines
   1 as: border
@@ -195,7 +195,7 @@ PRIVATE
     spr/line * + spr_base + spr_max mod selected!
   ;
 
-PUBLIC
+SHOW
 
   : showcase:draw ( -- )
     handle_select
@@ -212,7 +212,7 @@ END
 
 ( ===== editor ===== )
 
-PRIVATE
+COVER
 
   spr_w dup * as: width
   spr_h dup * as: height
@@ -320,7 +320,7 @@ PRIVATE
   top as: tool_y
   0 tool_x tool_y " reset" [ drop reset ] txtbtn:create drop
 
-PUBLIC
+SHOW
 
   : editor:draw
     handle_mouse
@@ -336,13 +336,13 @@ END
 
 ( ===== Toolbar ===== )
 
-PRIVATE
+COVER
 
   padding as: left
   ppu:height padding - as: bottom
   bottom 8 - as: top
 
-PUBLIC
+SHOW
 
   0 left top " save" [ drop save ] txtbtn:create drop
   0 left 36 + top " reset all" [ drop reset_all ] txtbtn:create drop

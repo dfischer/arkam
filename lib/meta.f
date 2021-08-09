@@ -114,21 +114,16 @@ adr_begin xhere!
 : image_size xhere x>t there - ;
 
 
-PRIVATE
+COVER
 
   var: id
 
-PUBLIC
+SHOW
 
   : save ( fname -- )
     " wb" file:open! id!
     there image_size id file:write!
     id file:close!
-  ;
-
-  : save: ( fname: -- )
-    forth:read [ panic" Image name required" ] unless
-    save
   ;
 
 END
@@ -627,11 +622,11 @@ xlexi_root as: lexi_root
 : # <IMMED> POSTPONE: # ;
 
 
-PRIVATE
+COVER
 
   xhere 0 x, as: link
 
-PUBLIC
+SHOW
 
   link as: init:link
 

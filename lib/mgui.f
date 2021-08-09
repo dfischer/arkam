@@ -6,7 +6,7 @@ require: lib/entity.f
 
 ( ===== button ===== )
 
-PRIVATE
+COVER
 
   128 as: max
 
@@ -73,7 +73,7 @@ PRIVATE
     id
   ;
 
-PUBLIC
+SHOW
 
   : btn:delete ( id -- ) btn entity:kill ;
 
@@ -115,7 +115,7 @@ END
 
 ( ===== slider ===== )
 
-PRIVATE
+COVER
 
   128 as: max_sliders
 
@@ -188,7 +188,7 @@ PRIVATE
     draw_bar
   ;
 
-PUBLIC
+SHOW
 
   # range: 0 <= v <= max
   #
