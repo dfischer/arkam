@@ -1,6 +1,6 @@
 ( ===== Locals ===== )
 
-only [core] also definitions [forth] also
+LEXI [forth] REFER
 
 # TODO: Use vocab to correct search order
 # Current locals will be hidden by newer words.
