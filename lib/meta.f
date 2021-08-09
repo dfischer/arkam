@@ -398,7 +398,7 @@ var: m:image_name
     drop
 ;
 
-: aux_set-lexicons ( 0 xlexi mlexi .. )
+: aux_order ( 0 xlexi mlexi .. )
     LEXI ORDER
     xonly xprevious
     [ ?dup [ STOP ] ;unless ALSO xalso GO ] while
@@ -696,11 +696,11 @@ END
 ;
 
 : REFER <IMMED>
-    " REFER" ;aux_compile [CORE] [ROOT] aux_set-lexicons
+    " REFER" ;aux_compile [CORE] [ROOT] aux_order
 ;
 
 : ORDER <IMMED>
-    " ORDER" ;aux_compile aux_set-lexicons
+    " ORDER" ;aux_compile aux_order
 ;
 
 : EDIT <IMMED>

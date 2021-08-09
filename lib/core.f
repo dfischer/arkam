@@ -982,14 +982,10 @@ LEXI [forth] REFER [root] EDIT
     0 [ ( no-op ) ] lexi:each
 ;
 
-: get-lexicons CONTEXT ;
-
 : ORDER ( 0 lexi ... -- )
     lexicons @ lexisp !
     [ ?dup [ ALSO GO ] [ STOP ] if ] while
 ;
-
-: set-lexicons ORDER ;
 
 : ?words
   " current: " pr current @ lexi:name prn
@@ -1001,7 +997,7 @@ LEXI [forth] REFER [root] EDIT
 ;
 
 : LEXI ( -- 0 ) 0 ;
-: REFER ( lexicons -- ) [core] [root] set-lexicons ;
+: REFER ( lexicons -- ) [core] [root] ORDER ;
 
 
 

@@ -1,6 +1,6 @@
 ( ===== Locals ===== )
 
-get-lexicons current @
+CONTEXT current @
 LEXI [forth] REFER [core] EDIT
 
 # Current locals will be hidden by newer words.
@@ -144,4 +144,4 @@ SHOW
 
 END
 
-EDIT set-lexicons
+EDIT ORDER
