@@ -1,6 +1,6 @@
 [forth] also
 
-PRIVATE
+COVER
 
     var: all
     var: hidden
@@ -10,7 +10,9 @@ PRIVATE
     var: hidden-len
     var: public-len
 
-    : count
+    : init 0 all! 0 hidden! 0 public! 0 all-len! 0 hidden-len! 0 public-len! ;
+
+    : count init
         [ ( lexi )
             [   var' all inc!
                 dup forth:name s:len dup all-len + all-len! swap ( len word )
@@ -30,13 +32,15 @@ PRIVATE
     : desc ( n s ) swap .. pr space ;
     : len ( n -- ) .. " chars" pr ;
 
-PUBLIC
+SHOW
+
     : stats
         count
         all " words" desc all-len len cr
         |> public " public" desc public-len len cr
         |> hidden " hidden" desc hidden-len len cr
     ;
+
 END
 
 only [core] also [user] also

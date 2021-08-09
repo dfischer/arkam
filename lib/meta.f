@@ -12,7 +12,7 @@
 # 1. Create cross-dictionary and define helper words
 # 2. Define meta-words that can be called in metacompile phase
 #   - Primitives (ex. dup, swap, !, @, >r)
-#   - Syntax (ex. :, ;, IF, [, PRIVATE)
+#   - Syntax (ex. :, ;, IF, [, COVER)
 # 3. Hide all words except meta-words
 # 4. Start metacompile by including lib/core.f
 # 5. Patch some addresses and save image
@@ -114,21 +114,16 @@ adr_begin xhere!
 : image_size xhere x>t there - ;
 
 
-PRIVATE
+COVER
 
   var: id
 
-PUBLIC
+SHOW
 
   : save ( fname -- )
     " wb" file:open! id!
     there image_size id file:write!
     id file:close!
-  ;
-
-  : save: ( fname: -- )
-    forth:read [ panic" Image name required" ] unless
-    save
   ;
 
 END
@@ -167,16 +162,19 @@ END
 xlexi:size xallot xlexis!
 xlexis xlexisp!
 
-: xlexi:create ( name -- adr )
-     xhere swap x:sput       ( name )
-     xhere:align! xhere swap ( lexi name )
-     0 x,
-     x,
+: xlexi:new ( -- adr )
+    xhere:align! xhere 0 x, 0 x,
 ;
 
 : xlexi:latest  ( lexi -- word ) x@ ;
 : xlexi:latest! ( word lexi -- ) x! ;
 : xlexi:name    ( lexi -- name ) cell + x@ ;
+: xlexi:name!   ( name lexi -- ) cell + x! ;
+
+: xlexi:create ( name -- adr )
+     xhere swap x:sput ( name )
+     xlexi:new tuck xlexi:name!
+;
 
 : xalso ( lexi -- ) xlexisp x! xlexisp cell + xlexisp! ;
 : xprevious ( -- ) xlexisp cell - xlexisp! ;
@@ -312,15 +310,6 @@ var: const_link
 : const_done const_link -1 = ;
 
 
-( for PRIVATE/PUBLIC )
-: x:hide_range ( start -- end )
-  # hide start < word <= end
-  [ 2dup = [ 2drop STOP ] ;when
-    dup x:hide! xnext GO
-  ] while
-;
-
-
 
 ( ===== Primitive Helper ===== )
 
@@ -410,6 +399,40 @@ var: m:image_name
     forth:mode [ rdrop x:find [ epr panic"  ?" ] ;unless xxt x, ] ;when
     drop
 ;
+
+( ----- COVER SHOW/HIDE ----- )
+
+COVER
+
+    var: public
+    var: private
+    var: xpublic
+    var: xprivate
+
+SHOW
+
+    : aux_SHOW public  current ! xpublic  xcurrent! ;
+    : aux_HIDE private current ! xprivate xcurrent! ;
+
+    : aux_COVER ( -- priv pub xpriv xpub q )
+        ( prev ) private public xprivate xpublic
+
+        ( meta )
+            lexi:new  private!
+            current @ public!
+            ( META -> private META )
+            previous private also definitions META also
+        ( cross )
+            xlexi:new xprivate!
+            xcurrent  xpublic!
+            xprivate xalso xdefinitions
+        ( close )
+            [ previous previous META also xprevious aux_SHOW
+              xpublic! xprivate! public! private! ]
+    ;
+
+END
+
 
 
 ( ----- meta words order ----- )
@@ -546,14 +569,6 @@ xlexi_root as: lexi_root
 ;
 
 
-: PRIVATE ( -- xstart mstart closer ) <run_only>
-  xlatest forth:latest [ forth:latest forth:hide_range xlatest x:hide_range ]
-;
-
-: PUBLIC ( xstart mstart closer -- xstart xend mstart mend closer ) <run_only>
-  drop xlatest swap forth:latest [ forth:hide_range x:hide_range ]
-;
-
 : END ( closer -- ) <IMMED> >r ;
 
 
@@ -627,11 +642,11 @@ xlexi_root as: lexi_root
 : # <IMMED> POSTPONE: # ;
 
 
-PRIVATE
+COVER
 
   xhere 0 x, as: link
 
-PUBLIC
+SHOW
 
   link as: init:link
 
@@ -686,6 +701,10 @@ END
     previous previous META also
     xprevious
 ;
+
+: COVER <IMMED> " COVER" ;aux_compile aux_COVER ;
+: SHOW  <IMMED> " SHOW"  ;aux_compile aux_SHOW ;
+: HIDE  <IMMED> " HIDE"  ;aux_compile aux_HIDE ;
 
 
 

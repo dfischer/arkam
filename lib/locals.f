@@ -9,7 +9,7 @@ only [core] also definitions [forth] also
 #     foo { a -- a } a ;
 #     234 foo => 123
 
-PRIVATE
+COVER
 
     var: fp  ( frame pointer )
 
@@ -118,7 +118,7 @@ PRIVATE
         0 localc! 0 argc!
     ;
 
-PUBLIC
+SHOW
 
     init
 

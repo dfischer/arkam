@@ -13,7 +13,7 @@ fm:deluxe_color 4 [ ppu:palette_color! ] for
 0 fm:operator!
 
 
-PRIVATE
+COVER
 
   16 as: steps
   steps allot as: seq
@@ -123,7 +123,7 @@ PRIVATE
     steps [ 2 rand IF 0 ELSE dur 2 - THEN swap at! ] for
   <init>
 
-PUBLIC
+SHOW
 
   : seq:pos! ( x y -- ) oy! ox! ;
 
@@ -141,7 +141,7 @@ END
 
 ( ===== params ===== )
 
-PRIVATE
+COVER
   32 as: max
 
   max ENTITY: sliders
@@ -156,7 +156,7 @@ PRIVATE
   END
 
   var: id
-  
+
   40 as: swidth
   8  as: sheight
   4  as: pad
@@ -220,7 +220,7 @@ PRIVATE
   10  26 0 oparams
   110 26 1 oparams
 
-PUBLIC
+SHOW
 
   : params:draw draw_all ;
 
