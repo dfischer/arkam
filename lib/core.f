@@ -1318,7 +1318,7 @@ SHOW
         private public
         lexi:new  private!
         current @ public!
-        private also definitions
+        private dup ALSO EDIT
         [ previous SHOW public! private! ]
     ;
 

@@ -427,7 +427,7 @@ SHOW
             lexi:new  private!
             current @ public!
             ( META -> private META )
-            previous private also definitions META also
+            previous private dup ALSO EDIT META also
         ( cross )
             xlexi:new xprivate!
             xcurrent  xpublic!
@@ -683,12 +683,6 @@ END
     ( meta )
     r> forth:create POSTPONE: <IMMED>
     ( mlexi xlexi ) LIT, , LIT, , JMP, [ forth:mode [ drop xLIT, x, ] when ] ,
-;
-
-: definitions ( -- ) <IMMED>
-    " definitions" ;aux_compile
-    previous definitions META also
-    xdefinitions
 ;
 
 : also ( xlexi mlexi -- ) <IMMED>
