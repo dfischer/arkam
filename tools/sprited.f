@@ -1,7 +1,8 @@
 require: lib/mgui.f
 
 lexicon: [sprited]
-[file] also [sprited] also definitions
+[sprited] EDIT
+LEXI [sprited] [file] REFER
 
 init:run
 

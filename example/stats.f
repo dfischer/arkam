@@ -1,4 +1,4 @@
-[forth] also
+LEXI [forth] REFER
 
 COVER
 
@@ -43,5 +43,4 @@ SHOW
 
 END
 
-only [core] also [user] also
-?words cr stats
+LEXI REFER ?words cr stats
