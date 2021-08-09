@@ -758,7 +758,6 @@ LEXI [forth] REFER [root] EDIT
 
 lexi_core as: [core]
 lexi_root as: [root]
-: context lexisp @ cell - @ ;
 : PREVIOUS ( -- ) lexisp @ cell - lexisp ! ;
 : EDIT ( lexi -- ) current ! ;
 : ALSO ( lexi -- ) lexisp @ ! lexisp @ cell + lexisp ! ;
