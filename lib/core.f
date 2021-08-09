@@ -1683,7 +1683,6 @@ LEXI REFER [core] EDIT
 lexicon: [repl]
 
 LEXI [repl] [forth] REFER [repl] EDIT
-lexicon: [user]
 
 COVER
 
@@ -1702,7 +1701,13 @@ COVER
 
   : notfound ( name -- ) epr "  ?" eprn ;
 
-  : lexicons [user] EDIT LEXI [user] REFER ;
+  : lexicons
+    # create [user] lexicon into [core] then refer and switch to it
+    LEXI REFER [core] EDIT
+    " [user]" lexi:create
+    dup " [user]" forth:create LIT, , RET,
+    dup ALSO EDIT
+  ;
 
 SHOW
 
