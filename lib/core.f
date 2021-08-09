@@ -264,33 +264,33 @@ ng as: STOP
 
 ( ===== Iterator ===== )
 
-PRIVATE
+COVER
   : loop ( q n ) dup 1 < IF 2drop RET THEN
     1 - over swap >r >r call r> r> AGAIN
   ;
-PUBLIC
+SHOW
   : times ( n q -- ) swap loop ;
 END
 
 
-PRIVATE
+COVER
   : loop ( q n i )
     2dup <= IF 3drop RET THEN
     swap over 1 +     # q i n i+1
     >r >r swap dup >r # i q | i+1 n q
     call r> r> r> AGAIN
   ;
-PUBLIC
+SHOW
  : for ( n q -- ) swap 0 loop ;
 END
 
 
-PRIVATE
+COVER
   : loop ( q n )
     dup 1 < IF 2drop RET THEN
     dec 2dup >r >r swap call r> r> AGAIN
   ;
-PUBLIC
+SHOW
   : for- ( n q -- ) swap loop ;
 END
 
@@ -303,9 +303,9 @@ END
 
 ( ===== System ===== )
 
-PRIVATE
+COVER
   : query 0 io ;
-PUBLIC
+SHOW
   : sys:size 0 query ;
   : sys:ds_size 2 query ;
   : sys:ds      3 query ;
@@ -390,7 +390,7 @@ defer: panic
 
 : ?h " HERE" prn ;
 
-PRIVATE
+COVER
 
   11 as: max ( i32: max " -2147483648" )
   var: buf
@@ -420,7 +420,7 @@ PRIVATE
 
   [ buf IF RET THEN max 1 + allot buf! ] >init
 
-PUBLIC
+SHOW
 
   : n>s ( n base -- buf )
     base! n! check_min check_sign init read put_sign i
@@ -451,7 +451,7 @@ END
 : ff ( n -- ) 0xFF and 16 /mod swap >hex putc >hex putc ;
 
 
-PRIVATE
+COVER
   16 as: bpl ( bytes per line )
   var: adr
   var: len
@@ -480,7 +480,7 @@ PRIVATE
     [ base + b@ ascii ] for
   ;
 
-PUBLIC
+SHOW
   : dump ( adr len ) len! adr!
     len bpl / lines!
     lines [ bpl * adr + base!
@@ -554,9 +554,9 @@ END
 
 
 
-PRIVATE
+COVER
   var: base
-PUBLIC
+SHOW
   : s>n ( s base -- n yes | no )
     base!
     dup b@ CHAR: - = IF inc -1 ELSE 1 THEN swap ( sign s )
@@ -629,7 +629,7 @@ END
 ;
 
 
-PRIVATE # ----- s:each_line! -----
+COVER # ----- s:each_line! -----
 
   # destructive!
   # Every newline in s will be replaced by 0
@@ -644,7 +644,7 @@ PRIVATE # ----- s:each_line! -----
     ] while
   ;
 
-PUBLIC
+SHOW
 
   : s:each_line! ( s q -- )
     [ >r split not IF rdrop STOP RET THEN
@@ -669,9 +669,9 @@ lexicon: [file]
 
 only <CORE> also [file] also definitions
 
-PRIVATE
+COVER
   : query    8 io ;
-PUBLIC
+SHOW
   : file:ready?  -1  query ; # -- ?
   : file:open     0  query ; # path mode -- id ok | ng
   : file:close    1  query ; # id -- ?
@@ -853,7 +853,7 @@ only <CORE> also definitions [forth] also
 
 only <CORE> also [forth] also definitions
 
-PRIVATE
+COVER
 
   32      as: len
   len 1 - as: max
@@ -896,28 +896,28 @@ PRIVATE
     s>hex
   ;
 
-PUBLIC
+SHOW
 
   max as: forth:max_len
 
   [ buf IF RET THEN len allot buf! ] >init
 
-  <CORE> also definitions
+<CORE> also definitions
   defer: forth:notfound ( name -- )
   ' notfound -> forth:notfound
-  previous definitions
+previous SHOW
 
   : forth:stream  stream  ;
   : forth:stream! stream! ;
   : forth:source  source  ;
   : forth:source! source! ;
 
-  <CORE> also definitions
+<CORE> also definitions
   : forth:take    take ;
   : forth:read ( -- buf yes | no )
     read dup b@ IF yes ELSE drop no THEN
   ;
-  previous definitions
+previous SHOW
 
   defer: forth:handle_num
   ' handle_num -> forth:handle_num
@@ -1090,7 +1090,7 @@ only <CORE> also definitions [forth] also
 
 ( ===== Require ===== )
 
-PRIVATE
+COVER
 
   var: len
   var: path
@@ -1150,7 +1150,7 @@ PRIVATE
   ;
 
 
-PUBLIC
+SHOW
 
   : require ( fname -- ) start ;
 
@@ -1276,12 +1276,12 @@ only <CORE> also [forth] also definitions
 
 only <CORE> also definitions [forth] also
 
-: PRIVATE ( -- start closer )
+: COVER ( -- start closer )
   forth:latest
   [ forth:latest forth:hide_range ]
 ;
 
-: PUBLIC ( start closer -- start end closer )
+: SHOW ( start closer -- start end closer )
   drop forth:latest ' forth:hide_range
 ;
 
@@ -1291,12 +1291,12 @@ only <CORE> also definitions [forth] also
 
 only <CORE> also definitions [forth] also
 
-PRIVATE
+COVER
 
     var: public
     var: private
 
-PUBLIC
+SHOW
 
     : SHOW public  current ! ;
     : HIDE private current ! ;
@@ -1317,11 +1317,11 @@ END
 
 only <CORE> also definitions
 
-PRIVATE
+COVER
 
   init:link as: link
 
-PUBLIC
+SHOW
 
   : >init ( xt -- )
     here link @ , link ! ,
@@ -1342,11 +1342,11 @@ END
 
 only <CORE> also definitions [forth] also
 
-PRIVATE
+COVER
 
   : close ( -- &back offset ) swap ! ;
 
-PUBLIC
+SHOW
 
   : STRUCT ( -- &back offset q )
     # LIT n RET
@@ -1418,7 +1418,7 @@ END
 
 only <CORE> also definitions [forth] also
 
-PRIVATE
+COVER
 
   : sweep ( here latest -- )
     forth:latest! here over here! ( start end )
@@ -1426,7 +1426,7 @@ PRIVATE
     rdrop ( return through cleared marker )
   ;
 
-PUBLIC
+SHOW
 
   : marker ( name -- )
     >r forth:latest here
@@ -1544,13 +1544,13 @@ only <CORE> also definitions
 #        0000 ( null terminated, aligned )
 
 
-PRIVATE
+COVER
 
   var: id
   var: addr
   var: size
 
-PUBLIC
+SHOW
 
   [file] also
   : loadfile ( path -- addr )
@@ -1582,7 +1582,7 @@ END
 
 only <CORE> also definitions
 
-PRIVATE
+COVER
 
   256 as: len
   var: buf
@@ -1593,7 +1593,7 @@ PRIVATE
 
   [ buf IF RET THEN len allot buf! ] >init
 
-PUBLIC
+SHOW
 
   var: opt:repl
   var: opt:argi
@@ -1628,7 +1628,7 @@ END
 
 only <CORE> also definitions [file] also [forth] also
 
-PRIVATE
+COVER
 
   var: id
   defer: main
@@ -1640,7 +1640,7 @@ PRIVATE
     ] 0x04 !
   ;
 
-PUBLIC
+SHOW
 
   : save_image ( fname -- )
     " wb" file:open! id!
@@ -1671,7 +1671,7 @@ lexicon: [repl]
 
 [forth] also [repl] also definitions
 
-PRIVATE
+COVER
 
   256 as: len
   255 as: max
@@ -1688,7 +1688,7 @@ PRIVATE
 
   : notfound ( name -- ) epr "  ?" eprn ;
 
-PUBLIC
+SHOW
 
   ' notfound -> forth:notfound
   : repl:init len allot buf! ;

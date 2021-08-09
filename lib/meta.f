@@ -162,16 +162,19 @@ END
 xlexi:size xallot xlexis!
 xlexis xlexisp!
 
-: xlexi:create ( name -- adr )
-     xhere swap x:sput       ( name )
-     xhere:align! xhere swap ( lexi name )
-     0 x,
-     x,
+: xlexi:new ( -- adr )
+    xhere:align! xhere 0 x, 0 x,
 ;
 
 : xlexi:latest  ( lexi -- word ) x@ ;
 : xlexi:latest! ( word lexi -- ) x! ;
 : xlexi:name    ( lexi -- name ) cell + x@ ;
+: xlexi:name!   ( name lexi -- ) cell + x! ;
+
+: xlexi:create ( name -- adr )
+     xhere swap x:sput ( name )
+     xlexi:new tuck xlexi:name!
+;
 
 : xalso ( lexi -- ) xlexisp x! xlexisp cell + xlexisp! ;
 : xprevious ( -- ) xlexisp cell - xlexisp! ;
@@ -405,6 +408,40 @@ var: m:image_name
     forth:mode [ rdrop x:find [ epr panic"  ?" ] ;unless xxt x, ] ;when
     drop
 ;
+
+( ----- COVER SHOW/HIDE ----- )
+
+COVER
+
+    var: public
+    var: private
+    var: xpublic
+    var: xprivate
+
+SHOW
+
+    : aux_SHOW public  current ! xpublic  xcurrent! ;
+    : aux_HIDE private current ! xprivate xcurrent! ;
+
+    : aux_COVER ( -- priv pub xpriv xpub q )
+        ( prev ) private public xprivate xpublic
+
+        ( meta )
+            lexi:new  private!
+            current @ public!
+            ( META -> private META )
+            previous private also definitions META also
+        ( cross )
+            xlexi:new xprivate!
+            xcurrent  xpublic!
+            xprivate xalso xdefinitions
+        ( close )
+            [ previous previous META also xprevious aux_SHOW
+              xpublic! xprivate! public! private! ]
+    ;
+
+END
+
 
 
 ( ----- meta words order ----- )
@@ -681,6 +718,10 @@ END
     previous previous META also
     xprevious
 ;
+
+: COVER <IMMED> " COVER" ;aux_compile aux_COVER ;
+: SHOW  <IMMED> " SHOW"  ;aux_compile aux_SHOW ;
+: HIDE  <IMMED> " HIDE"  ;aux_compile aux_HIDE ;
 
 
 
