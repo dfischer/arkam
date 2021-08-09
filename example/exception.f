@@ -5,15 +5,16 @@
 0 var> exc-handler
 
 
-: CATCH ( q -- 0 | exc )
+: CATCH ( q -- 0 | exc ) <IMMED>
     forth:mode [ panic" Do not use CATCH in run mode" ] ;unless
-    # r: -- sp prev
-    >r sp r> swap >r  ( q | r: sp )
-    exc-handler >r    ( q | r: sp prev )
-    rp exc-handler!
-    call
-    ( no exception )
-    rdrop rdrop 0
+    [ # r: -- sp prev
+      >r sp r> swap >r  ( q | r: sp )
+      exc-handler >r    ( q | r: sp prev )
+      rp exc-handler!
+      call
+      ( no exception )
+      rdrop rdrop 0
+    ] ,
 ;
 
 
@@ -47,7 +48,7 @@
 ;
 
 : main
-    [ baz ] CATCH ?dup IF " Error:" pr prn THEN
+    [ baz ] CATCH ?dup IF " Error: " pr prn THEN
 ;
 
 main
