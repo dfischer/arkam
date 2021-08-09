@@ -1,5 +1,7 @@
 ( ===== Locals ===== )
 
+only [core] also definitions [forth] also
+
 # TODO: Use vocab to correct search order
 # Current locals will be hidden by newer words.
 # example:

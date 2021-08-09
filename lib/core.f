@@ -805,6 +805,8 @@ only <CORE> also definitions [forth] also
 ;
 
 
+only <CORE> also [forth] also definitions
+
 : forth:find_in ( name lexi -- name no | word yes )
   lexi:latest [ ( name latest )
     ( notfound ) 0 [ no STOP ] ;case
@@ -820,6 +822,9 @@ only <CORE> also definitions [forth] also
         over @ forth:find_in [ nip yes STOP ] [ [ cell - ] dip GO ] if
     ] while
 ;
+
+
+only <CORE> also definitions [forth] also
 
 defer: forth:find
 ' forth:(find) -> forth:find
