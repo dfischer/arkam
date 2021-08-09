@@ -17,12 +17,12 @@
 # 4. Start metacompile by including lib/core.f
 # 5. Patch some addresses and save image
 
-only definitions core also
+only definitions [core] also
   lexicon: META
   lexicon: CROSS-ROOT
   lexicon: CROSS-CORE
 
-only core also definitions [file] also
+only [core] also definitions [file] also
 
 
 
@@ -180,8 +180,8 @@ xlexis xlexisp!
 : xprevious ( -- ) xlexisp cell - xlexisp! ;
 : xdefinitions ( -- ) xlexisp cell - x@ xcurrent! ;
 
-" core" xlexi:create as: xlexi_core
-" root" xlexi:create as: xlexi_root
+" [core]" xlexi:create as: xlexi_core
+" [root]" xlexi:create as: xlexi_root
 
 xlexi_root xalso
 xlexi_core xalso
@@ -357,7 +357,7 @@ var: m:image_name
   forth:mode [ xLIT, x, ] [ ( n -- n ) ] if
 ;
 
-root current !
+[root] current !
 
 : metacompile
   opt:read! [ panic" Image name required" ] ;unless -> m:image_name
@@ -377,7 +377,7 @@ root current !
 ( ##### Meta Words ##### )
 ( ###################### )
 
-only core also definitions
+only [core] also definitions
 
 ( ----- aux word definitions ----- )
 # meta words can't refer each other because of search order.
@@ -416,8 +416,8 @@ only core also definitions
 
 only
   META also definitions
-  root also
-  core also
+  [root] also
+  [core] also
 
 
 

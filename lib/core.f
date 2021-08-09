@@ -743,12 +743,12 @@ var: forth:mode
 
 
 <ROOT> also definitions
-lexi_core as: core
-lexi_root as: root
+lexi_core as: [core]
+lexi_root as: [root]
 : context lexisp @ cell - @ ;
 : also ( lexi -- ) lexisp @ ! lexisp @ cell + lexisp ! ;
 : previous ( -- ) lexisp @ cell - lexisp ! ;
-: only lexicons @ lexisp ! root also ;
+: only lexicons @ lexisp ! [root] also ;
 : definitions context current ! ;
 previous definitions
 
