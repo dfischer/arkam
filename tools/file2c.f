@@ -1,4 +1,4 @@
-only core also definitions <FILE> also
+only core also definitions [file] also
 
 : usage
   panic" Usage: file2c [-b] VARNAME SRC [OUT]"
