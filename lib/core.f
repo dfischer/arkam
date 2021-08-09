@@ -759,7 +759,7 @@ lexi_root as: [root]
 
 
 
-only <CORE> also definitions [forth] also
+only <CORE> also [forth] also definitions
 
 : forth:latest  current @ lexi:latest  ;
 : forth:latest! current @ lexi:latest! ;
@@ -793,6 +793,8 @@ only <CORE> also definitions [forth] also
 : forth:code  3 cells + @ ; # &entry -- &code
 : forth:code! 3 cells + ! ; # &code &entry --
 
+
+only <CORE> also definitions [forth] also
 
 : forth:create ( name -- )
   here:align! s:put here:align! ( &name )
@@ -978,6 +980,9 @@ previous
 
 ( ===== Forth Utils ===== )
 
+only <CORE> also definitions [forth] also
+
+
 : ;0 ( ? -- ) IF ELSE rdrop THEN ;
 
 : forth:read_find ( -- &entry yes | no )
@@ -1011,6 +1016,8 @@ previous
 
 
 ( ===== String ===== )
+
+only <CORE> also definitions [forth] also
 
 : c:escaped ( qtake -- c ok | ng )
   dup >r call r> swap
@@ -1242,7 +1249,7 @@ only definitions <CORE> also
 
 ( ===== Private/Public ===== )
 
-only <CORE> also definitions
+only <CORE> also [forth] also definitions
 
 : forth:hide_range ( start end -- )
   # hide  start < word <= end
@@ -1250,6 +1257,8 @@ only <CORE> also definitions
     dup forth:hide! forth:next GO
   ] while
 ;
+
+only <CORE> also definitions [forth] also
 
 : PRIVATE ( -- start closer )
   forth:latest
