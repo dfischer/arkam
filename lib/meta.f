@@ -342,7 +342,7 @@ var: m:image_name
   m:image_name [ panic" No image name" ] ;unless
 
   ( set entrypoint )
-  CROSS-CORE also
+  CROSS-CORE ALSO
   " main" x:find [ panic" word 'main' required in [core]" ] ;unless xxt entrypoint!
 
   m:image_name save
@@ -401,8 +401,8 @@ var: m:image_name
 : aux_set-lexicons ( 0 xlexi mlexi .. )
     LEXI ORDER
     xonly xprevious
-    [ ?dup [ STOP ] ;unless also xalso GO ] while
-    META also
+    [ ?dup [ STOP ] ;unless ALSO xalso GO ] while
+    META ALSO
 ;
 
 
@@ -427,13 +427,13 @@ SHOW
             lexi:new  private!
             current @ public!
             ( META -> private META )
-            PREVIOUS private dup ALSO EDIT META also
+            PREVIOUS private dup ALSO EDIT META ALSO
         ( cross )
             xlexi:new xprivate!
             xcurrent  xpublic!
             xprivate xalso xdefinitions
         ( close )
-            [ PREVIOUS PREVIOUS META also xprevious aux_SHOW
+            [ PREVIOUS PREVIOUS META ALSO xprevious aux_SHOW
               xpublic! xprivate! public! private! ]
     ;
 
@@ -685,15 +685,9 @@ END
     ( mlexi xlexi ) LIT, , LIT, , JMP, [ forth:mode [ drop xLIT, x, ] when ] ,
 ;
 
-: also ( xlexi mlexi -- ) <IMMED>
-    " also" ;aux_compile
-    PREVIOUS also META also
-    xalso
-;
-
 : PREVIOUS <IMMED>
     " PREVIOUS" ;aux_compile
-    PREVIOUS PREVIOUS META also
+    PREVIOUS PREVIOUS META ALSO
     xprevious
 ;
 
@@ -715,7 +709,7 @@ END
 
 : ALSO <IMMED>
     " ALSO" ;aux_compile
-    PREVIOUS also META also
+    PREVIOUS ALSO META ALSO
     xalso
 ;
 

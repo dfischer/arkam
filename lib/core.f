@@ -759,7 +759,9 @@ LEXI [forth] REFER [root] EDIT
 lexi_core as: [core]
 lexi_root as: [root]
 : context lexisp @ cell - @ ;
-: also ( lexi -- ) lexisp @ ! lexisp @ cell + lexisp ! ;
+: PREVIOUS ( -- ) lexisp @ cell - lexisp ! ;
+: EDIT ( lexi -- ) current ! ;
+: ALSO ( lexi -- ) lexisp @ ! lexisp @ cell + lexisp ! ;
 
 
 
@@ -983,11 +985,9 @@ LEXI [forth] REFER [root] EDIT
 
 : get-lexicons CONTEXT ;
 
-: PREVIOUS ( -- ) lexisp @ cell - lexisp ! ;
-
 : ORDER ( 0 lexi ... -- )
     lexicons @ lexisp !
-    [ ?dup [ also GO ] [ STOP ] if ] while
+    [ ?dup [ ALSO GO ] [ STOP ] if ] while
 ;
 
 : set-lexicons ORDER ;
@@ -1003,8 +1003,6 @@ LEXI [forth] REFER [root] EDIT
 
 : LEXI ( -- 0 ) 0 ;
 : REFER ( lexicons -- ) [core] [root] set-lexicons ;
-: EDIT ( lexi -- ) current ! ;
-: ALSO ( lexi -- ) lexisp @ ! lexisp @ cell + lexisp ! ;
 
 
 
@@ -1012,7 +1010,7 @@ LEXI [forth] REFER [root] EDIT
 
 LEXI [forth] REFER [core] EDIT
 
-[file] also
+[file] ALSO
 : include ( fname -- )
   " r" file:open! dup >r
   [ ( id -- c id ) dup file:getc swap ] forth:run
@@ -1564,7 +1562,7 @@ COVER
 
 SHOW
 
-  [file] also
+  [file] ALSO
   : loadfile ( path -- addr )
     " rb" file:open! id!
     id file:size size!
