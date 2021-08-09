@@ -17,15 +17,15 @@
 # 4. Start metacompile by including lib/core.f
 # 5. Patch some addresses and save image
 
-only definitions [core] also
+[core] EDIT LEXI REFER
   lexicon: META
   lexicon: CROSS-ROOT
   lexicon: CROSS-CORE
+  lexicon: [metacompiler]
 
-only [core] also definitions [file] also [forth] also
+[metacompiler] EDIT
+LEXI [metacompiler] [forth] [file] REFER
 
-lexicon: [metacompiler]
-[metacompiler] also definitions
 
 
 ( for debug )
@@ -358,10 +358,8 @@ var: m:image_name
   opt:read! [ panic" Image name required" ] ;unless -> m:image_name
   ( install )
   ' m:handle_num -> forth:handle_num
-  only
-    CROSS-ROOT also
-    CROSS-CORE also definitions
-    META  also ( use meta words first )
+  CROSS-CORE EDIT
+  LEXI META CROSS-CORE CROSS-ROOT [root] ORDER
   ( start  ) " lib/core.f" include
   ( finish ) m:finish
 ;
@@ -441,12 +439,7 @@ END
 #   core: IF, :(colon), etc...
 #   root: only, also, etc...
 
-only
-  META also definitions
-  [root] also
-  [core] also
-  [forth] also
-  [metacompiler] also
+META EDIT LEXI [metacompiler] [forth] [core] [root] META ORDER
 
 
 
