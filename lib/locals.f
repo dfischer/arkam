@@ -1,9 +1,8 @@
 ( ===== Locals ===== )
 
-CONTEXT current @
+CONTEXT CURRENT
 LEXI [forth] REFER [core] EDIT
 
-# Current locals will be hidden by newer words.
 # example:
 #     123 as: a
 #     foo { a -- a } a ;

@@ -1,4 +1,5 @@
-LEXI [forth] REFER
+CONTEXT current @
+LEXI [forth] REFER [core] EDIT
 
 COVER
 
@@ -44,3 +45,4 @@ SHOW
 END
 
 LEXI REFER ?words cr stats
+EDIT ORDER

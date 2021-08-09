@@ -34,7 +34,6 @@ LEXI REFER [core] EDIT
 # 0x14 current  -> [core]
 # 0x18 begin
 
-0x14 as: current
 
 : here    0x08 @ ;
 : here!   0x08 ! ;
@@ -733,7 +732,7 @@ var: forth:mode
 
 0x0C as: lexicons
 0x10 as: lexisp
-
+0x14 as: current
 
 : lexi:new ( -- adr )
   here:align! here
@@ -759,15 +758,16 @@ LEXI [forth] REFER [root] EDIT
 lexi_core as: [core]
 lexi_root as: [root]
 : PREVIOUS ( -- ) lexisp @ cell - lexisp ! ;
-: EDIT ( lexi -- ) current ! ;
-: ALSO ( lexi -- ) lexisp @ ! lexisp @ cell + lexisp ! ;
+: CURRENT ( -- lexi ) current @ ;
+: EDIT    ( lexi -- ) current ! ;
+: ALSO    ( lexi -- ) lexisp @ ! lexisp @ cell + lexisp ! ;
 
 
 
 LEXI [forth] REFER [forth] EDIT
 
-: forth:latest  current @ lexi:latest  ;
-: forth:latest! current @ lexi:latest! ;
+: forth:latest  CURRENT lexi:latest  ;
+: forth:latest! CURRENT lexi:latest! ;
 
 # Dictionary
 # | next:30 | hidden:1 | immed:1  tagged 32bit pointer
@@ -988,12 +988,20 @@ LEXI [forth] REFER [root] EDIT
 ;
 
 : ?words
-  " current: " pr current @ lexi:name prn
-  [ dup " ===== " pr lexi:name pr "  =====" prn
-    [ dup forth:hidden? [ drop ] ;when
-      forth:name pr space
-    ] forth:each_word cr
-  ] lexi:each
+    " current: " pr CURRENT lexi:name prn
+    [ dup " ===== " pr lexi:name pr "  =====" prn
+      [ dup forth:hidden? [ drop ] ;when
+        forth:name pr space
+      ] forth:each_word cr
+    ] lexi:each
+;
+
+: ?lexi
+    " LEXI" pr space
+    [ lexi:name pr space ] lexi:each
+    " ORDER" pr space
+    CURRENT lexi:name pr space
+    " EDIT" prn
 ;
 
 : LEXI ( -- 0 ) 0 ;
@@ -1301,13 +1309,13 @@ COVER
 
 SHOW
 
-    : SHOW public  current ! ;
-    : HIDE private current ! ;
+    : SHOW public  EDIT ;
+    : HIDE private EDIT ;
 
     : COVER ( -- prev-priv pre-pub q )
         private public
-        lexi:new  private!
-        current @ public!
+        lexi:new private!
+        CURRENT  public!
         private dup ALSO EDIT
         [ PREVIOUS SHOW public! private! ]
     ;

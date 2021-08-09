@@ -352,7 +352,7 @@ var: m:image_name
   forth:mode [ xLIT, x, ] [ ( n -- n ) ] if
 ;
 
-[root] current !
+[root] EDIT
 
 : metacompile
   opt:read! [ panic" Image name required" ] ;unless -> m:image_name
@@ -417,15 +417,15 @@ COVER
 
 SHOW
 
-    : aux_SHOW public  current ! xpublic  xcurrent! ;
-    : aux_HIDE private current ! xprivate xcurrent! ;
+    : aux_SHOW public  EDIT xpublic  xcurrent! ;
+    : aux_HIDE private EDIT xprivate xcurrent! ;
 
     : aux_COVER ( -- priv pub xpriv xpub q )
         ( prev ) private public xprivate xpublic
 
         ( meta )
-            lexi:new  private!
-            current @ public!
+            lexi:new private!
+            CURRENT  public!
             ( META -> private META )
             PREVIOUS private dup ALSO EDIT META ALSO
         ( cross )
@@ -704,7 +704,7 @@ END
 ;
 
 : EDIT <IMMED>
-    " EDIT" ;aux_compile current ! xcurrent!
+    " EDIT" ;aux_compile EDIT xcurrent!
 ;
 
 : ALSO <IMMED>
