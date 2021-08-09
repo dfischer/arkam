@@ -1668,6 +1668,8 @@ lexicon: [repl]
 
 [forth] also [repl] also definitions
 
+lexicon: [user]
+
 COVER
 
   256 as: len
@@ -1685,10 +1687,12 @@ COVER
 
   : notfound ( name -- ) epr "  ?" eprn ;
 
+  : lexicons [user] EDIT LEXI [user] REFER ;
+
 SHOW
 
   ' notfound -> forth:notfound
-  : repl:init len allot buf! ;
+  : repl:init len allot buf! lexicons ;
   : repl:hide_depth! no  show_depth! ;
   : repl:show_depth! yes show_depth! ;
   : repl:hide_stack! no  show_stack! ;
@@ -1699,7 +1703,6 @@ END
 
 
 only <CORE> also definitions
-lexicon: [user]
 
 [repl] also
 : main
@@ -1714,4 +1717,4 @@ lexicon: [user]
   bye
 ;
 
-only <CORE> also [user] also definitions
+only <CORE> also definitions
