@@ -22,6 +22,8 @@
 # You can't
 #   - run immediate cross-words defined here
 
+only <CORE> also definitions
+
 
 
 # ----- Memory Layout -----
@@ -691,6 +693,7 @@ END
 
 ( ===== CLI ===== )
 only <CORE> also definitions
+
 : cli:query 12 io ;
 : cli:argc    0 cli:query ; # -- n
 : cli:get_arg 1 cli:query ; # buf i len -- ?
