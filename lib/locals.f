@@ -1,8 +1,8 @@
 ( ===== Locals ===== )
 
-LEXI [forth] REFER
+get-lexicons current @
+LEXI [forth] REFER [core] EDIT
 
-# TODO: Use vocab to correct search order
 # Current locals will be hidden by newer words.
 # example:
 #     123 as: a
@@ -13,6 +13,7 @@ COVER
 
     var: fp  ( frame pointer )
 
+    lexicon: [local-vars]
 
     ( ----- local accessors ----- )
     # rstack
@@ -28,14 +29,14 @@ COVER
     0 var> offset
 
     : make-getter
-        " " forth:create
+        "  ?" forth:create
         COMPILE: fp LIT, offset , JMP, [ - @ ] ,
         forth:latest getp !
         getp cell + getp!
     ;
 
     : make-setter
-        " " forth:create
+        "  ?" forth:create
         COMPILE: fp LIT, offset , JMP, [ - ! ] ,
         forth:latest setp !
         setp cell + setp!
@@ -48,12 +49,14 @@ COVER
     ;
 
     : init
+        current @ [local-vars] EDIT [local-vars] ALSO
         max-locals cells dup
         allot getters!
         allot setters!
         getters getp!
         setters setp!
         max-locals [ make ] times
+        EDIT previous
     ;
 
 
@@ -116,6 +119,7 @@ COVER
         ] for-
         old_close >r
         0 localc! 0 argc!
+        previous
     ;
 
 SHOW
@@ -124,6 +128,7 @@ SHOW
 
     : { <IMMED> ( close -- close )
         localc [ " Do not define nested locals" panic ] ;when
+        [local-vars] ALSO
         old_close! ' close
         0 argc! 0 localc! ' def_arg -> define
         [   forth:read [ " unclosed locals definition" panic ] ;unless
@@ -138,3 +143,5 @@ SHOW
     ;
 
 END
+
+EDIT set-lexicons
