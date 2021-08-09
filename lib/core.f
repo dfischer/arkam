@@ -989,6 +989,11 @@ only definitions <CORE> also [forth] also
   ] lexi:each
 ;
 
+: LEXI ( -- 0 ) 0 ;
+: REFER ( lexicons -- ) [core] [root] set-lexicons ;
+: ORDER ( lexicons -- ) set-lexicons ;
+: EDIT ( lexi -- ) current ! ;
+
 
 
 ( ===== Include ===== )
