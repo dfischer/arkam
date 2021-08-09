@@ -1677,7 +1677,6 @@ lexicon: [user]
 
 : main
   init:run
-  [user] also definitions
   opt:parse_all
   opt:repl [
     repl:init
@@ -1687,3 +1686,5 @@ lexicon: [user]
   ] when
   bye
 ;
+
+only <CORE> also [user] also definitions

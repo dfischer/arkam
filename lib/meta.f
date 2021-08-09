@@ -349,9 +349,13 @@ var: m:image_name
     " doconst" x:find [ panic" doconst definition not found" ] ;unless
     xxt patch_const
     const_done [ panic" do patch_const" ] ;unless
+
   m:image_name [ panic" No image name" ] ;unless
-  xlatest xxt entrypoint!
-  verbose [ " Turnkey: " epr xlatest xname x>t eprn ] when
+
+  ( set entrypoint )
+  CROSS-CORE also
+  " main" x:find [ panic" word 'main' required in [core]" ] ;unless xxt entrypoint!
+
   m:image_name save
 ;
 
