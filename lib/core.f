@@ -993,6 +993,7 @@ only definitions <CORE> also [forth] also
 : REFER ( lexicons -- ) [core] [root] set-lexicons ;
 : ORDER ( lexicons -- ) set-lexicons ;
 : EDIT ( lexi -- ) current ! ;
+: ALSO ( lexi -- ) also ;
 
 
 
