@@ -980,14 +980,20 @@ END
 
 LEXI [forth] REFER [root] EDIT
 
-: get-lexicons ( -- 0 lexi ... )
+: CONTEXT ( -- 0 lexi ... )
     0 [ ( no-op ) ] lexi:each
 ;
 
-: set-lexicons ( 0 lexi ... -- )
-    only previous ( empty )
+: get-lexicons CONTEXT ;
+
+: PREVIOUS ( -- ) lexisp @ cell - lexisp ! ;
+
+: ORDER ( 0 lexi ... -- )
+    lexicons @ lexisp !
     [ ?dup [ also GO ] [ STOP ] if ] while
 ;
+
+: set-lexicons ORDER ;
 
 : ?words
   " current: " pr current @ lexi:name prn
@@ -1000,9 +1006,8 @@ LEXI [forth] REFER [root] EDIT
 
 : LEXI ( -- 0 ) 0 ;
 : REFER ( lexicons -- ) [core] [root] set-lexicons ;
-: ORDER ( lexicons -- ) set-lexicons ;
 : EDIT ( lexi -- ) current ! ;
-: ALSO ( lexi -- ) also ;
+: ALSO ( lexi -- ) lexisp @ ! lexisp @ cell + lexisp ! ;
 
 
 
