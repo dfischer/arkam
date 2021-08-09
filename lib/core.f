@@ -834,8 +834,12 @@ defer: forth:find
 ;
 
 
+only <CORE> also [forth] also definitions
+
 : prim>code 1 << 1 or ;
 : prim, prim>code , ;
+
+only <CORE> also definitions [forth] also
 : LIT,   2 prim, ;
 : RET,   3 prim, ;
 : +,     8 prim, ;
@@ -844,7 +848,10 @@ defer: forth:find
 : !,    19 prim, ;
 
 
+
 ( ----- stream ----- )
+
+only <CORE> also [forth] also definitions
 
 PRIVATE
 
@@ -895,17 +902,22 @@ PUBLIC
 
   [ buf IF RET THEN len allot buf! ] >init
 
+  <CORE> also definitions
   defer: forth:notfound ( name -- )
   ' notfound -> forth:notfound
+  previous definitions
 
   : forth:stream  stream  ;
   : forth:stream! stream! ;
   : forth:source  source  ;
   : forth:source! source! ;
+
+  <CORE> also definitions
   : forth:take    take ;
   : forth:read ( -- buf yes | no )
     read dup b@ IF yes ELSE drop no THEN
   ;
+  previous definitions
 
   defer: forth:handle_num
   ' handle_num -> forth:handle_num
@@ -938,7 +950,6 @@ PUBLIC
 
 END
 
-
 : lexi:each ( q -- ) # q: lexi --
     lexisp @ cell - [ ( q sp )
         dup lexicons @ < [ 2drop STOP ] ;when
@@ -954,7 +965,7 @@ END
   ] while
 ;
 
-<ROOT> also definitions [forth] also
+only definitions <CORE> also [forth] also
 : ?words
   " current: " pr current @ lexi:name prn
   [ dup " ===== " pr lexi:name pr "  =====" prn
@@ -966,7 +977,7 @@ END
 
 
 
-only <CORE> also definitions
+only <CORE> also definitions [forth] also
 
 [file] also
 : include ( fname -- )
@@ -1278,6 +1289,8 @@ only <CORE> also definitions [forth] also
 
 ( ===== Initializer ===== )
 
+only <CORE> also definitions
+
 PRIVATE
 
   init:link as: link
@@ -1300,6 +1313,8 @@ END
 
 
 ( ===== Struct ===== )
+
+only <CORE> also definitions [forth] also
 
 PRIVATE
 
@@ -1375,6 +1390,8 @@ END
 
 ( ===== Marker ===== )
 
+only <CORE> also definitions [forth] also
+
 PRIVATE
 
   : sweep ( here latest -- )
@@ -1401,6 +1418,8 @@ END
 
 
 ( ===== Var ===== )
+
+only <CORE> also definitions [forth] also
 
 : var>
   forth:read [ " Var name required" panic ] ;unless
@@ -1432,6 +1451,8 @@ END
 
 
 ( ===== Primitives ===== )
+
+only <CORE> also definitions [forth] also
 
 : compile_only ( prim -- ) forth:mode [ prim, ] [ " Compile Only" panic ] if ;
 : primitive ( prim q -- ) forth:mode [ drop prim, ] [ nip call ] if ;
@@ -1487,6 +1508,8 @@ END
 
 ( ===== Loadfile ===== )
 
+only <CORE> also definitions
+
 # loadfile ( path -- addr )
 # loadfile: ( :path -- addr )
 # addr:
@@ -1530,6 +1553,8 @@ END
 
 
 ( ===== CLI Option ===== )
+
+only <CORE> also definitions
 
 PRIVATE
 
@@ -1647,9 +1672,12 @@ PUBLIC
 END
 
 
+only <CORE> also definitions
+lexicon: [user]
 
 : main
   init:run
+  [user] also definitions
   opt:parse_all
   opt:repl [
     repl:init
@@ -1659,5 +1687,3 @@ END
   ] when
   bye
 ;
-
-only <CORE> also definitions

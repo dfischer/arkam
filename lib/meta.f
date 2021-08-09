@@ -24,6 +24,8 @@ only definitions [core] also
 
 only [core] also definitions [file] also [forth] also
 
+lexicon: [metacompiler]
+[metacompiler] also definitions
 
 
 ( for debug )
@@ -377,8 +379,6 @@ var: m:image_name
 ( ##### Meta Words ##### )
 ( ###################### )
 
-only [core] also definitions
-
 ( ----- aux word definitions ----- )
 # meta words can't refer each other because of search order.
 # ex. POSTPONE: '(tick) refers tick in core, not in META.
@@ -419,6 +419,7 @@ only
   [root] also
   [core] also
   [forth] also
+  [metacompiler] also
 
 
 
