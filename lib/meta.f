@@ -22,7 +22,7 @@ only definitions [core] also
   lexicon: CROSS-ROOT
   lexicon: CROSS-CORE
 
-only [core] also definitions [file] also
+only [core] also definitions [file] also [forth] also
 
 
 
@@ -418,6 +418,7 @@ only
   META also definitions
   [root] also
   [core] also
+  [forth] also
 
 
 

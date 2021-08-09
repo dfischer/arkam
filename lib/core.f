@@ -29,10 +29,12 @@ only <CORE> also definitions
 # ----- Memory Layout -----
 # 0x04 &start
 # 0x08 here
-# 0x0C lexicons
-# 0x10 lexisp
-# 0x14 current
+# 0x0C lexicons -> [forth]
+# 0x10 lexisp   -> [forth]
+# 0x14 current  -> [core]
 # 0x18 begin
+
+0x14 as: current
 
 : here    0x08 @ ;
 : here!   0x08 ! ;
@@ -709,8 +711,12 @@ only <CORE> also definitions
 only <CORE> also definitions
 lexicon: [forth]
 
+
 var: forth:mode
 : forth:mode! forth:mode! ;
+
+
+[forth] also definitions
 
 1 as: forth:compile_mode
 0 as: forth:run_mode
@@ -720,7 +726,6 @@ var: forth:mode
 
 0x0C as: lexicons
 0x10 as: lexisp
-0x14 as: current
 
 
 : lexi:new ( -- adr )
@@ -742,7 +747,8 @@ var: forth:mode
 
 
 
-<ROOT> also definitions
+only <CORE> also <ROOT> also definitions [forth] also
+
 lexi_core as: [core]
 lexi_root as: [root]
 : context lexisp @ cell - @ ;
@@ -750,7 +756,10 @@ lexi_root as: [root]
 : previous ( -- ) lexisp @ cell - lexisp ! ;
 : only lexicons @ lexisp ! [root] also ;
 : definitions context current ! ;
-previous definitions
+
+
+
+only <CORE> also definitions [forth] also
 
 : forth:latest  current @ lexi:latest  ;
 : forth:latest! current @ lexi:latest! ;
@@ -938,7 +947,7 @@ END
   ] while
 ;
 
-<ROOT> also definitions
+<ROOT> also definitions [forth] also
 : ?words
   " current: " pr current @ lexi:name prn
   [ dup " ===== " pr lexi:name pr "  =====" prn
@@ -947,8 +956,10 @@ END
     ] forth:each_word cr
   ] lexi:each
 ;
-previous definitions
 
+
+
+only <CORE> also definitions
 
 [file] also
 : include ( fname -- )
@@ -1131,6 +1142,8 @@ END
 
 ( ===== Syntax ===== )
 
+only <CORE> also definitions [forth] also
+
 : _: ( name -- q )
   forth:create
   forth:latest forth:hide!
@@ -1206,6 +1219,8 @@ END
 
 ( ===== Comment ===== )
 
+only definitions <CORE> also
+
 : ( <IMMED>
   [ forth:take
     0 [ " Unclosed comment" panic STOP ] ;case
@@ -1226,6 +1241,8 @@ END
 
 
 ( ===== Private/Public ===== )
+
+only <CORE> also definitions
 
 : forth:hide_range ( start end -- )
   # hide  start < word <= end
@@ -1544,6 +1561,8 @@ END
 
 ( ===== Turnkey Image ===== )
 
+only <CORE> also definitions [file] also [forth] also
+
 PRIVATE
 
   var: id
@@ -1558,7 +1577,6 @@ PRIVATE
 
 PUBLIC
 
-  [file] also
   : save_image ( fname -- )
     " wb" file:open! id!
     # zero clear 0x00-0x03
@@ -1567,7 +1585,6 @@ PUBLIC
     0x04 here id file:write!
     id file:close!
   ;
-  previous
 
   : turnkey ( fname adr -- )
     set_boot! save_image
@@ -1583,6 +1600,8 @@ END
 
 
 ( ===== REPL ===== )
+
+only <CORE> also definitions [forth] also
 
 PRIVATE
 
@@ -1626,3 +1645,5 @@ END
   ] when
   bye
 ;
+
+only <CORE> also definitions
