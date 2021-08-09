@@ -12,7 +12,7 @@
 # 1. Create cross-dictionary and define helper words
 # 2. Define meta-words that can be called in metacompile phase
 #   - Primitives (ex. dup, swap, !, @, >r)
-#   - Syntax (ex. :, ;, IF, [, PRIVATE)
+#   - Syntax (ex. :, ;, IF, [, COVER)
 # 3. Hide all words except meta-words
 # 4. Start metacompile by including lib/core.f
 # 5. Patch some addresses and save image
@@ -310,15 +310,6 @@ var: const_link
 : const_done const_link -1 = ;
 
 
-( for PRIVATE/PUBLIC )
-: x:hide_range ( start -- end )
-  # hide start < word <= end
-  [ 2dup = [ 2drop STOP ] ;when
-    dup x:hide! xnext GO
-  ] while
-;
-
-
 
 ( ===== Primitive Helper ===== )
 
@@ -577,14 +568,6 @@ xlexi_root as: lexi_root
   xJMP, xlatest xxt x,
 ;
 
-
-: PRIVATE ( -- xstart mstart closer ) <run_only>
-  xlatest forth:latest [ forth:latest forth:hide_range xlatest x:hide_range ]
-;
-
-: PUBLIC ( xstart mstart closer -- xstart xend mstart mend closer ) <run_only>
-  drop xlatest swap forth:latest [ forth:hide_range x:hide_range ]
-;
 
 : END ( closer -- ) <IMMED> >r ;
 

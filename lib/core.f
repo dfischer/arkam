@@ -1263,30 +1263,6 @@ only definitions <CORE> also
 
 
 
-( ===== Private/Public ===== )
-
-only <CORE> also [forth] also definitions
-
-: forth:hide_range ( start end -- )
-  # hide  start < word <= end
-  [ 2dup = [ 2drop STOP ] ;when
-    dup forth:hide! forth:next GO
-  ] while
-;
-
-only <CORE> also definitions [forth] also
-
-: COVER ( -- start closer )
-  forth:latest
-  [ forth:latest forth:hide_range ]
-;
-
-: SHOW ( start closer -- start end closer )
-  drop forth:latest ' forth:hide_range
-;
-
-
-
 ( ===== COVER SHOW/HIDE with lexicon ===== )
 
 only <CORE> also definitions [forth] also
