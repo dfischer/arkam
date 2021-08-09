@@ -706,6 +706,9 @@ only <CORE> also definitions
 
 ( ===== Forth ===== )
 
+only <CORE> also definitions
+lexicon: <FORTH>
+
 var: forth:mode
 : forth:mode! forth:mode! ;
 
