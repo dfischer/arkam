@@ -10,7 +10,9 @@ COVER
     var: hidden-len
     var: public-len
 
-    : count
+    : init 0 all! 0 hidden! 0 public! 0 all-len! 0 hidden-len! 0 public-len! ;
+
+    : count init
         [ ( lexi )
             [   var' all inc!
                 dup forth:name s:len dup all-len + all-len! swap ( len word )
