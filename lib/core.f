@@ -760,7 +760,6 @@ lexi_core as: [core]
 lexi_root as: [root]
 : context lexisp @ cell - @ ;
 : also ( lexi -- ) lexisp @ ! lexisp @ cell + lexisp ! ;
-: previous ( -- ) lexisp @ cell - lexisp ! ;
 
 
 
@@ -912,7 +911,7 @@ SHOW
 [core] ALSO [core] EDIT
   defer: forth:notfound ( name -- )
   ' notfound -> forth:notfound
-previous SHOW
+PREVIOUS SHOW
 
   : forth:stream  stream  ;
   : forth:stream! stream! ;
@@ -924,7 +923,7 @@ previous SHOW
   : forth:read ( -- buf yes | no )
     read dup b@ IF yes ELSE drop no THEN
   ;
-previous SHOW
+PREVIOUS SHOW
 
   defer: forth:handle_num
   ' handle_num -> forth:handle_num
@@ -1019,7 +1018,7 @@ LEXI [forth] REFER [core] EDIT
   [ ( id -- c id ) dup file:getc swap ] forth:run
   r> file:close!
 ;
-previous
+PREVIOUS
 
 : include:
   forth:read [ " File name required" panic ] ;unless
@@ -1146,7 +1145,7 @@ COVER
     dup file:exists? [ epr " : not found" panic ] ;unless
     path len file:fullpath [ path epr " : not found" panic ] ;unless
   ;
-  previous
+  PREVIOUS
 
   : check_circular ( req -- )
     fin [
@@ -1317,7 +1316,7 @@ SHOW
         lexi:new  private!
         current @ public!
         private dup ALSO EDIT
-        [ previous SHOW public! private! ]
+        [ PREVIOUS SHOW public! private! ]
     ;
 
 END
@@ -1577,7 +1576,7 @@ SHOW
     id file:close!
     addr
   ;
-  previous
+  PREVIOUS
 
   : loadfile: ( :path -- addr )
     forth:read [ " file name required" ] ;unless

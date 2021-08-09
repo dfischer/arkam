@@ -427,13 +427,13 @@ SHOW
             lexi:new  private!
             current @ public!
             ( META -> private META )
-            previous private dup ALSO EDIT META also
+            PREVIOUS private dup ALSO EDIT META also
         ( cross )
             xlexi:new xprivate!
             xcurrent  xpublic!
             xprivate xalso xdefinitions
         ( close )
-            [ previous previous META also xprevious aux_SHOW
+            [ PREVIOUS PREVIOUS META also xprevious aux_SHOW
               xpublic! xprivate! public! private! ]
     ;
 
@@ -687,13 +687,13 @@ END
 
 : also ( xlexi mlexi -- ) <IMMED>
     " also" ;aux_compile
-    previous also META also
+    PREVIOUS also META also
     xalso
 ;
 
-: previous <IMMED>
-    " previous" ;aux_compile
-    previous previous META also
+: PREVIOUS <IMMED>
+    " PREVIOUS" ;aux_compile
+    PREVIOUS PREVIOUS META also
     xprevious
 ;
 
@@ -715,7 +715,7 @@ END
 
 : ALSO <IMMED>
     " ALSO" ;aux_compile
-    previous also META also
+    PREVIOUS also META also
     xalso
 ;
 

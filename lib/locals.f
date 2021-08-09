@@ -56,7 +56,7 @@ COVER
         getters getp!
         setters setp!
         max-locals [ make ] times
-        EDIT previous
+        EDIT PREVIOUS
     ;
 
 
@@ -119,7 +119,7 @@ COVER
         ] for-
         old_close >r
         0 localc! 0 argc!
-        previous
+        PREVIOUS
     ;
 
 SHOW
