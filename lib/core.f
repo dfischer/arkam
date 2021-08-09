@@ -965,7 +965,21 @@ END
   ] while
 ;
 
+
+
+( ===== Root ===== )
+
 only definitions <CORE> also [forth] also
+
+: get-lexicons ( -- 0 lexi ... )
+    0 [ ( no-op ) ] lexi:each
+;
+
+: set-lexicons ( 0 lexi ... -- )
+    only previous ( empty )
+    [ ?dup [ also GO ] [ STOP ] if ] while
+;
+
 : ?words
   " current: " pr current @ lexi:name prn
   [ dup " ===== " pr lexi:name pr "  =====" prn
@@ -976,6 +990,8 @@ only definitions <CORE> also [forth] also
 ;
 
 
+
+( ===== Include ===== )
 
 only <CORE> also definitions [forth] also
 
