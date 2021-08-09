@@ -22,7 +22,7 @@
 # You can't
 #   - run immediate cross-words defined here
 
-only <CORE> also definitions
+only [core] also definitions
 
 
 
@@ -320,7 +320,7 @@ SHOW
   : sys:ds0! sys:ds_base cell - sp! ;
 END
 
-<ROOT> also definitions
+[root] also definitions
 : bye 0 HALT ;
 previous definitions
 
@@ -667,7 +667,7 @@ END
 ( ===== File ===== )
 lexicon: [file]
 
-only <CORE> also [file] also definitions
+only [core] also [file] also definitions
 
 COVER
   : query    8 io ;
@@ -694,7 +694,7 @@ END
 
 
 ( ===== CLI ===== )
-only <CORE> also definitions
+only [core] also definitions
 
 : cli:query 12 io ;
 : cli:argc    0 cli:query ; # -- n
@@ -708,7 +708,7 @@ only <CORE> also definitions
 
 ( ===== Forth ===== )
 
-only <CORE> also definitions
+only [core] also definitions
 lexicon: [forth]
 
 
@@ -747,7 +747,7 @@ var: forth:mode
 
 
 
-only <CORE> also <ROOT> also definitions [forth] also
+only [core] also [root] also definitions [forth] also
 
 lexi_core as: [core]
 lexi_root as: [root]
@@ -759,7 +759,7 @@ lexi_root as: [root]
 
 
 
-only <CORE> also [forth] also definitions
+only [core] also [forth] also definitions
 
 : forth:latest  current @ lexi:latest  ;
 : forth:latest! current @ lexi:latest! ;
@@ -794,7 +794,7 @@ only <CORE> also [forth] also definitions
 : forth:code! 3 cells + ! ; # &code &entry --
 
 
-only <CORE> also definitions [forth] also
+only [core] also definitions [forth] also
 
 : forth:create ( name -- )
   here:align! s:put here:align! ( &name )
@@ -805,7 +805,7 @@ only <CORE> also definitions [forth] also
 ;
 
 
-only <CORE> also [forth] also definitions
+only [core] also [forth] also definitions
 
 : forth:find_in ( name lexi -- name no | word yes )
   lexi:latest [ ( name latest )
@@ -824,7 +824,7 @@ only <CORE> also [forth] also definitions
 ;
 
 
-only <CORE> also definitions [forth] also
+only [core] also definitions [forth] also
 
 defer: forth:find
 ' forth:(find) -> forth:find
@@ -834,12 +834,12 @@ defer: forth:find
 ;
 
 
-only <CORE> also [forth] also definitions
+only [core] also [forth] also definitions
 
 : prim>code 1 << 1 or ;
 : prim, prim>code , ;
 
-only <CORE> also definitions [forth] also
+only [core] also definitions [forth] also
 : LIT,   2 prim, ;
 : RET,   3 prim, ;
 : +,     8 prim, ;
@@ -851,7 +851,7 @@ only <CORE> also definitions [forth] also
 
 ( ----- stream ----- )
 
-only <CORE> also [forth] also definitions
+only [core] also [forth] also definitions
 
 COVER
 
@@ -902,7 +902,7 @@ SHOW
 
   [ buf IF RET THEN len allot buf! ] >init
 
-<CORE> also definitions
+[core] also definitions
   defer: forth:notfound ( name -- )
   ' notfound -> forth:notfound
 previous SHOW
@@ -912,7 +912,7 @@ previous SHOW
   : forth:source  source  ;
   : forth:source! source! ;
 
-<CORE> also definitions
+[core] also definitions
   : forth:take    take ;
   : forth:read ( -- buf yes | no )
     read dup b@ IF yes ELSE drop no THEN
@@ -969,7 +969,7 @@ END
 
 ( ===== Root ===== )
 
-only definitions <CORE> also [forth] also
+only definitions [core] also [forth] also
 
 : get-lexicons ( -- 0 lexi ... )
     0 [ ( no-op ) ] lexi:each
@@ -999,7 +999,7 @@ only definitions <CORE> also [forth] also
 
 ( ===== Include ===== )
 
-only <CORE> also definitions [forth] also
+only [core] also definitions [forth] also
 
 [file] also
 : include ( fname -- )
@@ -1018,7 +1018,7 @@ previous
 
 ( ===== Forth Utils ===== )
 
-only <CORE> also definitions [forth] also
+only [core] also definitions [forth] also
 
 
 : ;0 ( ? -- ) IF ELSE rdrop THEN ;
@@ -1055,7 +1055,7 @@ only <CORE> also definitions [forth] also
 
 ( ===== String ===== )
 
-only <CORE> also definitions [forth] also
+only [core] also definitions [forth] also
 
 : c:escaped ( qtake -- c ok | ng )
   dup >r call r> swap
@@ -1187,7 +1187,7 @@ END
 
 ( ===== Syntax ===== )
 
-only <CORE> also definitions [forth] also
+only [core] also definitions [forth] also
 
 : _: ( name -- q )
   forth:create
@@ -1264,7 +1264,7 @@ only <CORE> also definitions [forth] also
 
 ( ===== Comment ===== )
 
-only definitions <CORE> also
+only definitions [core] also
 
 : ( <IMMED>
   [ forth:take
@@ -1287,7 +1287,7 @@ only definitions <CORE> also
 
 ( ===== COVER SHOW/HIDE with lexicon ===== )
 
-only <CORE> also definitions [forth] also
+only [core] also definitions [forth] also
 
 COVER
 
@@ -1313,7 +1313,7 @@ END
 
 ( ===== Initializer ===== )
 
-only <CORE> also definitions
+only [core] also definitions
 
 COVER
 
@@ -1338,7 +1338,7 @@ END
 
 ( ===== Struct ===== )
 
-only <CORE> also definitions [forth] also
+only [core] also definitions [forth] also
 
 COVER
 
@@ -1414,7 +1414,7 @@ END
 
 ( ===== Marker ===== )
 
-only <CORE> also definitions [forth] also
+only [core] also definitions [forth] also
 
 COVER
 
@@ -1443,7 +1443,7 @@ END
 
 ( ===== Var ===== )
 
-only <CORE> also definitions [forth] also
+only [core] also definitions [forth] also
 
 : var>
   forth:read [ " Var name required" panic ] ;unless
@@ -1476,7 +1476,7 @@ only <CORE> also definitions [forth] also
 
 ( ===== Primitives ===== )
 
-only <CORE> also definitions [forth] also
+only [core] also definitions [forth] also
 
 : compile_only ( prim -- ) forth:mode [ prim, ] [ " Compile Only" panic ] if ;
 : primitive ( prim q -- ) forth:mode [ drop prim, ] [ nip call ] if ;
@@ -1532,7 +1532,7 @@ only <CORE> also definitions [forth] also
 
 ( ===== Loadfile ===== )
 
-only <CORE> also definitions
+only [core] also definitions
 
 # loadfile ( path -- addr )
 # loadfile: ( :path -- addr )
@@ -1578,7 +1578,7 @@ END
 
 ( ===== CLI Option ===== )
 
-only <CORE> also definitions
+only [core] also definitions
 
 COVER
 
@@ -1624,7 +1624,7 @@ END
 
 ( ===== Turnkey Image ===== )
 
-only <CORE> also definitions [file] also [forth] also
+only [core] also definitions [file] also [forth] also
 
 COVER
 
@@ -1664,7 +1664,7 @@ END
 
 ( ===== REPL ===== )
 
-only <CORE> also definitions
+only [core] also definitions
 lexicon: [repl]
 
 [forth] also [repl] also definitions
@@ -1703,7 +1703,7 @@ SHOW
 END
 
 
-only <CORE> also definitions
+only [core] also definitions
 
 [repl] also
 : main
@@ -1718,4 +1718,4 @@ only <CORE> also definitions
   bye
 ;
 
-only <CORE> also definitions
+only [core] also definitions

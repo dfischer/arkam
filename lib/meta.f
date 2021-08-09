@@ -501,8 +501,13 @@ END
 xlexi_core as: lexi_core
 xlexi_root as: lexi_root
 
-: <CORE> xlexi_core CROSS-CORE ;
-: <ROOT> xlexi_root CROSS-ROOT ;
+: [core] <IMMED> ( -- xcore mcore )
+  forth:mode [ xLIT, lexi_core x, ] [ xlexi_core CROSS-CORE ] if
+;
+
+: [root] <IMMED> ( -- xcore mcore )
+  forth:mode [ xLIT, lexi_root x, ] [ xlexi_root CROSS-ROOT ] if
+;
 
 
 
