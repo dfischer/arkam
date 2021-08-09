@@ -1,3 +1,5 @@
+[forth] also
+
 PRIVATE
 
     var: all
@@ -9,16 +11,18 @@ PRIVATE
     var: public-len
 
     : count
-        [   var' all inc!
-            dup forth:name s:len dup all-len + all-len! swap ( len word )
-            forth:hidden? [
-                hidden-len + hidden-len!
-                var' hidden inc!
-            ] [
-                public-len + public-len!
-                var' public inc!
-            ] if
-        ] forth:each_word
+        [ ( lexi )
+            [   var' all inc!
+                dup forth:name s:len dup all-len + all-len! swap ( len word )
+                forth:hidden? [
+                    hidden-len + hidden-len!
+                    var' hidden inc!
+                ] [
+                    public-len + public-len!
+                    var' public inc!
+                ] if
+            ] forth:each_word
+        ] lexi:each
     ;
 
     : |> space space space space ;
@@ -35,4 +39,5 @@ PUBLIC
     ;
 END
 
-stats
+only [core] also [user] also
+?words cr stats

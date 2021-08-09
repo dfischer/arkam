@@ -22,13 +22,19 @@
 # You can't
 #   - run immediate cross-words defined here
 
+only <CORE> also definitions
+
 
 
 # ----- Memory Layout -----
 # 0x04 &start
 # 0x08 here
-# 0x0C latest
-# 0x10 begin
+# 0x0C lexicons -> [forth]
+# 0x10 lexisp   -> [forth]
+# 0x14 current  -> [core]
+# 0x18 begin
+
+0x14 as: current
 
 : here    0x08 @ ;
 : here!   0x08 ! ;
@@ -314,8 +320,9 @@ PUBLIC
   : sys:ds0! sys:ds_base cell - sp! ;
 END
 
+<ROOT> also definitions
 : bye 0 HALT ;
-
+previous definitions
 
 
 ( ===== Stdio ===== )
@@ -658,6 +665,9 @@ END
 
 
 ( ===== File ===== )
+lexicon: [file]
+
+only <CORE> also [file] also definitions
 
 PRIVATE
   : query    8 io ;
@@ -684,6 +694,7 @@ END
 
 
 ( ===== CLI ===== )
+only <CORE> also definitions
 
 : cli:query 12 io ;
 : cli:argc    0 cli:query ; # -- n
@@ -697,8 +708,15 @@ END
 
 ( ===== Forth ===== )
 
+only <CORE> also definitions
+lexicon: [forth]
+
+
 var: forth:mode
 : forth:mode! forth:mode! ;
+
+
+[forth] also definitions
 
 1 as: forth:compile_mode
 0 as: forth:run_mode
@@ -706,8 +724,45 @@ var: forth:mode
 0x01 as: flag_immed
 0x02 as: flag_hidden
 
-: forth:latest  0x0C @ ;
-: forth:latest! 0x0C ! ;
+0x0C as: lexicons
+0x10 as: lexisp
+
+
+: lexi:new ( -- adr )
+  here:align! here
+  ( latest ) 0 ,
+  ( name   ) 0 ,
+;
+
+: lexi:latest  @ ;
+: lexi:latest! ! ;
+: lexi:name  cell + @ ;
+: lexi:name! cell + ! ;
+
+: lexi:name lexi:name dup [ drop " ???" ] unless ;  # for anonymous lexicon
+
+: lexi:create ( name -- adr )
+    s:put lexi:new tuck lexi:name!
+;
+
+
+
+only <CORE> also <ROOT> also definitions [forth] also
+
+lexi_core as: [core]
+lexi_root as: [root]
+: context lexisp @ cell - @ ;
+: also ( lexi -- ) lexisp @ ! lexisp @ cell + lexisp ! ;
+: previous ( -- ) lexisp @ cell - lexisp ! ;
+: only lexicons @ lexisp ! [root] also ;
+: definitions context current ! ;
+
+
+
+only <CORE> also [forth] also definitions
+
+: forth:latest  current @ lexi:latest  ;
+: forth:latest! current @ lexi:latest! ;
 
 # Dictionary
 # | next:30 | hidden:1 | immed:1  tagged 32bit pointer
@@ -739,6 +794,8 @@ var: forth:mode
 : forth:code! 3 cells + ! ; # &code &entry --
 
 
+only <CORE> also definitions [forth] also
+
 : forth:create ( name -- )
   here:align! s:put here:align! ( &name )
   ( latest ) here forth:latest , forth:latest!
@@ -748,25 +805,41 @@ var: forth:mode
 ;
 
 
-defer: forth:find
-: forth:(find) ( name -- name 0 | normal: &entry 1 | immed: &entry 2 )
-  forth:latest [ # name latest
+only <CORE> also [forth] also definitions
+
+: forth:find_in ( name lexi -- name no | word yes )
+  lexi:latest [ ( name latest )
     ( notfound ) 0 [ no STOP ] ;case
     ( hidden   ) dup forth:hidden? [ forth:next GO ] ;when
-    ( found    ) 2dup forth:name s=
-                 [ nip dup forth:immed? IF 2 ELSE 1 THEN STOP ] ;when
+    ( found    ) 2dup forth:name s= [ nip yes STOP ] ;when
     ( next     ) forth:next GO
   ] while
 ;
+
+: forth:(find) ( name -- name no | word yes )
+    lexisp @ cell - swap [ ( sp name )
+        over lexicons @ < [ nip no STOP ] ;when
+        over @ forth:find_in [ nip yes STOP ] [ [ cell - ] dip GO ] if
+    ] while
+;
+
+
+only <CORE> also definitions [forth] also
+
+defer: forth:find
 ' forth:(find) -> forth:find
 
-: forth:find! ( name -- normal: &entry 1 | immed: &entry 2 )
+: forth:find! ( name -- word )
   forth:find [ epr "  ?" panic ] ;unless
 ;
 
 
+only <CORE> also [forth] also definitions
+
 : prim>code 1 << 1 or ;
 : prim, prim>code , ;
+
+only <CORE> also definitions [forth] also
 : LIT,   2 prim, ;
 : RET,   3 prim, ;
 : +,     8 prim, ;
@@ -775,7 +848,10 @@ defer: forth:find
 : !,    19 prim, ;
 
 
+
 ( ----- stream ----- )
+
+only <CORE> also [forth] also definitions
 
 PRIVATE
 
@@ -826,17 +902,22 @@ PUBLIC
 
   [ buf IF RET THEN len allot buf! ] >init
 
+  <CORE> also definitions
   defer: forth:notfound ( name -- )
   ' notfound -> forth:notfound
+  previous definitions
 
   : forth:stream  stream  ;
   : forth:stream! stream! ;
   : forth:source  source  ;
   : forth:source! source! ;
+
+  <CORE> also definitions
   : forth:take    take ;
   : forth:read ( -- buf yes | no )
     read dup b@ IF yes ELSE drop no THEN
   ;
+  previous definitions
 
   defer: forth:handle_num
   ' handle_num -> forth:handle_num
@@ -846,9 +927,13 @@ PUBLIC
     [ forth:read [ STOP ] ;unless
       forth:find
       ( found )
-      2 [ forth:code call GO ] ;case
-      1 [ forth:code forth:mode IF , ELSE call THEN GO ] ;case
-      2drop
+      [ dup forth:immed? [
+          forth:code call GO
+        ] [
+          forth:code forth:mode IF , ELSE call THEN GO
+        ] if
+      ] ;when
+      drop
       ( dec )
       buf s>dec [ forth:handle_num GO ] ;when
       ( hex )
@@ -865,27 +950,42 @@ PUBLIC
 
 END
 
+: lexi:each ( q -- ) # q: lexi --
+    lexisp @ cell - [ ( q sp )
+        dup lexicons @ < [ 2drop STOP ] ;when
+        2dup >r >r @ swap call
+        r> r> cell - GO
+    ] while
+;
 
-: forth:each_word ( q -- ) # q: &entry --
-  forth:latest [
+: forth:each_word ( lexi q -- ) # q: &entry --
+  swap lexi:latest [
     0 [ drop STOP ] ;case
     2dup forth:next >r >r swap call r> r> GO
   ] while
 ;
 
-
-: forth:words
-  [ dup forth:hidden? [ drop ] ;when
-    forth:name pr space
-  ] forth:each_word cr
+only definitions <CORE> also [forth] also
+: ?words
+  " current: " pr current @ lexi:name prn
+  [ dup " ===== " pr lexi:name pr "  =====" prn
+    [ dup forth:hidden? [ drop ] ;when
+      forth:name pr space
+    ] forth:each_word cr
+  ] lexi:each
 ;
 
 
+
+only <CORE> also definitions [forth] also
+
+[file] also
 : include ( fname -- )
   " r" file:open! dup >r
   [ ( id -- c id ) dup file:getc swap ] forth:run
   r> file:close!
 ;
+previous
 
 : include:
   forth:read [ " File name required" panic ] ;unless
@@ -895,6 +995,9 @@ END
 
 
 ( ===== Forth Utils ===== )
+
+only <CORE> also definitions [forth] also
+
 
 : ;0 ( ? -- ) IF ELSE rdrop THEN ;
 
@@ -929,6 +1032,8 @@ END
 
 
 ( ===== String ===== )
+
+only <CORE> also definitions [forth] also
 
 : c:escaped ( qtake -- c ok | ng )
   dup >r call r> swap
@@ -1001,10 +1106,12 @@ PRIVATE
   : fin! 2 cells + ! ;
   : req 3 cells ;
 
+  [file] also
   : >path ( fname -- )
     dup file:exists? [ epr " : not found" panic ] ;unless
     path len file:fullpath [ path epr " : not found" panic ] ;unless
   ;
+  previous
 
   : check_circular ( req -- )
     fin [
@@ -1057,6 +1164,8 @@ END
 
 
 ( ===== Syntax ===== )
+
+only <CORE> also definitions [forth] also
 
 : _: ( name -- q )
   forth:create
@@ -1117,6 +1226,9 @@ END
   LIT, , JMP, ' doconst ,
 ;
 
+: lexicon:
+    lexi:new dup POSTPONE: as: forth:latest forth:name swap lexi:name!
+;
 
 : defer:
   forth:read [ " Defered name required" panic ] ;unless
@@ -1129,6 +1241,8 @@ END
 
 
 ( ===== Comment ===== )
+
+only definitions <CORE> also
 
 : ( <IMMED>
   [ forth:take
@@ -1151,12 +1265,16 @@ END
 
 ( ===== Private/Public ===== )
 
+only <CORE> also [forth] also definitions
+
 : forth:hide_range ( start end -- )
   # hide  start < word <= end
   [ 2dup = [ 2drop STOP ] ;when
     dup forth:hide! forth:next GO
   ] while
 ;
+
+only <CORE> also definitions [forth] also
 
 : PRIVATE ( -- start closer )
   forth:latest
@@ -1170,6 +1288,8 @@ END
 
 
 ( ===== Initializer ===== )
+
+only <CORE> also definitions
 
 PRIVATE
 
@@ -1193,6 +1313,8 @@ END
 
 
 ( ===== Struct ===== )
+
+only <CORE> also definitions [forth] also
 
 PRIVATE
 
@@ -1268,6 +1390,8 @@ END
 
 ( ===== Marker ===== )
 
+only <CORE> also definitions [forth] also
+
 PRIVATE
 
   : sweep ( here latest -- )
@@ -1294,6 +1418,8 @@ END
 
 
 ( ===== Var ===== )
+
+only <CORE> also definitions [forth] also
 
 : var>
   forth:read [ " Var name required" panic ] ;unless
@@ -1325,6 +1451,8 @@ END
 
 
 ( ===== Primitives ===== )
+
+only <CORE> also definitions [forth] also
 
 : compile_only ( prim -- ) forth:mode [ prim, ] [ " Compile Only" panic ] if ;
 : primitive ( prim q -- ) forth:mode [ drop prim, ] [ nip call ] if ;
@@ -1380,6 +1508,8 @@ END
 
 ( ===== Loadfile ===== )
 
+only <CORE> also definitions
+
 # loadfile ( path -- addr )
 # loadfile: ( :path -- addr )
 # addr:
@@ -1396,6 +1526,7 @@ PRIVATE
 
 PUBLIC
 
+  [file] also
   : loadfile ( path -- addr )
     " rb" file:open! id!
     id file:size size!
@@ -1407,6 +1538,7 @@ PUBLIC
     id file:close!
     addr
   ;
+  previous
 
   : loadfile: ( :path -- addr )
     forth:read [ " file name required" ] ;unless
@@ -1421,6 +1553,8 @@ END
 
 
 ( ===== CLI Option ===== )
+
+only <CORE> also definitions
 
 PRIVATE
 
@@ -1466,6 +1600,8 @@ END
 
 ( ===== Turnkey Image ===== )
 
+only <CORE> also definitions [file] also [forth] also
+
 PRIVATE
 
   var: id
@@ -1504,6 +1640,8 @@ END
 
 ( ===== REPL ===== )
 
+only <CORE> also definitions [forth] also
+
 PRIVATE
 
   256 as: len
@@ -1534,6 +1672,8 @@ PUBLIC
 END
 
 
+only <CORE> also definitions
+lexicon: [user]
 
 : main
   init:run
@@ -1546,3 +1686,5 @@ END
   ] when
   bye
 ;
+
+only <CORE> also [user] also definitions

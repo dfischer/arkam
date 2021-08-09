@@ -23,6 +23,7 @@ out/forth2.ark: out/forth1.ark
 meta-check: out/forth2.ark
 	diff out/forth1.ark out/forth2.ark
 
+
 .PHONY: meta-test
 meta-test: out/forth1.ark bin/test_arkvm
 	./test/run.sh out/forth1.ark
@@ -32,6 +33,17 @@ meta-test: out/forth1.ark bin/test_arkvm
 meta-install: meta meta-check meta-test
 	cp forth.ark out/forth.ark.old
 	mv out/forth1.ark forth.ark
+
+
+.PHONY: meta-run
+meta-run: meta
+	./bin/arkvm out/forth1.ark
+
+
+.PHONY: meta-time
+meta-time:
+	rm -f out/forth1.ark out/forth2.ark
+	time make meta-check
 
 
 .PHONY: all

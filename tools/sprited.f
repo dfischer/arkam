@@ -1,5 +1,8 @@
 require: lib/mgui.f
 
+lexicon: [sprited]
+[file] also [sprited] also definitions
+
 init:run
 
 
@@ -33,7 +36,7 @@ PUBLIC
   fname loadfile
     dup filesize spr_bytes != [ " Invalid sprite file" panic ] when
     filedata as: spr_buf
-  
+
   spr_bytes allot as: spr_back
   spr_buf spr_back spr_bytes memcopy
 
@@ -164,7 +167,7 @@ PRIVATE
 
   : draw_cursor
     3 ppu:color!
-    x border - y border - 
+    x border - y border -
     spr_w border + spr_h border +
     rect
   ;
@@ -213,11 +216,11 @@ PRIVATE
 
   spr_w dup * as: width
   spr_h dup * as: height
-  
+
   1 as: border
-  
+
   padding 3 * as: leftpad
-  
+
   gui_top                  border + as: top
   showcase:right leftpad + border + as: left
   left width +                      as: right
@@ -228,7 +231,7 @@ PRIVATE
   var: adr
   : dot  adr b@ ;
   : dot! adr b! ;
-  
+
   : row!  dup row!  spr_h * top + y!  ;
   : col!
     dup col!
@@ -240,12 +243,12 @@ PRIVATE
   left border - as: bl
   width  border 2 * + as: bw
   height border 2 * + as: bh
-  
+
   : draw_border
     1 ppu:color!
     bl bt bw bh rect
   ;
-  
+
   : draw_canvas
     1 ppu:color!
     spr_h [ row!
@@ -256,10 +259,10 @@ PRIVATE
       ] for
     ] for
   ;
-  
+
   bl as: prv_x
   bt bh + 4 + as: prv_y
-  
+
   : draw_preview
     spr_target sprite:i!
     prv_x prv_y sprite:plot
@@ -326,7 +329,7 @@ PUBLIC
     draw_preview
     draw_selcolor
   ;
-  
+
 END
 
 

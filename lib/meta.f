@@ -17,6 +17,15 @@
 # 4. Start metacompile by including lib/core.f
 # 5. Patch some addresses and save image
 
+only definitions [core] also
+  lexicon: META
+  lexicon: CROSS-ROOT
+  lexicon: CROSS-CORE
+
+only [core] also definitions [file] also [forth] also
+
+lexicon: [metacompiler]
+[metacompiler] also definitions
 
 
 ( for debug )
@@ -50,8 +59,10 @@ image_max allot as: there
 
 0x04 as: adr_start
 0x08 as: adr_here
-0x0C as: adr_xlatest
-0x10 as: adr_begin
+0x0C as: adr_lexicons   ( lexicon order )
+0x10 as: adr_lexisp ( lexicon stack pointer )
+0x14 as: adr_current ( defining lexicon )
+0x18 as: adr_begin
 
 
 ( relative pointer )
@@ -78,6 +89,8 @@ var: xhere
 
 : x,  xhere x!  xhere cell + xhere! ;
 : bx, xhere bx! xhere inc    xhere! ;
+
+: xallot ( n -- addr ) xhere tuck + xhere! ;
 
 
 
@@ -136,6 +149,48 @@ END
 
 ( ===== Cross&Meta Dictionary ===== )
 
+# Cross Lexicon
+# | name...
+# |----- ( 0alined )
+# | next
+# | latest
+# | name
+
+: xlexis  adr_lexicons x@ ;
+: xlexis! adr_lexicons x! ;
+: xlexisp  adr_lexisp x@ ;
+: xlexisp! adr_lexisp x! ;
+: xcurrent  adr_current x@ ;
+: xcurrent! adr_current x! ;
+
+16 cells as: xlexi:size
+xlexi:size xallot xlexis!
+xlexis xlexisp!
+
+: xlexi:create ( name -- adr )
+     xhere swap x:sput       ( name )
+     xhere:align! xhere swap ( lexi name )
+     0 x,
+     x,
+;
+
+: xlexi:latest  ( lexi -- word ) x@ ;
+: xlexi:latest! ( word lexi -- ) x! ;
+: xlexi:name    ( lexi -- name ) cell + x@ ;
+
+: xalso ( lexi -- ) xlexisp x! xlexisp cell + xlexisp! ;
+: xprevious ( -- ) xlexisp cell - xlexisp! ;
+: xdefinitions ( -- ) xlexisp cell - x@ xcurrent! ;
+
+" [core]" xlexi:create as: xlexi_core
+" [root]" xlexi:create as: xlexi_root
+
+xlexi_root xalso
+xlexi_core xalso
+xlexi_core xcurrent!
+
+: xonly ( -- ) xlexis xlexisp! xlexi_root xalso ;
+
 # Cross Dictionary
 #  | name ...
 #  | ( 0alined )
@@ -151,8 +206,8 @@ END
 0x02 as: hidden_flag
 
 
-: xlatest  adr_xlatest x@ ;
-: xlatest! adr_xlatest x! ;
+: xlatest  xcurrent xlexi:latest  ;
+: xlatest! xcurrent xlexi:latest! ;
 
 : xnext! x! ;
 : xnext  x@ ;
@@ -172,11 +227,18 @@ END
 : xxt!   3 cells + x! ;
 : xxt    3 cells + x@ ;
 
+: x:find_in ( name lexi -- xword yes | name no )
+    xlexi:latest [
+        0 [ no STOP ] ;case
+        2dup xname x>t s= [ nip yes STOP ] ;when
+        xnext GO
+    ] while
+;
+
 : x:find ( name -- xword yes | name no )
-  xlatest [ ( name xword )
-    0 [ no STOP ] ;case
-    2dup xname x>t s= [ nip yes STOP ] ;when
-    xnext GO
+  xlexisp cell - swap [ ( sp name )
+      over xlexis < [ nip no STOP ] ;when
+      over x@ x:find_in [ nip yes STOP ] [ [ cell - ] dip GO ] if
   ] while
 ;
 
@@ -200,37 +262,7 @@ END
 ;
 
 
-0 var> meta_latest
-
-: meta:push ( word -- ) here meta_latest , meta_latest! , ;
-
-: meta:find ( s -- word yes | no )
-  meta_latest [
-    0 [ drop no STOP ] ;case
-    2dup cell + @ forth:name s= [ nip cell + @ yes STOP ] ;when
-    @ GO
-  ] while
-;
-
-
-" M-                " as: meta_buf
-meta_buf 2 +          as: meta_name
-meta_name s:len       as: meta_len
-
-: name>meta ( s -- buf )
-  meta_len s:check [ epr panic" : too long" ] ;unless
-  meta_name s:copy
-  meta_buf
-;
-
-var: m_close
-
-: M:
-  forth:read [ panic" Meta word name required" ] ;unless
-  name>meta _:
-  ( closer ) m_close!
-  [ m_close call forth:latest meta:push ]
-;
+: meta? ( s -- ? ) META forth:find_in nip ;
 
 : <run_only> <IMMED>
   POSTPONE: <IMMED>
@@ -297,16 +329,11 @@ var: const_link
 : PRIM: ( n closer q name: -- n+ )
   # : name <IMMED> LIT code LIT q JMP handler
   forth:read [ panic" Primitive name required" ] ;unless
-  name>meta forth:create
+  forth:create
   POSTPONE: <IMMED>
   >r over prim>code LIT, , r> LIT, , JMP,
   [ forth:mode [ drop x, ] [ nip >r ] if ] ,
   ' inc dip
-  verbose [
-    " prim " epr meta_name epr
-    "  code " epr over .. forth:latest forth:code cell + @ .
-  ] when
-  forth:latest meta:push
 ;
 
 : compile_only [ panic" compile only!" ] ;
@@ -318,10 +345,17 @@ var: const_link
 var: m:image_name
 
 : m:finish
+  ( const )
+    " doconst" x:find [ panic" doconst definition not found" ] ;unless
+    xxt patch_const
+    const_done [ panic" do patch_const" ] ;unless
+
   m:image_name [ panic" No image name" ] ;unless
-  const_done [ panic" do patch_const" ] ;unless
-  xlatest xxt entrypoint!
-  verbose [ " Turnkey: " epr xlatest xname x>t eprn ] when
+
+  ( set entrypoint )
+  CROSS-CORE also
+  " main" x:find [ panic" word 'main' required in [core]" ] ;unless xxt entrypoint!
+
   m:image_name save
 ;
 
@@ -329,53 +363,68 @@ var: m:image_name
   forth:mode [ xLIT, x, ] [ ( n -- n ) ] if
 ;
 
-: m:reveal ( start -- )
-  # reveal M-foo to foo
-  forth:latest [
-    0    [ STOP ] ;case
-    over [ STOP ] ;case
-    dup forth:name " M-" s:start? [
-      dup forth:name 2 + over forth:name!
-    ] when
-    forth:next GO
-  ] while drop
-;
-
-: m:hide ( start -- )
-  # hide words before &start
-  [ 0 [ STOP ] ;case
-    dup forth:hide!
-    forth:next GO
-  ] while
-;
-
-: m:install ( meta_start -- )
-  dup m:hide m:reveal
-  word' m:finish forth:show!
-  word' (        forth:show!
-  word' #        forth:show!
-  word' include: forth:show!
-  ' m:handle_num -> forth:handle_num
-  verbose [
-    " --Meta Words----- " prn forth:words
-  ] when
-;
-
-: m:start [do LIT, forth:latest , ] m:install ;
+[root] current !
 
 : metacompile
   opt:read! [ panic" Image name required" ] ;unless -> m:image_name
-  m:start
-  " lib/core.f" include
-  " doconst" x:find [ panic" doconst definition not found" ] ;unless
-  xxt patch_const
-  m:finish
+  ( install )
+  ' m:handle_num -> forth:handle_num
+  only
+    CROSS-ROOT also
+    CROSS-CORE also definitions
+    META  also ( use meta words first )
+  ( start  ) " lib/core.f" include
+  ( finish ) m:finish
 ;
+
 
 
 ( ###################### )
 ( ##### Meta Words ##### )
 ( ###################### )
+
+( ----- aux word definitions ----- )
+# meta words can't refer each other because of search order.
+# ex. POSTPONE: '(tick) refers tick in core, not in META.
+# so some shared routines must be defined here.
+
+: aux_tick
+    forth:read [ panic" Word name required" ] ;unless
+    x:find [ epr "  ?" panic ] ;unless
+    xxt
+    forth:mode [ xLIT, x, ] when
+;
+
+: aux_var
+    forth:read [ panic" Var name required" ] ;unless
+    30 s:check [ epr panic" : too long var name" ] ;unless
+    dup >r
+    dup x:create m:create
+    xLIT, xhere swap x, xRET, r>
+    dup " !" s:append!
+    dup x:create m:create
+    xLIT, x, x!, xRET,
+;
+
+: ;aux_compile ( name -- )
+    forth:mode [ rdrop x:find [ epr panic"  ?" ] ;unless xxt x, ] ;when
+    drop
+;
+
+
+( ----- meta words order ----- )
+# META < root < core
+# overwrite
+#   core: IF, :(colon), etc...
+#   root: only, also, etc...
+
+only
+  META also definitions
+  [root] also
+  [core] also
+  [forth] also
+  [metacompiler] also
+
 
 
 ( ===== Meta Primitive word ===== )
@@ -431,19 +480,28 @@ END
 
 
 
-( ===== Meta Syntax Word ===== )
+( ===== Meta Lexicon Words ===== )
 
-M: : <run_only>
+xlexi_core as: lexi_core
+xlexi_root as: lexi_root
+
+: <CORE> xlexi_core CROSS-CORE ;
+: <ROOT> xlexi_root CROSS-ROOT ;
+
+
+
+( ===== Meta Syntax Words ===== )
+
+: : <run_only>
   forth:read [ panic" Word name required" ] ;unless
-  dup meta:find [ drop meta:create_cross ] [ meta:create ] if
+  dup meta? [ meta:create_cross ] [ meta:create ] if
 ;
 
-M: ; <IMMED> ( q -- ) >r ;
+: ; <IMMED> ( q -- ) >r ;
 
-M: <IMMED> <IMMED> xlatest x:immed! ;
+: <IMMED> <IMMED> xlatest x:immed! ;
 
-
-M: as: ( n name: -- ) <run_only>
+: as: ( n name: -- ) <run_only>
   forth:mode [ panic" Do not call as: in compile mode" ] ;when
   forth:read [ panic" Const name required" ] ;unless
   dup
@@ -454,10 +512,10 @@ M: as: ( n name: -- ) <run_only>
   [ forth:mode [ xLIT, x, ] when ] ,
 ;
 
-M: patch_const ( xadr ) <run_only> patch_const ;
+: patch_const ( xadr ) <run_only> patch_const ;
 
 
-M: [ <IMMED>
+: [ <IMMED>
   forth:mode [ xJMP, xhere 0 x, ] when xhere ( &back &q | &q )
   forth:mode yes forth:mode! ( &back &q mode | &q mode )
   [ xRET,
@@ -466,47 +524,47 @@ M: [ <IMMED>
   ]
 ;
 
-M: ] <IMMED> ( q -- ) >r ;
+: ] <IMMED> ( q -- ) >r ;
 
 
-M: IF <IMMED> ( -- &back )
+: IF <IMMED> ( -- &back )
   xZJMP, xhere 0 x,
 ;
 
-M: ELSE <IMMED> ( &back -- &back2 )
+: ELSE <IMMED> ( &back -- &back2 )
   xJMP, xhere 0 x, swap ( &back2 &back )
   xhere swap x!
 ;
 
-M: THEN <IMMED> ( &back -- )
+: THEN <IMMED> ( &back -- )
   xhere swap x!
 ;
 
 
-M: AGAIN <IMMED>
+: AGAIN <IMMED>
   xJMP, xlatest xxt x,
 ;
 
 
-M: PRIVATE ( -- xstart mstart closer ) <run_only>
+: PRIVATE ( -- xstart mstart closer ) <run_only>
   xlatest forth:latest [ forth:latest forth:hide_range xlatest x:hide_range ]
 ;
 
-M: PUBLIC ( xstart mstart closer -- xstart xend mstart mend closer ) <run_only>
+: PUBLIC ( xstart mstart closer -- xstart xend mstart mend closer ) <run_only>
   drop xlatest swap forth:latest [ forth:hide_range x:hide_range ]
 ;
 
-M: END ( closer -- ) <IMMED> >r ;
+: END ( closer -- ) <IMMED> >r ;
 
 
-M: defer: ( name: -- ) <run_only>
+: defer: ( name: -- ) <run_only>
   # JMP actual
   forth:read [ panic" Word name required" ] ;unless
   dup x:create m:create
   xJMP, 0 x,
 ;
 
-M: -> <IMMED> ( v &code -- )
+: -> <IMMED> ( v &code -- )
   forth:read [ panic" Word name required" ] ;unless
   x:find [ epr " ?" panic ] ;unless
   xxt
@@ -515,15 +573,10 @@ M: -> <IMMED> ( v &code -- )
 ;
 
 
-M: ' <IMMED>
-  forth:read [ panic" Word name required" ] ;unless
-  x:find [ epr "  ?" panic ] ;unless
-  xxt
-  forth:mode [ xLIT, x, ] when
-;
+: ' <IMMED> aux_tick ;
 
 
-M: POSTPONE: <IMMED>
+: POSTPONE: <IMMED>
   forth:mode [ panic" Do not use POSTPONE: in run mode" ] ;unless
   forth:read [ panic" Word name required" ] ;unless
   x:find [ epr panic"  ?" ] ;unless
@@ -531,29 +584,20 @@ M: POSTPONE: <IMMED>
 ;
 
 
-M: COMPILE: <IMMED>
+: COMPILE: <IMMED>
   forth:mode [ panic" Do not use COMPILE: in run mode" ] ;unless
-  POSTPONE: M-'
+  aux_tick
   " ," x:find [ panic" comma(,) is not defined yet in cross-env" ] ;unless
   xxt x,
 ;
 
 
-M: var> <run_only>
-  forth:read [ panic" Var name required" ] ;unless
-  30 s:check [ epr panic" : too long var name" ] ;unless
-  dup >r
-  dup x:create m:create
-  xLIT, xhere swap x, xRET, r>
-  dup " !" s:append!
-  dup x:create m:create
-  xLIT, x, x!, xRET,
-;
+: var> <run_only> aux_var ;
 
-M: var: <run_only> 0 POSTPONE: M-var> ;
+: var: <run_only> 0 aux_var ;
 
 
-M: CHAR: <IMMED>
+: CHAR: <IMMED>
   forth:read [ panic" A character required" ] ;unless
   dup b@ dup CHAR: \\ = [ drop inc
     [ [ inc ] [ b@ ] biq ] c:escaped
@@ -563,7 +607,7 @@ M: CHAR: <IMMED>
 ;
 
 
-M: " <IMMED>
+: " <IMMED>
   forth:mode [ xJMP, xhere 0 x, xhere swap ] [ xhere ] if
   [ forth:take
     0  [ panic" Unclosed string" STOP ] ;case
@@ -579,8 +623,8 @@ M: " <IMMED>
   forth:mode [ xhere swap x! xLIT, x, ] when
 ;
 
-M: ( <IMMED> POSTPONE: ( ;
-M: # <IMMED> POSTPONE: # ;
+: ( <IMMED> POSTPONE: ( ;
+: # <IMMED> POSTPONE: # ;
 
 
 PRIVATE
@@ -591,12 +635,12 @@ PUBLIC
 
   link as: init:link
 
-  M: >init <run_only>
+  : >init <run_only>
     xhere link x@ x, link x!
     x,
   ;
 
-  M: init:run <IMMED>
+  : init:run <IMMED>
     " init:run" x:find [ drop panic" Define init:run" ] ;unless
     xxt x,
   ;
@@ -604,13 +648,54 @@ PUBLIC
 END
 
 
+( ----- lexicon ----- )
+
+: lexicon: <run_only>
+    # meta:  ( -- xlexi mlexi )
+    # cross: ( -- xlexi )
+    forth:read [ panic" lexicon name required" ] ;unless
+    >r i lexi:create i xlexi:create ( mlexi xlexi )
+    ( cross ) i x:create drop xLIT, dup x, xJMP, const_link, xlatest x:immed!
+    ( meta )
+    r> forth:create POSTPONE: <IMMED>
+    ( mlexi xlexi ) LIT, , LIT, , JMP, [ forth:mode [ drop xLIT, x, ] when ] ,
+;
+
+: definitions ( -- ) <IMMED>
+    " definitions" ;aux_compile
+    previous definitions META also
+    xdefinitions
+;
+
+: also ( xlexi mlexi -- ) <IMMED>
+    " also" ;aux_compile
+    previous also META also
+    xalso
+;
+
+: only ( -- ) <IMMED>
+    # meta:  root CROSS-ROOT META
+    # cross: root
+    " only" ;aux_compile
+    only CROSS-ROOT also META also
+    xonly
+;
+
+: previous <IMMED>
+    " previous" ;aux_compile
+    previous previous META also
+    xprevious
+;
+
+
 
 ( ----- debug ----- )
 
-M: ?H <IMMED> " HERE" prn ;
+: ?H <IMMED> " HERE" prn ;
 
-M: ?STACK <IMMED> ?stack ;
+: ?STACK <IMMED> ?stack ;
 
+: ?WORDS <IMMED> cr ?words ;
 
 
 ( ####################### )
