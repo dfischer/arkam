@@ -22,7 +22,7 @@
 # You can't
 #   - run immediate cross-words defined here
 
-only [core] also definitions
+LEXI REFER [core] EDIT
 
 
 

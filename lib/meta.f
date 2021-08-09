@@ -398,6 +398,14 @@ var: m:image_name
     drop
 ;
 
+: aux_set-lexicons ( 0 xlexi mlexi .. )
+    LEXI ORDER
+    xonly xprevious
+    [ ?dup [ STOP ] ;unless also xalso GO ] while
+    META also
+;
+
+
 ( ----- COVER SHOW/HIDE ----- )
 
 COVER
@@ -501,12 +509,15 @@ END
 xlexi_core as: lexi_core
 xlexi_root as: lexi_root
 
+: [CORE] xlexi_core CROSS-CORE ;
+: [ROOT] xlexi_root CROSS-ROOT ;
+
 : [core] <IMMED> ( -- xcore mcore )
-  forth:mode [ xLIT, lexi_core x, ] [ xlexi_core CROSS-CORE ] if
+  forth:mode [ xLIT, lexi_core x, ] [ [CORE] ] if
 ;
 
 : [root] <IMMED> ( -- xcore mcore )
-  forth:mode [ xLIT, lexi_root x, ] [ xlexi_root CROSS-ROOT ] if
+  forth:mode [ xLIT, lexi_root x, ] [ [ROOT] ] if
 ;
 
 
@@ -698,6 +709,28 @@ END
     " previous" ;aux_compile
     previous previous META also
     xprevious
+;
+
+: LEXI <IMMED>
+    " LEXI" ;aux_compile 0
+;
+
+: REFER <IMMED>
+    " REFER" ;aux_compile [CORE] [ROOT] aux_set-lexicons
+;
+
+: ORDER <IMMED>
+    " ORDER" ;aux_compile aux_set-lexicons
+;
+
+: EDIT <IMMED>
+    " EDIT" ;aux_compile current ! xcurrent!
+;
+
+: ALSO <IMMED>
+    " ALSO" ;aux_compile
+    previous also META also
+    xalso
 ;
 
 : COVER <IMMED> " COVER" ;aux_compile aux_COVER ;
