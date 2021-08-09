@@ -1640,7 +1640,10 @@ END
 
 ( ===== REPL ===== )
 
-only <CORE> also definitions [forth] also
+only <CORE> also definitions
+lexicon: [repl]
+
+[forth] also [repl] also definitions
 
 PRIVATE
 
@@ -1675,6 +1678,7 @@ END
 only <CORE> also definitions
 lexicon: [user]
 
+[repl] also
 : main
   init:run
   opt:parse_all
