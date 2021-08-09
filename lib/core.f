@@ -1287,6 +1287,32 @@ only <CORE> also definitions [forth] also
 
 
 
+( ===== COVER SHOW/HIDE with lexicon ===== )
+
+only <CORE> also definitions [forth] also
+
+PRIVATE
+
+    var: public
+    var: private
+
+PUBLIC
+
+    : SHOW public  current ! ;
+    : HIDE private current ! ;
+
+    : COVER ( -- prev-priv pre-pub q )
+        private public
+        lexi:new  private!
+        current @ public!
+        private also definitions
+        [ previous SHOW public! private! ]
+    ;
+
+END
+
+
+
 ( ===== Initializer ===== )
 
 only <CORE> also definitions
