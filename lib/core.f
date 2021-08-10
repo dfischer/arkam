@@ -299,6 +299,10 @@ END
 
 ( ===== System ===== )
 
+LEXI REFER [core] EDIT
+lexicon: [sys]
+[sys] ALSO [sys] EDIT
+
 COVER
   : query 0 io ;
 SHOW
@@ -438,6 +442,7 @@ END
 : . .. cr ;
 
 
+[sys] ALSO
 : ?stack ( -- )
   [ sp cell + ( adr )
     sys:depth dec [ ( adr i )
@@ -446,6 +451,7 @@ END
     cr
   ] >stderr
 ;
+PREVIOUS
 
 : ff ( n -- ) 0xFF and 16 /mod swap >hex putc >hex putc ;
 
@@ -1679,7 +1685,7 @@ END
 LEXI REFER [core] EDIT
 lexicon: [repl]
 
-LEXI [repl] [forth] REFER [repl] EDIT
+LEXI [repl] [sys] [forth] REFER [repl] EDIT
 
 COVER
 
