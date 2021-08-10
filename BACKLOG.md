@@ -7,8 +7,4 @@
 
 
 ## meta compiler
-- define cross-words with `:`
-  - with meta-wrods dictionary?
-- separate cross-dictionary and cross-code
-  - will be used for cross compiler or tree-shaker
 - use hash table as dictionary
