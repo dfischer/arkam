@@ -341,9 +341,7 @@ LEXI REFER [core] EDIT
 : stdio:ready? -1 1 io ; # -- ?
 : (putc)          0 1 io ; # c --
 : (getc)          1 1 io ; # -- c
-: stdio:port      2 1 io ; # -- p
-: stdio:port!     3 1 io ; # p --
-: (eputc)         4 1 io ; # c --
+: (eputc)         2 1 io ; # c --
 
 defer: putc  ' (putc) -> putc
 defer: getc  ' (getc) -> getc
