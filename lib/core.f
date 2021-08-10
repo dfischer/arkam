@@ -323,30 +323,38 @@ END
 
 LEXI REFER [root] EDIT
 : bye 0 HALT ;
+: die 1 HALT ;
+
+
+( ===== Defered ===== )
+# defined here for stdio
+LEXI REFER [core] EDIT
+: defered ( xt -- ) cell + @ ;
 
 
 
 ( ===== Stdio ===== )
 
 LEXI REFER [core] EDIT
+lexicon: [stdio]
+[stdio] ALSO
 
+[stdio] EDIT
 # port 1:stdout 2:stderr
 : stdio:ready? -1 1 io ; # -- ?
 : (putc)          0 1 io ; # c --
 : (getc)          1 1 io ; # -- c
-: stdio:port      2 1 io ; # -- p
-: stdio:port!     3 1 io ; # p --
+: (eputc)         2 1 io ; # c --
 
+
+[core] EDIT
 defer: putc  ' (putc) -> putc
 defer: getc  ' (getc) -> getc
 
-1 as: stdout
-2 as: stderr
 
-
+[core] EDIT
 : cr    10 putc ;
 : space 32 putc ;
-
 
 : pr ( s -- )
   dup b@ dup 0 = [ 2drop ] ;when
@@ -356,17 +364,24 @@ defer: getc  ' (getc) -> getc
 : prn ( s -- ) pr cr ;
 
 
-: call/port ( q p -- ) stdio:port >r stdio:port! call r> stdio:port! ;
-  # call-with-port
-  # call q with port p then restore previous port
+[stdio] EDIT
+: call/putc ( &putc q -- )
+    # call-with-putc
+    # call q with &putc then restore previous port
+    ' putc defered >r
+    swap -> putc call
+    r> -> putc
+;
 
-: >stdout ( q -- ) stdout call/port ;
-: >stderr ( q -- ) stderr call/port ;
+
+[core] EDIT
+: >stdout ( q -- ) ' (putc)  call/putc ;
+: >stderr ( q -- ) ' (eputc) call/putc ;
 
 
+[core] EDIT
 : epr  ( s -- ) [ pr  ] >stderr ;
 : eprn ( s -- ) [ prn ] >stderr ;
-
 
 : getline ( buf len -- success? )
   swap ( len buf )
@@ -379,15 +394,17 @@ defer: getc  ' (getc) -> getc
 ;
 
 
-: die 1 HALT ;
-
-defer: panic
+[stdio] EDIT
 : (panic) eprn die ;
+
+[core] EDIT
+defer: panic
 ' (panic) -> panic
 
 
 
 ( ===== Debug print ===== )
+LEXI REFER [core] EDIT
 
 : >hex ( n -- c ) dup 10 < IF 48 ELSE 55 THEN + ;
 

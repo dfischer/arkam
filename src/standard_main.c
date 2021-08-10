@@ -23,15 +23,13 @@ void guard_err(VM* vm, Code code) {
 
 // ===== Peripheral =====
 
-FILE* stdio_port;
-
 Code handleSTDIO(VM* vm, Cell op) {
   switch (op) {
 
   case 0: // putc ( c -- )
     if (!ark_has_ds_items(vm, 1)) Raise(DS_UNDERFLOW);
-    putc(Pop(), stdio_port);
-    fflush(stdio_port);
+    putc(Pop(), stdout);
+    fflush(stdout);
     return ARK_OK;
 
   case 1: // getc ( -- c )
@@ -39,28 +37,11 @@ Code handleSTDIO(VM* vm, Cell op) {
     Push(getc(stdin));
     return ARK_OK;
 
-  case 2: // query port
-    {
-      if (!ark_has_ds_spaces(vm, 1)) Raise(DS_OVERFLOW);
-      Cell p = 0;
-
-      if      (stdio_port == stdout) { p = 1; }
-      else if (stdio_port == stderr) { p = 2; }
-      else    { die("Stdio port is invalid"); }
-
-      Push(p);
-      return ARK_OK;
-    }
-
-  case 3: // set port
+  case 2: // eputc ( c -- )
     {
       if (!ark_has_ds_items(vm, 1)) Raise(DS_UNDERFLOW);
-      Cell p = Pop();
-      switch (p) {
-      case 1: stdio_port = stdout; break;
-      case 2: stdio_port = stderr; break;
-      default: die("Unknown stdio port: %d", p);
-      }
+      putc(Pop(), stderr);
+      fflush(stderr);
       return ARK_OK;
     }
 
@@ -402,8 +383,6 @@ void read_image(VM* vm, char* fname) {
 
 
 VM* create_default() {
-  stdio_port = stdout;
-
   ArkVMOptions opts;
   ark_set_default_options(&opts);
 
