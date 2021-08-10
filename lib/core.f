@@ -1029,6 +1029,8 @@ LEXI [forth] REFER [root] EDIT
 
 : LEXI ( -- 0 ) 0 ;
 : REFER ( lexicons -- ) [core] [root] ORDER ;
+
+[core] EDIT
 : TEMPORARY ( -- lexicons current q ) CONTEXT CURRENT [ EDIT ORDER ] ;
 
 
