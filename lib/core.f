@@ -1002,9 +1002,12 @@ LEXI [forth] REFER [root] EDIT
     0 [ ( no-op ) ] lexi:each
 ;
 
-: ORDER ( 0 lexi ... -- )
-    lexicons @ lexisp !
+: MORE ( 0 lexi ... -- )
     [ ?dup [ ALSO GO ] [ STOP ] if ] while
+;
+
+: ORDER ( 0 lexi ... -- )
+    lexicons @ lexisp ! MORE
 ;
 
 : ?words
@@ -1026,6 +1029,7 @@ LEXI [forth] REFER [root] EDIT
 
 : LEXI ( -- 0 ) 0 ;
 : REFER ( lexicons -- ) [core] [root] ORDER ;
+: TEMPORARY ( -- lexicons current q ) CONTEXT CURRENT [ EDIT ORDER ] ;
 
 
 
