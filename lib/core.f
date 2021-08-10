@@ -48,9 +48,6 @@ LEXI REFER [core] EDIT
 ok as: yes
 ng as: no
 
-ok as: true
-ng as: false
-
 ok as: GO
 ng as: STOP
 
