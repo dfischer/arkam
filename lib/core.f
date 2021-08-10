@@ -375,8 +375,8 @@ defer: getc  ' (getc) -> getc
 
 
 [core] EDIT
-: >stdout ( q -- ) ' (putc)  call/putc ;
-: >stderr ( q -- ) ' (eputc) call/putc ;
+: >stdout ( q -- ) ' (putc)  swap call/putc ;
+: >stderr ( q -- ) ' (eputc) swap call/putc ;
 
 
 [core] EDIT
