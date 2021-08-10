@@ -1513,55 +1513,61 @@ LEXI [forth] REFER [core] EDIT
 
 LEXI [forth] REFER [core] EDIT
 
-: compile_only ( prim -- ) forth:mode [ prim, ] [ " Compile Only" panic ] if ;
-: primitive ( prim q -- ) forth:mode [ drop prim, ] [ nip call ] if ;
+COVER
 
-: noop <IMMED> ;
-: HALT <IMMED> 1 [ HALT ] primitive ;
-: LIT  <IMMED> 2 compile_only ;
-: RET  <IMMED> 3 compile_only ;
+    : compile_only ( prim -- ) forth:mode [ prim, ] [ " Compile Only" panic ] if ;
+    : primitive ( prim q -- ) forth:mode [ drop prim, ] [ nip call ] if ;
 
-: dup  <IMMED> 4 [ dup  ] primitive ;
-: drop <IMMED> 5 [ drop ] primitive ;
-: swap <IMMED> 6 [ swap ] primitive ;
-: over <IMMED> 7 [ over ] primitive ;
+SHOW
 
-: +    <IMMED> 8  [ +    ] primitive ;
-: -    <IMMED> 9  [ -    ] primitive ;
-: *    <IMMED> 10 [ *    ] primitive ;
-: /mod <IMMED> 11 [ /mod ] primitive ;
+    : noop <IMMED> ;
+    : HALT <IMMED> 1 [ HALT ] primitive ;
+    : LIT  <IMMED> 2 compile_only ;
+    : RET  <IMMED> 3 compile_only ;
 
-: =  <IMMED> 12 [ =  ] primitive ;
-: != <IMMED> 13 [ != ] primitive ;
-: >  <IMMED> 14 [ >  ] primitive ;
-: <  <IMMED> 15 [ <  ] primitive ;
+    : dup  <IMMED> 4 [ dup  ] primitive ;
+    : drop <IMMED> 5 [ drop ] primitive ;
+    : swap <IMMED> 6 [ swap ] primitive ;
+    : over <IMMED> 7 [ over ] primitive ;
 
-: JMP  <IMMED> 16 compile_only ;
-: ZJMP <IMMED> 17 compile_only ;
+    : +    <IMMED> 8  [ +    ] primitive ;
+    : -    <IMMED> 9  [ -    ] primitive ;
+    : *    <IMMED> 10 [ *    ] primitive ;
+    : /mod <IMMED> 11 [ /mod ] primitive ;
 
-: @  <IMMED> 18 [ @  ] primitive ;
-: !  <IMMED> 19 [ !  ] primitive ;
-: b@ <IMMED> 20 [ b@ ] primitive ;
-: b! <IMMED> 21 [ b! ] primitive ;
+    : =  <IMMED> 12 [ =  ] primitive ;
+    : != <IMMED> 13 [ != ] primitive ;
+    : >  <IMMED> 14 [ >  ] primitive ;
+    : <  <IMMED> 15 [ <  ] primitive ;
 
-: and <IMMED> 22 [ and ] primitive ;
-: or  <IMMED> 23 [ or  ] primitive ;
-: inv <IMMED> 24 [ inv ] primitive ;
-: xor <IMMED> 25 [ xor ] primitive ;
+    : JMP  <IMMED> 16 compile_only ;
+    : ZJMP <IMMED> 17 compile_only ;
 
-: lsft <IMMED> 26 [ lsft ] primitive ;
-: asft <IMMED> 27 [ asft ] primitive ;
+    : @  <IMMED> 18 [ @  ] primitive ;
+    : !  <IMMED> 19 [ !  ] primitive ;
+    : b@ <IMMED> 20 [ b@ ] primitive ;
+    : b! <IMMED> 21 [ b! ] primitive ;
 
-: io <IMMED> 28 [ io ] primitive ;
+    : and <IMMED> 22 [ and ] primitive ;
+    : or  <IMMED> 23 [ or  ] primitive ;
+    : inv <IMMED> 24 [ inv ] primitive ;
+    : xor <IMMED> 25 [ xor ] primitive ;
 
-: >r    <IMMED> 29 compile_only ;
-: r>    <IMMED> 30 compile_only ;
-: rdrop <IMMED> 31 compile_only ;
+    : lsft <IMMED> 26 [ lsft ] primitive ;
+    : asft <IMMED> 27 [ asft ] primitive ;
 
-: sp  <IMMED> 32 [ sp  ] primitive ;
-: sp! <IMMED> 33 [ sp! ] primitive ;
-: rp  <IMMED> 34 [ rp  ] primitive ;
-: rp! <IMMED> 35 [ rp! ] primitive ;
+    : io <IMMED> 28 [ io ] primitive ;
+
+    : >r    <IMMED> 29 compile_only ;
+    : r>    <IMMED> 30 compile_only ;
+    : rdrop <IMMED> 31 compile_only ;
+
+    : sp  <IMMED> 32 [ sp  ] primitive ;
+    : sp! <IMMED> 33 [ sp! ] primitive ;
+    : rp  <IMMED> 34 [ rp  ] primitive ;
+    : rp! <IMMED> 35 [ rp! ] primitive ;
+
+END
 
 
 
