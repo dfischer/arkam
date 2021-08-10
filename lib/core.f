@@ -929,22 +929,22 @@ SHOW
 
   [ buf IF RET THEN len allot buf! ] >init
 
-[core] ALSO [core] EDIT
+TEMPORARY [core] EDIT
   defer: forth:notfound ( name -- )
   ' notfound -> forth:notfound
-PREVIOUS SHOW
+END
 
   : forth:stream  stream  ;
   : forth:stream! stream! ;
   : forth:source  source  ;
   : forth:source! source! ;
 
-[core] ALSO [core] EDIT
+TEMPORARY [core] EDIT
   : forth:take    take ;
   : forth:read ( -- buf yes | no )
     read dup b@ IF yes ELSE drop no THEN
   ;
-PREVIOUS SHOW
+END
 
   defer: forth:handle_num
   ' handle_num -> forth:handle_num
@@ -1167,12 +1167,12 @@ COVER
   : fin! 2 cells + ! ;
   : req 3 cells ;
 
-  [file] ALSO
+  TEMPORARY [file] ALSO
   : >path ( fname -- )
     dup file:exists? [ epr " : not found" panic ] ;unless
     path len file:fullpath [ path epr " : not found" panic ] ;unless
   ;
-  PREVIOUS
+  END
 
   : check_circular ( req -- )
     fin [
@@ -1597,7 +1597,7 @@ COVER
 
 SHOW
 
-  [file] ALSO
+  TEMPORARY [file] ALSO
   : loadfile ( path -- addr )
     " rb" file:open! id!
     id file:size size!
@@ -1609,7 +1609,7 @@ SHOW
     id file:close!
     addr
   ;
-  PREVIOUS
+  END
 
   : loadfile: ( :path -- addr )
     forth:read [ " file name required" ] ;unless
