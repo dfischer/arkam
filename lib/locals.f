@@ -1,7 +1,6 @@
 ( ===== Locals ===== )
 
-CONTEXT CURRENT
-LEXI [forth] REFER [core] EDIT
+TEMPORARY LEXI [forth] REFER [core] EDIT
 
 # example:
 #     123 as: a
@@ -48,14 +47,14 @@ COVER
     ;
 
     : init
-        current @ [local-vars] EDIT [local-vars] ALSO
+        TEMPORARY [local-vars] EDIT [local-vars] ALSO
         max-locals cells dup
         allot getters!
         allot setters!
         getters getp!
         setters setp!
         max-locals [ make ] times
-        EDIT PREVIOUS
+        ( END ) call
     ;
 
 
@@ -143,4 +142,5 @@ SHOW
 
 END
 
-EDIT ORDER
+
+END ( TEMPORARY )
