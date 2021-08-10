@@ -1039,13 +1039,13 @@ LEXI [forth] REFER [root] EDIT
 
 LEXI [forth] REFER [core] EDIT
 
-[file] ALSO
+TEMPORARY [file] ALSO
 : include ( fname -- )
   " r" file:open! dup >r
   [ ( id -- c id ) dup file:getc swap ] forth:run
   r> file:close!
 ;
-PREVIOUS
+END
 
 : include:
   forth:read [ " File name required" panic ] ;unless

@@ -157,6 +157,7 @@ END
 : xlexisp! adr_lexisp x! ;
 : xcurrent  adr_current x@ ;
 : xcurrent! adr_current x! ;
+: xedit xcurrent! ;
 
 16 cells as: xlexi:size
 xlexi:size xallot xlexis!
@@ -176,9 +177,22 @@ xlexis xlexisp!
      xlexi:new tuck xlexi:name!
 ;
 
+: xlexi:each ( q -- ) # q: xlexi --
+    xlexisp cell - [ ( q sp )
+        dup xlexis < [ 2drop STOP ] ;when
+        2dup >r >r x@ swap call
+        r> r> cell - GO
+    ] while
+;
+
 : xalso ( lexi -- ) xlexisp x! xlexisp cell + xlexisp! ;
 : xprevious ( -- ) xlexisp cell - xlexisp! ;
 : xdefinitions ( -- ) xlexisp cell - x@ xcurrent! ;
+
+: xcontext 0 [ ( no-op ) ] xlexi:each ;
+: xorder ( 0 xlexi ... )
+    xlexis xlexisp! [ ?dup [ xalso GO ] [ STOP ] if ] while
+;
 
 " [core]" xlexi:create as: xlexi_core
 " [root]" xlexi:create as: xlexi_root
@@ -711,6 +725,11 @@ END
     " ALSO" ;aux_compile
     PREVIOUS ALSO META ALSO
     xalso
+;
+
+: TEMPORARY <IMMED> ( -- lexis current xlexis xcurrent q )
+    " TEMPORARY" ;aux_compile
+    CONTEXT CURRENT xcontext xcurrent [ xedit xorder EDIT ORDER ]
 ;
 
 : COVER <IMMED> " COVER" ;aux_compile aux_COVER ;
