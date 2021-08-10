@@ -323,6 +323,13 @@ END
 
 LEXI REFER [root] EDIT
 : bye 0 HALT ;
+: die 1 HALT ;
+
+
+( ===== Defered ===== )
+# defined here for stdio
+LEXI REFER [core] EDIT
+: defered ( xt -- ) cell + @ ;
 
 
 
@@ -341,13 +348,8 @@ LEXI REFER [core] EDIT
 defer: putc  ' (putc) -> putc
 defer: getc  ' (getc) -> getc
 
-1 as: stdout
-2 as: stderr
-
-
 : cr    10 putc ;
 : space 32 putc ;
-
 
 : pr ( s -- )
   dup b@ dup 0 = [ 2drop ] ;when
@@ -356,18 +358,19 @@ defer: getc  ' (getc) -> getc
 
 : prn ( s -- ) pr cr ;
 
+: call/putc ( &putc q -- )
+    # call-with-putc
+    # call q with &putc then restore previous port
+    ' putc defered >r
+    swap -> putc call
+    r> -> putc
+;
 
-: call/port ( q p -- ) stdio:port >r stdio:port! call r> stdio:port! ;
-  # call-with-port
-  # call q with port p then restore previous port
-
-: >stdout ( q -- ) stdout call/port ;
-: >stderr ( q -- ) stderr call/port ;
-
+: >stdout ( q -- ) ' (putc)  call/putc ;
+: >stderr ( q -- ) ' (eputc) call/putc ;
 
 : epr  ( s -- ) [ pr  ] >stderr ;
 : eprn ( s -- ) [ prn ] >stderr ;
-
 
 : getline ( buf len -- success? )
   swap ( len buf )
@@ -378,9 +381,6 @@ defer: getc  ' (getc) -> getc
     over b! ' dec ' inc bi* GO
   ] while
 ;
-
-
-: die 1 HALT ;
 
 defer: panic
 : (panic) eprn die ;
