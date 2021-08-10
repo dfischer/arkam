@@ -336,16 +336,23 @@ LEXI REFER [core] EDIT
 ( ===== Stdio ===== )
 
 LEXI REFER [core] EDIT
+lexicon: [stdio]
+[stdio] ALSO
 
+[stdio] EDIT
 # port 1:stdout 2:stderr
 : stdio:ready? -1 1 io ; # -- ?
 : (putc)          0 1 io ; # c --
 : (getc)          1 1 io ; # -- c
 : (eputc)         2 1 io ; # c --
 
+
+[core] EDIT
 defer: putc  ' (putc) -> putc
 defer: getc  ' (getc) -> getc
 
+
+[core] EDIT
 : cr    10 putc ;
 : space 32 putc ;
 
@@ -356,6 +363,8 @@ defer: getc  ' (getc) -> getc
 
 : prn ( s -- ) pr cr ;
 
+
+[stdio] EDIT
 : call/putc ( &putc q -- )
     # call-with-putc
     # call q with &putc then restore previous port
@@ -364,9 +373,13 @@ defer: getc  ' (getc) -> getc
     r> -> putc
 ;
 
+
+[core] EDIT
 : >stdout ( q -- ) ' (putc)  call/putc ;
 : >stderr ( q -- ) ' (eputc) call/putc ;
 
+
+[core] EDIT
 : epr  ( s -- ) [ pr  ] >stderr ;
 : eprn ( s -- ) [ prn ] >stderr ;
 
@@ -380,13 +393,18 @@ defer: getc  ' (getc) -> getc
   ] while
 ;
 
-defer: panic
+
+[stdio] EDIT
 : (panic) eprn die ;
+
+[core] EDIT
+defer: panic
 ' (panic) -> panic
 
 
 
 ( ===== Debug print ===== )
+LEXI REFER [core] EDIT
 
 : >hex ( n -- c ) dup 10 < IF 48 ELSE 55 THEN + ;
 
