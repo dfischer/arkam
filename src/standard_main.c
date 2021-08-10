@@ -64,6 +64,14 @@ Code handleSTDIO(VM* vm, Cell op) {
       return ARK_OK;
     }
 
+  case 4: // eputc ( c -- )
+    {
+      if (!ark_has_ds_items(vm, 1)) Raise(DS_UNDERFLOW);
+      putc(Pop(), stderr);
+      fflush(stdio_port);
+      return ARK_OK;
+    }
+
   default:
     Raise(IO_UNKNOWN_OP);
   }
