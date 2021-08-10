@@ -1,4 +1,4 @@
-CONTEXT current @
+CONTEXT CURRENT
 LEXI [forth] REFER [core] EDIT
 
 COVER
