@@ -1145,6 +1145,12 @@ LEXI [forth] REFER [core] EDIT
   forth:mode [ COMPILE: prn ] [ prn here! ] if
 ;
 
+: .." <IMMED>
+  forth:mode [ here ] unless
+  POSTPONE: "
+  forth:mode [ COMPILE: pr ] [ pr here! ] if
+;
+
 
 
 ( ===== Require ===== )
