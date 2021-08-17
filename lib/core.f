@@ -316,6 +316,7 @@ SHOW
   : sys:min_int 8 query ;
   ( calculated )
   : sys:ds_base sys:ds_size cells sys:ds + ;
+  : sys:rs_base sys:rs_size cells sys:rs + ;
   : sys:depth sp cell + sys:ds_base swap - cell / ; # order matters
   : sys:ds0! sys:ds_base cell - sp! ;
 END
