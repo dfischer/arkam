@@ -685,6 +685,13 @@ END
 : rand:seed! 1 2 io ;
 : rand:init  2 2 io ;
 
+: shuffle ( adr len -- )
+    tuck [ ( len adr i -- )
+        cells >r over rand cells over + over r> + ( len adr src dst )
+        [ dup @ ] bia >r ! r> swap !
+    ] for 2drop
+;
+
 
 
 ( ===== File ===== )

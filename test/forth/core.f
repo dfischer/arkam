@@ -363,3 +363,33 @@ END
 ] CHECK
 
 <STRUCT>
+
+
+
+
+MARKER: <SHUFFLE>
+
+var: xs here xs!
+0 ,
+1 ,
+2 ,
+3 ,
+4 ,
+5 ,
+6 ,
+7 ,
+8 ,
+9 ,
+
+: sum
+    xs 10 shuffle
+    0 10 [ cells xs + @ + ] for
+;
+
+sum 45 = ASSERT" shuffle1"
+sum 45 = ASSERT" shuffle1"
+sum 45 = ASSERT" shuffle1"
+sum 45 = ASSERT" shuffle1"
+sum 45 = ASSERT" shuffle1"
+
+<SHUFFLE>
