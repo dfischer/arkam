@@ -177,6 +177,7 @@ TEMPORARY
 
     : sender self &sender @ ;
     : parcel self &parcel @ ;
+    : message self &message @ ;
 
     : SEND ( parcel message task -- )
         ( wait )
@@ -188,9 +189,12 @@ TEMPORARY
     ;
 
     : RECV ( -- message )
-        ( wait   ) SLEEP
-        ( awaken ) [ self &message @ [ STOP ] [ PAUSE GO ] if ] while
-        self &message @
+        ( wait )
+        message ?dup [
+            SLEEP
+            [ message ?dup [ STOP ] [ PAUSE GO ] if ] while
+        ] unless
+
         0 self &message !
     ;
 
@@ -216,6 +220,10 @@ TEMPORARY
         : task: ( xt -- task )
             spawn dup var>
             forth:latest forth:next forth:name swap name!
+        ;
+
+        : mes: ( name: -- )
+            0 as: forth:latest [ forth:name ] [ forth:code cell + ] biq !
         ;
     END
 
