@@ -314,8 +314,8 @@ SHOW
   : sys:cell_size 6 query ;
   : sys:max_int 7   query ;
   : sys:min_int 8   query ;
-  : sys:dstack! 9   query ; # adr cells --
-  : sys:rstack! 10  query ; # adr cells --
+  : sys:dstack! 9   query ; # sp adr cells --
+  : sys:rstack! 10  query ; # rp adr cells --
   ( calculated )
   : sys:ds_base sys:ds_size cells sys:ds + ;
   : sys:rs_base sys:rs_size cells sys:rs + ;
