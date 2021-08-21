@@ -1,4 +1,5 @@
 TEMPORARY
+
     LEXI [sys] REFER [core] EDIT
     lexicon: [multi]
     [multi] dup ALSO EDIT
@@ -89,6 +90,7 @@ TEMPORARY
     ;
 
 
+
     # ----- Inspect -----
     
     [multi:private] EDIT
@@ -114,6 +116,7 @@ TEMPORARY
     ;
 
 
+
     # ----- Setup root task -----
     
     [multi] EDIT
@@ -132,6 +135,7 @@ TEMPORARY
     root_task current!
     root_task active!
     " root" root_task name!
+
 
 
     # ----- Switch -----
@@ -162,6 +166,7 @@ TEMPORARY
     ;
 
     : SLEEP current sleep PAUSE ;
+
 
 
     # ----- Messaging -----
@@ -213,55 +218,5 @@ TEMPORARY
     END
 
 
-
-    # ===== Test =====
-
-    " PAUSE" [
-        .." root task before ... " PAUSE ." after" PAUSE
-    ok ] CHECK
-
-
-    [ [ ." [A] hi"  SLEEP GO ] while ] task: task_a
-    [ [ ." [B] hay" SLEEP GO ] while ] task: task_b
-
-    cr ?tasks cr
-    
-    " new_task" [
-        10 [
-            .." [ROOT] hello " ? cr PAUSE
-            ." [ROOT] wake up!"
-            2 mod [ task_a ] [ task_b ] if awake PAUSE
-        ] for
-    ok ] CHECK
-
-
-
-    # ----- messaging -----
-
-    : desc
-        self name pr space
-        .." received " .. .." from " sender name prn
-    ;
-
-    1 as: who
-    2 as: say ( parcel: str )
-    [
-      [ ( mes )
-        who [ ." I am a printer" ] ;case
-        say [ parcel pr space .." by " sender name prn ] ;case
-        .. ." Unknown message"
-      ] recv
-    ] task: printer
-
-    [ [ desc " hello" say printer SEND ] recv ] task: sender_a
-
-    [ [ desc " hello" say printer SEND ] recv ] task: sender_b
-
-    PAUSE ( run other tasks )
-    3 [
-        0 who sender_a SEND PAUSE
-        0 who sender_b SEND PAUSE
-    ] times
-    ?tasks ( alone? )
 
 END
