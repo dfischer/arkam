@@ -167,6 +167,8 @@ TEMPORARY
 
     : SLEEP current sleep PAUSE ;
 
+    : activate ( task -- ) awake PAUSE ;
+    
 
 
     # ----- Messaging -----
@@ -207,7 +209,7 @@ TEMPORARY
     32 var> task:rs_cells
 
     : spawn ( xt -- task )
-        task:rs_cells task:ds_cells task:new dup awake
+        task:rs_cells task:ds_cells task:new dup activate
     ;
 
     TEMPORARY [forth] ALSO

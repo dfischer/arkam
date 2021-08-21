@@ -7,9 +7,9 @@ var: count
 [ [ count + count! ] recv ] task: counter
 
 [ [ drop 0 1 counter SEND ] recv ] task: inc1
+
 [ [ drop 0 1 counter SEND ] recv ] task: inc2
 
-PAUSE
 
 3 [
     0 1 inc1 SEND PAUSE
