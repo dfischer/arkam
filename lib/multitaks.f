@@ -173,7 +173,7 @@ TEMPORARY
 
     : SEND ( parcel message task -- )
         ( wait )
-        [ PAUSE dup &message @ ] while
+        dup awake [ PAUSE dup &message @ ] while
         self over &sender !
         tuck &message !
         &parcel !
@@ -181,8 +181,8 @@ TEMPORARY
     ;
 
     : RECV ( -- message )
-        ( wait )
-        [ PAUSE self &message @ not ] while
+        ( wait   ) SLEEP
+        ( awaken ) [ self &message @ [ STOP ] [ PAUSE GO ] if ] while
         self &message @
         0 self &message !
     ;
@@ -244,8 +244,17 @@ TEMPORARY
       ] while
     ] task: printer
 
-    [ [ " hello" say printer SEND GO ] while ] task: sender_a
-    [ [ " hello" say printer SEND GO ] while ] task: sender_b
-    10 [ PAUSE ] times
+    [ [
+      " hello" say printer SEND PAUSE
+      0 who root_task SEND PAUSE GO
+    ] while ] task: sender_a
+
+    [ [
+      " hello" say printer SEND PAUSE
+      0 who root_task SEND PAUSE GO
+    ] while ] task: sender_b
+
+    : recv RECV ? drop .." received from " sender name prn ;
+    10 [ recv ] times
 
 END
