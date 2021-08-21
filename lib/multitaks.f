@@ -15,6 +15,8 @@ TEMPORARY
 
     STRUCT Task
         cell: &next
+        cell: &prev
+        cell: &active
         cell: &sp
         cell: &rp
         cell: &ds_cells
@@ -23,7 +25,14 @@ TEMPORARY
         cell: &rs_start
     END
 
-    : insert ( task -- ) latest over &next ! latest! ;
+    : active?   ( task -- ? ) &active @ ;
+    : active!   ( task -- ) yes swap &active ! ;
+    : inactive! ( task -- ) no swap &active ! ;
+
+    : insert ( task -- )
+        dup latest over &next ! latest!
+        0 swap &prev !
+    ;
 
     : allot_ds ( task -- )
         dup &ds_cells @ cells allot swap &ds_start !
@@ -45,9 +54,12 @@ TEMPORARY
         over ! cell - swap &rp !
     ;
 
-    : new_task ( xt rs_cells ds_cells -- adr )
+    [multi] EDIT
+    : task:new ( xt rs_cells ds_cells -- adr )
         Task allot
         0 over &next !
+        0 over &prev !
+        dup inactive!
         0 over &sp !
         tuck &ds_cells !
         tuck &rs_cells !
@@ -64,6 +76,7 @@ TEMPORARY
     [multi] EDIT
     Task allot as: root_task
     0           root_task &next !
+    0           root_task &prev !
     0           root_task &sp !
     0           root_task &rp !
     sys:ds      root_task &ds_start !
@@ -71,12 +84,26 @@ TEMPORARY
     sys:ds_size root_task &ds_cells !
     sys:rs_size root_task &rs_cells !
     root_task dup insert current!
-
+    root_task active!
 
 
     # ----- Switch -----
 
     [multi] EDIT
+
+    : awake ( task -- )
+        dup active? [ drop ] ;when
+        dup active! insert
+    ;
+
+    : sleep ( task -- )
+        dup active? [ drop ] ;unless
+        dup &prev @ ?dup [ ( task prev )
+            over &next @ swap &next ! ( keep next )
+        ] when
+        drop
+    ;
+
     : PAUSE ( -- )
         # save state
         rp current &rp !
@@ -88,6 +115,21 @@ TEMPORARY
         current [ &rp @ ] [ &rs_start @ ] [ &rs_cells @ ] triq sys:rstack!
     ;
 
+    : SLEEP current sleep PAUSE ;
+
+
+
+    # ----- Utils -----
+
+    # defaults
+    32 var> task:ds_cells
+    32 var> task:rs_cells
+
+    : spawn ( xt -- task )
+        task:rs_cells task:ds_cells task:new dup awake
+    ;
+
+    : task: ( xt -- task ) spawn var> ;
 
 
     # ===== Test =====
@@ -96,10 +138,23 @@ TEMPORARY
         .." root task before ... " PAUSE ." after" PAUSE
     ok ] CHECK
 
+    [ [
+        3 [ ? ." I am A" PAUSE ] for
+        SLEEP
+        GO
+      ] while
+    ] task: task_a
+
+    [ [
+        5 [ ? ." I am B" PAUSE ] for
+        SLEEP
+        GO
+      ] while
+    ] task: task_b
+
+
     " new_task" [
-        [ [ ." I am A" GO PAUSE ] while ] 32 32 new_task insert
-        [ [ ." I am B" GO PAUSE ] while ] 32 32 new_task insert
-        10 [ .. ." I am ROOT" PAUSE ] for
+        10 [ .. ." I am ROOT" PAUSE task_a awake PAUSE task_b awake ] for
     ok ] CHECK
 
 END
