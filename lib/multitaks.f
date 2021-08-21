@@ -23,6 +23,10 @@ TEMPORARY
         cell: &rs_cells
         cell: &ds_start
         cell: &rs_start
+        ( messaging )
+        cell: &sender
+        cell: &message
+        cell: &parcel
     END
 
     : active?   ( task -- ? ) &active @ ;
@@ -122,6 +126,9 @@ TEMPORARY
     sys:rs      root_task &rs_start !
     sys:ds_size root_task &ds_cells !
     sys:rs_size root_task &rs_cells !
+    0           root_task &sender !
+    0           root_task &message !
+    0           root_task &parcel !
     root_task current!
     root_task active!
     " root" root_task name!
@@ -130,6 +137,8 @@ TEMPORARY
     # ----- Switch -----
 
     [multi] EDIT
+
+    : self current ;
 
     : awake ( task -- )
         dup active? [ drop ] ;when
@@ -155,8 +164,34 @@ TEMPORARY
     : SLEEP current sleep PAUSE ;
 
 
+    # ----- Messaging -----
+
+    [multi] EDIT
+
+    : sender self &sender @ ;
+    : parcel self &parcel @ ;
+
+    : SEND ( parcel message task -- )
+        ( wait )
+        [ PAUSE dup &message @ ] while
+        self over &sender !
+        tuck &message !
+        &parcel !
+        PAUSE
+    ;
+
+    : RECV ( -- message )
+        ( wait )
+        [ PAUSE self &message @ not ] while
+        self &message @
+        0 self &message !
+    ;
+
+
 
     # ----- Utils -----
+
+    [multi] EDIT
 
     # defaults
     32 var> task:ds_cells
@@ -194,5 +229,23 @@ TEMPORARY
             2 mod [ task_a ] [ task_b ] if awake PAUSE
         ] for
     ok ] CHECK
+
+
+
+    # ----- messaging -----
+
+    1 as: who
+    2 as: say ( parcel: str )
+    [
+      [ RECV
+        who [ ." I am a printer" GO ] ;case
+        say [ parcel pr space .." by " sender name prn GO ] ;case
+        .. ." Unknown message" GO
+      ] while
+    ] task: printer
+
+    [ [ " hello" say printer SEND GO ] while ] task: sender_a
+    [ [ " hello" say printer SEND GO ] while ] task: sender_b
+    10 [ PAUSE ] times
 
 END
