@@ -74,13 +74,17 @@ TEMPORARY
     var: xt
     : activate ( xt task -- )
         insert xt!
+        
         # save state
         current IF rp sp current &sp ! THEN
+        
         # restore state
         latest current!
+        
         # setup data stack
         current [ &ds_start @ ] [ &ds_cells @ ] biq
         2dup cells + cell - pushdown sys:dstack!
+        
         # setup return stack
         current [ &rs_start @ ] [ &rs_cells @ ] biq
         2dup cells + cell - ( rs_start rs_cells rp )
