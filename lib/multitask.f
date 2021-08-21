@@ -187,6 +187,10 @@ TEMPORARY
         0 self &message !
     ;
 
+    : recv ( q -- )  # q: message --
+        >r RECV i call r> AGAIN
+    ;
+
 
 
     # ----- Utils -----
@@ -234,8 +238,7 @@ TEMPORARY
 
     # ----- messaging -----
 
-    : recv
-        RECV
+    : desc
         self name pr space
         .." received " .. .." from " sender name prn
     ;
@@ -243,16 +246,16 @@ TEMPORARY
     1 as: who
     2 as: say ( parcel: str )
     [
-      [ RECV
-        who [ ." I am a printer" GO ] ;case
-        say [ parcel pr space .." by " sender name prn GO ] ;case
-        .. ." Unknown message" GO
-      ] while
+      [ ( mes )
+        who [ ." I am a printer" ] ;case
+        say [ parcel pr space .." by " sender name prn ] ;case
+        .. ." Unknown message"
+      ] recv
     ] task: printer
 
-    [ [ recv " hello" say printer SEND GO ] while ] task: sender_a
+    [ [ desc " hello" say printer SEND ] recv ] task: sender_a
 
-    [ [ recv " hello" say printer SEND GO ] while ] task: sender_b
+    [ [ desc " hello" say printer SEND ] recv ] task: sender_b
 
     PAUSE ( run other tasks )
     3 [
