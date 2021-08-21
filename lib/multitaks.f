@@ -154,7 +154,11 @@ TEMPORARY
 
 
     " new_task" [
-        10 [ .. ." I am ROOT" PAUSE task_a awake PAUSE task_b awake ] for
+        PAUSE
+        10 [
+            ? ." I am ROOT" PAUSE
+            2 mod [ task_a ] [ task_b ] if awake PAUSE
+        ] for
     ok ] CHECK
 
 END
