@@ -2,7 +2,6 @@ require: lib/multitask.f
 
 LEXI [multi] REFER
 
-var: count
 mes: inc
 mes: sum
 
