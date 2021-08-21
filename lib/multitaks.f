@@ -30,7 +30,9 @@ TEMPORARY
     : inactive! ( task -- ) no swap &active ! ;
 
     : insert ( task -- )
-        dup latest over &next ! latest!
+        latest ?dup [ over swap &prev ! ] when
+        latest over &next !
+        dup latest!
         0 swap &prev !
     ;
 
@@ -98,10 +100,13 @@ TEMPORARY
 
     : sleep ( task -- )
         dup active? [ drop ] ;unless
+        dup inactive!
         dup &prev @ ?dup [ ( task prev )
             over &next @ swap &next ! ( keep next )
-        ] when
-        drop
+            drop
+        ] [ ( task )
+            &next @ dup latest! 0 swap &prev !
+        ] if
     ;
 
     : PAUSE ( -- )
@@ -138,25 +143,15 @@ TEMPORARY
         .." root task before ... " PAUSE ." after" PAUSE
     ok ] CHECK
 
-    [ [
-        3 [ ? ." I am A" PAUSE ] for
-        SLEEP
-        GO
-      ] while
-    ] task: task_a
 
-    [ [
-        5 [ ? ." I am B" PAUSE ] for
-        SLEEP
-        GO
-      ] while
-    ] task: task_b
 
+    [ [ ." [A] hi"  SLEEP GO ] while ] task: task_a
+    [ [ ." [B] hay" SLEEP GO ] while ] task: task_b
 
     " new_task" [
-        PAUSE
         10 [
-            ? ." I am ROOT" PAUSE
+            .." [ROOT] hello " ? cr PAUSE
+            ." [ROOT] wake up!"
             2 mod [ task_a ] [ task_b ] if awake PAUSE
         ] for
     ok ] CHECK
