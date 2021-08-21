@@ -306,14 +306,16 @@ lexicon: [sys]
 COVER
   : query 0 io ;
 SHOW
-  : sys:size 0 query ;
-  : sys:ds_size 2 query ;
-  : sys:ds      3 query ;
-  : sys:rs_size 4 query ;
-  : sys:rs      5 query ;
+  : sys:size 0      query ;
+  : sys:ds_size 2   query ;
+  : sys:ds      3   query ;
+  : sys:rs_size 4   query ;
+  : sys:rs      5   query ;
   : sys:cell_size 6 query ;
-  : sys:max_int 7 query ;
-  : sys:min_int 8 query ;
+  : sys:max_int 7   query ;
+  : sys:min_int 8   query ;
+  : sys:dstack! 9   query ; # adr cells --
+  : sys:rstack! 10  query ; # adr cells --
   ( calculated )
   : sys:ds_base sys:ds_size cells sys:ds + ;
   : sys:rs_base sys:rs_size cells sys:rs + ;

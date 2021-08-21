@@ -46,6 +46,13 @@ typedef ArkCode Code;
 #define Raise(err_name) { vm->err = ARK_ERR_##err_name; return ARK_ERR; }
 #define ExpectOK        if (code != ARK_OK) return code;
 
+#define PopValid(v) {                \
+  Code c = ark_pop_valid_addr(vm);   \
+  if (c != ARK_OK) return ARK_ERR;   \
+  *(v) = vm->result;                 \
+  }
+
+
 
 // Error strings
 // =============================================================================
@@ -628,6 +635,28 @@ Private Code handleSYS(VM* vm, Cell op) {
     /* Minimum integer(cell) */
     Push(ARK_MIN_INT);
     return ARK_OK;
+
+  case 9:
+    /* Set Data Stack ( addr cells -- ) */
+    {
+      if (!has_ds_items(vm, 2)) Raise(DS_UNDERFLOW);
+      Cell size = Pop();
+      Cell adr = 0; PopValid(&adr);
+      vm->ds_size = size;
+      vm->ds = adr;
+      return ARK_OK;
+    }
+
+  case 10:
+    /* Set Return Stack ( addr cells -- ) */
+    {
+      if (!has_ds_items(vm, 2)) Raise(DS_UNDERFLOW);
+      Cell size = Pop();
+      Cell adr = 0; PopValid(&adr);
+      vm->rs_size = size;
+      vm->rs = adr;
+      return ARK_OK;
+    }
 
   default: Raise(IO_UNKNOWN_OP);
   }

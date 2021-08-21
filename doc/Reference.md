@@ -86,6 +86,10 @@ op -1 is query for ready.
 7 maximum_integer ( -- n )
 
 8 minimum_integer ( -- n )
+
+9 set_data_stack ( addr cells -- )
+
+10 set_return_stack ( addr cells -- )
 ```
 
 
