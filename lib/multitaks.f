@@ -16,6 +16,7 @@ TEMPORARY
     STRUCT Task
         cell: &next
         cell: &sp
+        cell: &rp
         cell: &ds_cells
         cell: &rs_cells
         cell: &ds_start
@@ -32,7 +33,19 @@ TEMPORARY
         dup &rs_cells @ cells allot swap &rs_start !    
     ;
 
-    : new_task ( rs_cells ds_cells -- adr )
+    : >empty ( cells stack -- adr ) swap 1 - cells + ;
+
+    : init_sp ( task -- )
+        dup [ &ds_cells @ ] [ &ds_start @ ] biq >empty swap &sp !
+    ;
+
+    : init_rp ( xt task -- )
+        swap >r ( task | xt )
+        dup [ &rs_cells @ ] [ &rs_start @ ] biq >empty r> ( task rp xt )
+        over ! cell - swap &rp !
+    ;
+
+    : new_task ( xt rs_cells ds_cells -- adr )
         Task allot
         0 over &next !
         0 over &sp !
@@ -40,6 +53,8 @@ TEMPORARY
         tuck &rs_cells !
         dup allot_ds
         dup allot_rs
+        dup init_sp
+        tuck init_rp
     ;
 
 
@@ -50,6 +65,7 @@ TEMPORARY
     Task allot as: root_task
     0           root_task &next !
     0           root_task &sp !
+    0           root_task &rp !
     sys:ds      root_task &ds_start !
     sys:rs      root_task &rs_start !
     sys:ds_size root_task &ds_cells !
@@ -63,52 +79,27 @@ TEMPORARY
     [multi] EDIT
     : PAUSE ( -- )
         # save state
-        rp sp current &sp !
+        rp current &rp !
+        sp current &sp !
         # next task ( round robin )
         current &next @ ?dup [ current! ] [ latest current! ] if
         # restore state
         current [ &sp @ ] [ &ds_start @ ] [ &ds_cells @ ] triq sys:dstack!
-        ( rp ) current [ &rs_start @ ] [ &rs_cells @ ] biq sys:rstack!
-    ;
-
-    var: xt
-    : activate ( xt task -- )
-        insert xt!
-        
-        # save state
-        current IF rp sp current &sp ! THEN
-        
-        # restore state
-        latest current!
-        
-        # setup data stack
-        current [ &ds_start @ ] [ &ds_cells @ ] biq
-        2dup cells + cell - pushdown sys:dstack!
-        
-        # setup return stack
-        current [ &rs_start @ ] [ &rs_cells @ ] biq
-        2dup cells + cell - ( rs_start rs_cells rp )
-        xt over ! cell -
-        pushdown sys:rstack!
+        current [ &rp @ ] [ &rs_start @ ] [ &rs_cells @ ] triq sys:rstack!
     ;
 
 
 
     # ===== Test =====
 
-    var: task_a
-    var: task_b
-
     " PAUSE" [
         .." root task before ... " PAUSE ." after" PAUSE
     ok ] CHECK
 
     " new_task" [
-        32 32 new_task task_a!
-        32 32 new_task task_b!
-        [ ." I am A" PAUSE ." hello A" PAUSE bye ] task_a activate
-        [ ." I am B" PAUSE ." hello B" PAUSE bye ] task_b activate
-        ." I am ROOT" PAUSE
+        [ [ ." I am A" GO PAUSE ] while ] 32 32 new_task insert
+        [ [ ." I am B" GO PAUSE ] while ] 32 32 new_task insert
+        10 [ .. ." I am ROOT" PAUSE ] for
     ok ] CHECK
 
 END
