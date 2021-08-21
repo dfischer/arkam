@@ -10,13 +10,13 @@ TEMPORARY
 
     # ----- Task -----
 
-    0 var> latest
     0 var> current
 
     STRUCT Task
         cell: &next
         cell: &prev
         cell: &active
+        cell: &name
         cell: &sp
         cell: &rp
         cell: &ds_cells
@@ -29,11 +29,23 @@ TEMPORARY
     : active!   ( task -- ) yes swap &active ! ;
     : inactive! ( task -- ) no swap &active ! ;
 
+    : name! ( s task -- ) &name ! ;
+    : name ( task -- s )
+        &name @ ?dup [ " (noname)" ] unless
+    ;
+
     : insert ( task -- )
-        latest ?dup [ over swap &prev ! ] when
-        latest over &next !
-        dup latest!
-        0 swap &prev !
+        ( prev<-task ) current &prev @ over &prev !
+        ( prev->task ) dup &prev @ over swap &next !
+        ( task->cur  ) current over &next !
+        ( task<-cur  ) current &prev !
+    ;
+
+    : remove ( task -- )
+        dup [ &prev @ ] [ &next @ ] biq ( task prev next )
+        ( prev->next ) 2dup swap &next !
+        ( prev<-next ) &prev !
+        drop
     ;
 
     : allot_ds ( task -- )
@@ -61,6 +73,7 @@ TEMPORARY
         Task allot
         0 over &next !
         0 over &prev !
+        0 over &name !
         dup inactive!
         0 over &sp !
         tuck &ds_cells !
@@ -72,21 +85,46 @@ TEMPORARY
     ;
 
 
+    # ----- Inspect -----
+    
+    [multi:private] EDIT
+    : label ( task -- ) dup name pr .." @" .. ;
+    : sep space space ;
+    : tab sep sep ;
+    
+    [multi] EDIT
+    : ?task ( task -- task )
+        >r
+        i label cr
+        tab .." <- " i &prev @ label
+        sep i &next @ label ." ->"
+        r>
+    ;
+
+    : ?tasks
+        current ?task
+        dup [ ( start task ) &next @
+          2dup = [ 2drop STOP ] ;when
+          ?task GO
+        ] while
+    ;
+
 
     # ----- Setup root task -----
     
     [multi] EDIT
     Task allot as: root_task
-    0           root_task &next !
-    0           root_task &prev !
+    root_task   root_task &next !
+    root_task   root_task &prev !
     0           root_task &sp !
     0           root_task &rp !
     sys:ds      root_task &ds_start !
     sys:rs      root_task &rs_start !
     sys:ds_size root_task &ds_cells !
     sys:rs_size root_task &rs_cells !
-    root_task dup insert current!
+    root_task current!
     root_task active!
+    " root" root_task name!
 
 
     # ----- Switch -----
@@ -100,13 +138,7 @@ TEMPORARY
 
     : sleep ( task -- )
         dup active? [ drop ] ;unless
-        dup inactive!
-        dup &prev @ ?dup [ ( task prev )
-            over &next @ swap &next ! ( keep next )
-            drop
-        ] [ ( task )
-            &next @ dup latest! 0 swap &prev !
-        ] if
+        dup inactive! remove
     ;
 
     : PAUSE ( -- )
@@ -114,7 +146,7 @@ TEMPORARY
         rp current &rp !
         sp current &sp !
         # next task ( round robin )
-        current &next @ ?dup [ current! ] [ latest current! ] if
+        current &next @ current!
         # restore state
         current [ &sp @ ] [ &ds_start @ ] [ &ds_cells @ ] triq sys:dstack!
         current [ &rp @ ] [ &rs_start @ ] [ &rs_cells @ ] triq sys:rstack!
@@ -134,7 +166,13 @@ TEMPORARY
         task:rs_cells task:ds_cells task:new dup awake
     ;
 
-    : task: ( xt -- task ) spawn var> ;
+    TEMPORARY [forth] ALSO
+        : task: ( xt -- task )
+            spawn dup var>
+            forth:latest forth:next forth:name swap name!
+        ;
+    END
+
 
 
     # ===== Test =====
@@ -144,10 +182,11 @@ TEMPORARY
     ok ] CHECK
 
 
-
     [ [ ." [A] hi"  SLEEP GO ] while ] task: task_a
     [ [ ." [B] hay" SLEEP GO ] while ] task: task_b
 
+    cr ?tasks cr
+    
     " new_task" [
         10 [
             .." [ROOT] hello " ? cr PAUSE
