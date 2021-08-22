@@ -147,9 +147,9 @@ END
 # Cross Lexicon
 # | name...
 # |----- ( 0alined )
-# | next
 # | latest
 # | name
+# | hashtable...
 
 : xlexis  adr_lexicons x@ ;
 : xlexis! adr_lexicons x! ;
@@ -163,14 +163,21 @@ END
 xlexi:size xallot xlexis!
 xlexis xlexisp!
 
+16 dup as: hashd_len
+cells as: hashd_size
+
 : xlexi:new ( -- adr )
-    xhere:align! xhere 0 x, 0 x,
+    xhere:align! xhere
+    0 x, ( latest )
+    0 x, ( name )
+    hashd_len [ 0 x, ] times ( hashdict )
 ;
 
 : xlexi:latest  ( lexi -- word ) x@ ;
 : xlexi:latest! ( word lexi -- ) x! ;
 : xlexi:name    ( lexi -- name ) cell + x@ ;
 : xlexi:name!   ( name lexi -- ) cell + x! ;
+: xlexi:hashd   ( lexi -- adr  ) 2 cells + ;
 
 : xlexi:create ( name -- adr )
      xhere swap x:sput ( name )
@@ -239,8 +246,18 @@ xlexi_core xcurrent!
 : xxt!   3 cells + x! ;
 : xxt    3 cells + x@ ;
 
+: x:hashd_link ( xlexi s -- xlink )
+    s:hash abs hashd_len mod cells ( offset )
+    swap xlexi:hashd +
+;
+
+: x:put_hashd ( xlexi xword -- )
+    tuck xname x>t x:hashd_link ( xword xlink )
+    2dup x@ swap xnext! x!
+;
+
 : x:find_in ( name lexi -- xword yes | name no )
-    xlexi:latest [
+    over x:hashd_link x@ [ ( name word )
         0 [ no STOP ] ;case
         2dup xname x>t s= [ nip yes STOP ] ;when
         xnext GO
@@ -256,10 +273,12 @@ xlexi_core xcurrent!
 
 : x:create ( name -- xword )
   xhere:align! xhere swap x:sput ( &name )
-  ( next  ) xhere:align! xhere xlatest x, xlatest!
+  xhere:align! xhere xlatest!
+  ( next  ) 0 x,
   ( flags ) 0 x,
   ( name  ) x,
   ( xt    ) xhere cell + x,
+  ( hashd ) xcurrent xlatest x:put_hashd
   xlatest
 ;
 
@@ -736,6 +755,7 @@ END
 : SHOW  <IMMED> " SHOW"  ;aux_compile aux_SHOW ;
 : HIDE  <IMMED> " HIDE"  ;aux_compile aux_HIDE ;
 
+hashd_len as: mhashd_len
 
 
 ( ----- debug ----- )

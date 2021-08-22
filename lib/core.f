@@ -764,16 +764,20 @@ var: forth:mode
 0x10 as: lexisp
 0x14 as: current
 
+mhashd_len as: hashd_len
+
 : lexi:new ( -- adr )
   here:align! here
   ( latest ) 0 ,
   ( name   ) 0 ,
+  ( hashd  ) hashd_len [ 0 , ] times
 ;
 
 : lexi:latest  @ ;
 : lexi:latest! ! ;
 : lexi:name  cell + @ ;
 : lexi:name! cell + ! ;
+: lexi:hashd 2 cells + ;
 
 : lexi:name lexi:name dup [ drop " ???" ] unless ;  # for anonymous lexicon
 
@@ -828,22 +832,44 @@ LEXI [forth] REFER [forth] EDIT
 : forth:code  3 cells + @ ; # &entry -- &code
 : forth:code! 3 cells + ! ; # &code &entry --
 
+: hashd_link ( lexi s -- link )
+    s:hash abs hashd_len mod cells ( offset )
+    swap lexi:hashd +
+;
+
+: forth:register ( lexi word -- )
+    tuck forth:name hashd_link ( word link )
+    2dup @ swap forth:next! !
+;
+
 
 LEXI [forth] REFER [core] EDIT
 
 : forth:create ( name -- )
   here:align! s:put here:align! ( &name )
-  ( latest ) here forth:latest , forth:latest!
+  ( latest ) here forth:latest!
+  ( next   ) 0 ,
   ( flags  ) 0 ,
   ( &name  ) ,
   ( &code  ) here cell + ,
+  CURRENT forth:latest forth:register
 ;
 
 
 LEXI [forth] REFER [forth] EDIT
 
+: forth:remove ( word lexi -- )
+    over forth:name hashd_link ( target link )
+    dup @ [ ( target link word )
+        0 [ drop forth:name epr space " ?" panic ] ;case
+        swap >r 2dup = r> swap ( target word link ? )
+        [ [ forth:next ] dip ! drop STOP ] ;when
+        drop dup forth:next GO
+    ] while
+;
+
 : forth:find_in ( name lexi -- name no | word yes )
-  lexi:latest [ ( name latest )
+  over hashd_link @ [ ( name latest )
     ( notfound ) 0 [ no STOP ] ;case
     ( hidden   ) dup forth:hidden? [ forth:next GO ] ;when
     ( found    ) 2dup forth:name s= [ nip yes STOP ] ;when
@@ -996,10 +1022,12 @@ END
 ;
 
 : forth:each_word ( lexi q -- ) # q: &entry --
-  swap lexi:latest [
-    0 [ drop STOP ] ;case
-    2dup forth:next >r >r swap call r> r> GO
-  ] while
+  swap lexi:hashd hashd_len [ ( q hashd i )
+      cells over + @ swap >r [ ( q latest )
+        0 [ STOP ] ;case
+        2dup forth:next >r >r swap call r> r> GO
+      ] while r>
+  ] for 2drop
 ;
 
 
@@ -1475,7 +1503,7 @@ LEXI [forth] REFER [core] EDIT
 
 COVER
 
-  : sweep ( here latest -- )
+  : sweep ( here latest -- ) 2drop rdrop RET
     forth:latest! here over here! ( start end )
     over - memclear
     rdrop ( return through cleared marker )
