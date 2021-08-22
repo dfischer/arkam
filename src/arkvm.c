@@ -46,6 +46,13 @@ typedef ArkCode Code;
 #define Raise(err_name) { vm->err = ARK_ERR_##err_name; return ARK_ERR; }
 #define ExpectOK        if (code != ARK_OK) return code;
 
+#define PopValid(v) {                \
+  Code c = ark_pop_valid_addr(vm);   \
+  if (c != ARK_OK) return ARK_ERR;   \
+  *(v) = vm->result;                 \
+  }
+
+
 
 // Error strings
 // =============================================================================
@@ -101,15 +108,16 @@ Public int ark_has_ds_items(VM* vm, int n) {
      sp points 1 cell lower than current top.
 
      available)
-       sp -> | 1 cell can be popped
-             | x
-       rs -> | Start of return stack
+            sp -> | 1 cell can be popped
+                  | x
+       ds_base -> |
 
      empty)
-       sp -> | BOTTOM OF DS, EMPTY
-       rs -> | DO NOT POINT HERE
+            sp -> | BOTTOM OF DS, EMPTY
+       ds_base -> | DO NOT POINT HERE
    */
-  return vm->sp + Cells(n) < vm->rs;
+  Cell ds_base = vm->ds + Cells(vm->ds_size);
+  return vm->sp + Cells(n) < ds_base;
 }
 
 #define has_ds_items ark_has_ds_items
@@ -191,15 +199,16 @@ Private int has_rs_items(VM* vm, int n) {
      rp points 1 cell lower than current top.
 
      available)
-       rp ->   | 1 cell can be popped
-               | x
-       cells-> ( Out of memory )
+         rp ->   | 1 cell can be popped
+                 | x
+       rs_base-> |
 
      empty)
-          rp -> | BOTTOM OF RS, EMPTY
-       cells ->   DO NOT POINT HERE
+            rp -> | BOTTOM OF RS, EMPTY
+       rs_base -> | DO NOT POINT HERE
    */
-  return vm->rp + Cells(n) < Cells(vm->cells);
+  Cell rs_base = vm->rs + Cells(vm->rs_size);
+  return vm->rp + Cells(n) < rs_base;
 }
 
 Private int has_rs_spaces(VM* vm, int n) {
@@ -628,6 +637,32 @@ Private Code handleSYS(VM* vm, Cell op) {
     /* Minimum integer(cell) */
     Push(ARK_MIN_INT);
     return ARK_OK;
+
+  case 9:
+    /* Set Data Stack ( sp addr cells -- ) */
+    {
+      if (!has_ds_items(vm, 3)) Raise(DS_UNDERFLOW);
+      Cell size = Pop();
+      Cell adr = 0; PopValid(&adr);
+      Cell sp = 0; PopValid(&sp);
+      vm->ds_size = size;
+      vm->ds = adr;
+      vm->sp = sp;
+      return ARK_OK;
+    }
+
+  case 10:
+    /* Set Return Stack ( rp addr cells -- ) */
+    {
+      if (!has_ds_items(vm, 3)) Raise(DS_UNDERFLOW);
+      Cell size = Pop();
+      Cell adr = 0; PopValid(&adr);
+      Cell rp = 0; PopValid(&rp);
+      vm->rs_size = size;
+      vm->rs = adr;
+      vm->rp = rp;
+      return ARK_OK;
+    }
 
   default: Raise(IO_UNKNOWN_OP);
   }
