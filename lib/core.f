@@ -1497,35 +1497,6 @@ LEXI REFER [core] EDIT
 
 
 
-( ===== Marker ===== )
-
-LEXI [forth] REFER [core] EDIT
-
-COVER
-
-  : sweep ( here latest -- ) 2drop rdrop RET
-    forth:latest! here over here! ( start end )
-    over - memclear
-    rdrop ( return through cleared marker )
-  ;
-
-SHOW
-
-  : marker ( name -- )
-    >r forth:latest here
-    r> forth:create
-    LIT, , LIT, , ' sweep , ( returned from sweep )
-  ;
-
-  : MARKER: ( name: -- )
-    forth:read [ " marker name required" panic ] ;unless
-    marker
-  ;
-
-END
-
-
-
 ( ===== Var ===== )
 
 LEXI [forth] REFER [core] EDIT
@@ -1807,7 +1778,6 @@ LEXI [repl] REFER [core] EDIT
   opt:repl [
     repl:init
     repl:show_depth!
-    " clear" marker
     repl
   ] when
   bye

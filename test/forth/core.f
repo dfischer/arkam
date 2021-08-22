@@ -1,4 +1,4 @@
-MARKER: <TEST-TOOLS>
+# ----- Test tools -----
 
 ok ASSERT" ASSERT"
 
@@ -9,8 +9,6 @@ ok ASSERT" ASSERT\""
 [ ] CLEAN" clean 0-0"
 1 [ drop 0 ] CLEAN" clean 1-1"
 
-<TEST-TOOLS>
-
 
 
 # ( ng ASSERT" COMMENT"
@@ -18,7 +16,7 @@ ok ASSERT" ASSERT\""
 
 
 
-MARKER: <STACK>
+# ----- Stack -----
 
 " tuck" [ 1 2 tuck 2drop 2 = ] CHECK
 
@@ -41,11 +39,9 @@ MARKER: <STACK>
   ok
 ] CHECK
 
-<STACK>
 
 
-
-MARKER: <CONTROLFLOW>
+# ----- Control flow -----
 
 : test;when   [ yes ] ;when   no ;
 : test;unless [ yes ] ;unless no ;
@@ -62,21 +58,17 @@ MARKER: <CONTROLFLOW>
   ok
 ] CHECK
 
-<CONTROLFLOW>
 
 
-
-MARKER: <FORTH>
+# ----- Forth -----
 
 : foo [do 3 LIT, , RET, ] ;
 
 " LIT, and RET," [ foo 3 = ] CHECK
 
-<FORTH>
 
 
-
-MARKER: <NUM>
+# ----- Num -----
 
 " clamp" [
   0 1 4 clamp 1 = ASSERT" clamp under"
@@ -97,11 +89,9 @@ MARKER: <NUM>
   ok
 ] CHECK
 
-<NUM>
 
 
-
-MARKER: <COVER>
+# ----- COVER -----
 
 123 as: x
 
@@ -129,11 +119,9 @@ x 123 = ASSERT" out of module - no exposed"
 ( ----- no content ----- )
 COVER END
 
-<COVER>
 
 
-
-MARKER: <STRING>
+# ----- String -----
 
 " s= same" [ " foo" " foo" s=     ] CHECK
 " s= diff" [ " foo" " bar" s= not ] CHECK
@@ -254,11 +242,9 @@ len dec as: max
   ok
 ] CHECK
 
-<STRING>
 
 
-
-MARKER: <COMBINATOR>
+# ----- Combinator -----
 
 " dip 1" [ 1 2 [ inc ] dip + ( => 2 2 + ) 4 = ] CHECK
 
@@ -289,11 +275,9 @@ MARKER: <COMBINATOR>
 
 " tri* 1" [ 1 2 3 [ inc ] [ inc ] [ inc ] tri* + + ( => 2 3 4 + + ) 9 = ] CHECK
 
-<COMBINATOR>
 
 
-
-MARKER: <VAR>
+# ----- Var -----
 
 var: x
 
@@ -325,11 +309,9 @@ var: x
   ok
 ] CHECK
 
-<VAR>
 
 
-
-MARKER: <CHAR>
+# ----- Char -----
 
 64 as: atmark
 
@@ -340,11 +322,9 @@ MARKER: <CHAR>
 
 CHAR: @ atmark = ASSERT" char: in run mode"
 
-<CHAR>
 
 
-
-MARKER: <STRUCT>
+# ----- Struct -----
 
 STRUCT foo
   3 field: a
@@ -362,12 +342,9 @@ END
   ok
 ] CHECK
 
-<STRUCT>
 
 
-
-
-MARKER: <SHUFFLE>
+# ----- Shuffle -----
 
 var: xs here xs!
 0 ,
@@ -391,5 +368,3 @@ sum 45 = ASSERT" shuffle1"
 sum 45 = ASSERT" shuffle1"
 sum 45 = ASSERT" shuffle1"
 sum 45 = ASSERT" shuffle1"
-
-<SHUFFLE>
