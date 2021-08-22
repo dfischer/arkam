@@ -864,7 +864,7 @@ LEXI [forth] REFER [forth] EDIT
         0 [ drop forth:name epr space " ?" panic ] ;case
         swap >r 2dup = r> swap ( target word link ? )
         [ [ forth:next ] dip ! drop STOP ] ;when
-        drop dup forth:next
+        drop dup forth:next GO
     ] while
 ;
 

@@ -80,13 +80,28 @@ COVER
 
     defer: define
 
+    : accessor! ( localc -- )
+        cells
+            [ getters + @ getter! ]
+            [ setters + @ setter! ] biq
+    ;
+
+    : remove
+        getter [local-vars] forth:remove
+        setter [local-vars] forth:remove
+    ;
+
+    : register
+        [local-vars] getter forth:register
+        [local-vars] setter forth:register
+    ;
+
     : def_var ( name -- )
-        localc cells
-          [ getters + @ getter! ]
-          [ setters + @ setter! ] biq
+        localc accessor! remove
         [ getter forth:name s:copy ]
         [ setter forth:name s:copy ] biq
         setter forth:name " !" s:append!
+        register
     ;
 
     : def_arg ( name -- )
@@ -111,9 +126,9 @@ COVER
     var: old_close
 
     : close
-        localc [
-            cells [ setters + @ ] [ getters + @ ] biq
-            [ forth:name " " swap s:copy ] bia
+        localc [ accessor! remove
+            getter setter [ forth:name " " swap s:copy ] bia
+            register
         ] for-
         old_close >r
         0 localc! 0 argc!
