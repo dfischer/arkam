@@ -764,16 +764,20 @@ var: forth:mode
 0x10 as: lexisp
 0x14 as: current
 
+mhashd_len as: hashd_len
+
 : lexi:new ( -- adr )
   here:align! here
   ( latest ) 0 ,
   ( name   ) 0 ,
+  ( hashd  ) hashd_len [ 0 , ] times
 ;
 
 : lexi:latest  @ ;
 : lexi:latest! ! ;
 : lexi:name  cell + @ ;
 : lexi:name! cell + ! ;
+: lexi:hashd 2 cells + ;
 
 : lexi:name lexi:name dup [ drop " ???" ] unless ;  # for anonymous lexicon
 

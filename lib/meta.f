@@ -147,9 +147,9 @@ END
 # Cross Lexicon
 # | name...
 # |----- ( 0alined )
-# | next
 # | latest
 # | name
+# | hashtable...
 
 : xlexis  adr_lexicons x@ ;
 : xlexis! adr_lexicons x! ;
@@ -163,14 +163,21 @@ END
 xlexi:size xallot xlexis!
 xlexis xlexisp!
 
+8 dup as: hashd_len
+cells as: hashd_size
+
 : xlexi:new ( -- adr )
-    xhere:align! xhere 0 x, 0 x,
+    xhere:align! xhere
+    0 x, ( latest )
+    0 x, ( name )
+    hashd_len [ 0 x, ] times ( hashdict )
 ;
 
 : xlexi:latest  ( lexi -- word ) x@ ;
 : xlexi:latest! ( word lexi -- ) x! ;
 : xlexi:name    ( lexi -- name ) cell + x@ ;
 : xlexi:name!   ( name lexi -- ) cell + x! ;
+: xlexi:hashd   ( lexi -- adr  ) 2 cells + ;
 
 : xlexi:create ( name -- adr )
      xhere swap x:sput ( name )
@@ -736,6 +743,7 @@ END
 : SHOW  <IMMED> " SHOW"  ;aux_compile aux_SHOW ;
 : HIDE  <IMMED> " HIDE"  ;aux_compile aux_HIDE ;
 
+hashd_len as: mhashd_len
 
 
 ( ----- debug ----- )
