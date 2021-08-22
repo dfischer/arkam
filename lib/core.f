@@ -837,7 +837,7 @@ LEXI [forth] REFER [forth] EDIT
     swap lexi:hashd +
 ;
 
-: put_hashd ( lexi word -- )
+: forth:register ( lexi word -- )
     tuck forth:name hashd_link ( word link )
     2dup @ swap forth:next! !
 ;
@@ -852,8 +852,11 @@ LEXI [forth] REFER [core] EDIT
   ( flags  ) 0 ,
   ( &name  ) ,
   ( &code  ) here cell + ,
-  CURRENT forth:latest put_hashd
+  CURRENT forth:latest forth:register
 ;
+
+
+LEXI [forth] REFER [forth] EDIT
 
 : forth:remove ( word lexi -- )
     over forth:name hashd_link ( target link )
@@ -864,16 +867,6 @@ LEXI [forth] REFER [core] EDIT
         drop dup forth:next
     ] while
 ;
-
-: forth:rename ( s word lexi -- )
-    2dup forth:remove
-    >r tuck forth:name! r>
-    swap put_hashd
-;
-
-
-
-LEXI [forth] REFER [forth] EDIT
 
 : forth:find_in ( name lexi -- name no | word yes )
   over hashd_link @ [ ( name latest )
