@@ -855,8 +855,8 @@ LEXI [forth] REFER [core] EDIT
   CURRENT forth:latest put_hashd
 ;
 
-: forth:remove ( word -- )
-    CURRENT over forth:name hashd_link ( target link )
+: forth:remove ( word lexi -- )
+    over forth:name hashd_link ( target link )
     dup @ [ ( target link word )
         0 [ drop forth:name epr space " ?" panic ] ;case
         swap >r 2dup = r> swap ( target word link ? )
@@ -864,6 +864,13 @@ LEXI [forth] REFER [core] EDIT
         drop dup forth:next
     ] while
 ;
+
+: forth:rename ( s word lexi -- )
+    2dup forth:remove
+    >r tuck forth:name! r>
+    swap put_hashd
+;
+
 
 
 LEXI [forth] REFER [forth] EDIT
