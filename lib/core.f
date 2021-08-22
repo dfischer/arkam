@@ -855,6 +855,16 @@ LEXI [forth] REFER [core] EDIT
   CURRENT forth:latest put_hashd
 ;
 
+: forth:remove ( word -- )
+    CURRENT over forth:name hashd_link ( target link )
+    dup @ [ ( target link word )
+        0 [ drop forth:name epr space " ?" panic ] ;case
+        swap >r 2dup = r> swap ( target word link ? )
+        [ [ forth:next ] dip ! drop STOP ] ;when
+        drop dup forth:next
+    ] while
+;
+
 
 LEXI [forth] REFER [forth] EDIT
 
@@ -1493,7 +1503,7 @@ LEXI [forth] REFER [core] EDIT
 
 COVER
 
-  : sweep ( here latest -- )
+  : sweep ( here latest -- ) 2drop rdrop RET
     forth:latest! here over here! ( start end )
     over - memclear
     rdrop ( return through cleared marker )
