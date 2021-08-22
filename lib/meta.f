@@ -163,7 +163,7 @@ END
 xlexi:size xallot xlexis!
 xlexis xlexisp!
 
-8 dup as: hashd_len
+16 dup as: hashd_len
 cells as: hashd_size
 
 : xlexi:new ( -- adr )
@@ -246,8 +246,18 @@ xlexi_core xcurrent!
 : xxt!   3 cells + x! ;
 : xxt    3 cells + x@ ;
 
+: x:hashd_link ( xlexi s -- xlink )
+    s:hash abs hashd_len mod cells ( offset )
+    swap xlexi:hashd +
+;
+
+: x:put_hashd ( xlexi xword -- )
+    tuck xname x>t x:hashd_link ( xword xlink )
+    2dup x@ swap xnext! x!
+;
+
 : x:find_in ( name lexi -- xword yes | name no )
-    xlexi:latest [
+    over x:hashd_link x@ [ ( name word )
         0 [ no STOP ] ;case
         2dup xname x>t s= [ nip yes STOP ] ;when
         xnext GO
@@ -263,10 +273,12 @@ xlexi_core xcurrent!
 
 : x:create ( name -- xword )
   xhere:align! xhere swap x:sput ( &name )
-  ( next  ) xhere:align! xhere xlatest x, xlatest!
+  xhere:align! xhere xlatest!
+  ( next  ) 0 x,
   ( flags ) 0 x,
   ( name  ) x,
   ( xt    ) xhere cell + x,
+  ( hashd ) xcurrent xlatest x:put_hashd
   xlatest
 ;
 
