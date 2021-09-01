@@ -1021,6 +1021,12 @@ END
     ] while
 ;
 
+: lexi:clear ( adr -- )
+    lexi:hashd hashd_len [  ( hashd i )
+        cells over + 0 swap !
+    ] for drop
+;
+
 : forth:each_word ( lexi q -- ) # q: &entry --
   swap lexi:hashd hashd_len [ ( q hashd i )
       cells over + @ swap >r [ ( q latest )
