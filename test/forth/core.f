@@ -326,7 +326,7 @@ CHAR: @ atmark = ASSERT" char: in run mode"
 
 # ----- Struct -----
 
-STRUCT foo
+STRUCT: foo
   3 field: a
   cell field: b
   cell: c
@@ -342,6 +342,17 @@ END
   ok
 ] CHECK
 
+
+STRUCT: %foo
+  cell: .bar :access
+END
+
+%foo allot as: foo
+
+" struct accessor" [
+  123 foo bar!
+  foo bar  123  = ASSERT" get/set"
+ok ] CHECK
 
 
 # ----- Shuffle -----

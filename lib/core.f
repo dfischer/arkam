@@ -908,6 +908,7 @@ LEXI [forth] REFER [core] EDIT
 : +,     8 prim, ;
 : JMP,  16 prim, ;
 : ZJMP, 17 prim, ;
+: @,    18 prim, ;
 : !,    19 prim, ;
 
 
@@ -1431,11 +1432,21 @@ LEXI [forth] REFER [core] EDIT
 
 COVER
 
+  var: latest
+
+  " 01234567890123456789012345678901" as: buf
+
   : close ( -- &back offset ) swap ! ;
+
+  : name   latest forth:name 1 + ;
+  : copy   name buf s:copy ;
+  : offset latest forth:code cell + @ ;
+  : getter copy buf ;
+  : setter getter dup " !" s:append! ;
 
 SHOW
 
-  : STRUCT ( -- &back offset q )
+  : STRUCT: ( -- &back offset q )
     # LIT n RET
     forth:read [ " struct name required" panic ] ;unless
     forth:create
@@ -1449,9 +1460,14 @@ SHOW
     swap >r over
     LIT, , JMP, [ + ] ,
     + r>
+    forth:latest latest!
   ;
 
   : cell: ( offset q -- offset+n q ) cell field: ;
+
+  : :get getter forth:create LIT, offset , JMP, [ + @ ] , ;
+  : :set setter forth:create LIT, offset , JMP, [ + ! ] , ;
+  : :access :get :set ;
 
 END
 

@@ -12,13 +12,13 @@ COVER
   #   | &entities
   #   | cells ...
 
-  STRUCT entities
+  STRUCT: entities
     cell field: size
     cell field: latest
     0    field: alives
   END
 
-  STRUCT components
+  STRUCT: components
     cell field: es
     0    field: data
   END

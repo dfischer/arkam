@@ -13,7 +13,7 @@ TEMPORARY
 
     0 var> current
 
-    STRUCT Task
+    STRUCT: Task
         cell: &next
         cell: &prev
         cell: &active
