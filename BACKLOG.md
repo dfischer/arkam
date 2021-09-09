@@ -1,10 +1,9 @@
 # Backlog
 
 - edit [src/README.md](src/README.md)
-- rename APP I/O appropriately
 - add Glossary
 
+## core
 
-
-## meta compiler
-- use hash table as dictionary
+- use only string instead of stream in forth:eval
+- string prefix
