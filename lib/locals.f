@@ -27,14 +27,14 @@ COVER
     0 var> offset
 
     : make-getter
-        "  ?" forth:create
+        " ?" forth:create
         COMPILE: fp LIT, offset , JMP, [ - @ ] ,
         forth:latest getp !
         getp cell + getp!
     ;
 
     : make-setter
-        "  ?" forth:create
+        " ?" forth:create
         COMPILE: fp LIT, offset , JMP, [ - ! ] ,
         forth:latest setp !
         setp cell + setp!
@@ -100,7 +100,7 @@ COVER
         localc accessor! remove
         [ getter forth:name s:copy ]
         [ setter forth:name s:copy ] biq
-        setter forth:name " !" s:append!
+        setter forth:name "!" s:append!
         register
     ;
 
@@ -117,7 +117,7 @@ COVER
 
     : skip_to_close
         [   forth:take
-            0       [ " unclosed locals definition" panic ] ;case
+            0       [ "unclosed locals definition" panic ] ;case
             CHAR: } [ STOP ] ;case
             drop GO
         ] while
@@ -127,7 +127,7 @@ COVER
 
     : close
         localc [ accessor! remove
-            getter setter [ forth:name " " swap s:copy ] bia
+            getter setter [ forth:name "" swap s:copy ] bia
             register
         ] for-
         old_close >r
@@ -144,10 +144,10 @@ SHOW
         [local-vars] ALSO
         old_close! ' close
         0 argc! 0 localc! ' def_arg -> define
-        [   forth:read [ " unclosed locals definition" panic ] ;unless
-            dup " |"  s= [ drop ' def_local -> define GO ] ;when
-            dup " --" s= [ drop skip_to_close STOP ] ;when
-            dup " }"  s= [ drop STOP ] ;when
+        [   forth:read [ "unclosed locals definition" panic ] ;unless
+            dup "|"  s= [ drop ' def_local -> define GO ] ;when
+            dup "--" s= [ drop skip_to_close STOP ] ;when
+            dup "}"  s= [ drop STOP ] ;when
             define GO
         ] while
         ( finish )

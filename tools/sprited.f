@@ -31,11 +31,11 @@ COVER
 SHOW
 
   len allot as: fname
-  opt:read! [ panic" filename required" ] unless
-  max s:check [ panic" Too long file name" ] unless
+  opt:read! [ "filename required" panic ] unless
+  max s:check [ "Too long file name" panic ] unless
   fname s:copy
   fname loadfile
-    dup filesize spr_bytes != [ " Invalid sprite file" panic ] when
+    dup filesize spr_bytes != [ "Invalid sprite file" panic ] when
     filedata as: spr_buf
 
   spr_bytes allot as: spr_back
@@ -44,7 +44,7 @@ SHOW
   : reset_all ( -- ) spr_back spr_buf spr_bytes memcopy ;
 
   : save
-    fname " wb" file:open! id!
+    fname "wb" file:open! id!
     spr_buf spr_bytes id file:write!
     id file:close!
   ;
@@ -319,7 +319,7 @@ COVER
   ( ----- tools ----- )
   right padding + as: tool_x
   top as: tool_y
-  0 tool_x tool_y " reset" [ drop reset ] txtbtn:create drop
+  0 tool_x tool_y "reset" [ drop reset ] txtbtn:create drop
 
 SHOW
 
@@ -345,8 +345,8 @@ COVER
 
 SHOW
 
-  0 left top " save" [ drop save ] txtbtn:create drop
-  0 left 36 + top " reset all" [ drop reset_all ] txtbtn:create drop
+  0 left top "save" [ drop save ] txtbtn:create drop
+  0 left 36 + top "reset all" [ drop reset_all ] txtbtn:create drop
 
 END
 
