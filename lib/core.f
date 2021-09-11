@@ -601,6 +601,20 @@ END
 
 
 
+: c:escaped ( qtake -- c ok | ng )
+  dup >r call r> swap
+  ( no following sequence ) 0 [ drop ng ] ;case
+  ( \b bs      ) CHAR: b [ drop 8  ok ] ;case
+  ( \t htab    ) CHAR: t [ drop 9  ok ] ;case
+  ( \n newline ) CHAR: n [ drop 10 ok ] ;case
+  ( \r cr      ) CHAR: r [ drop 13 ok ] ;case
+  ( \" dquote  ) CHAR: " [ drop 34 ok ] ;case
+  ( \0 null    ) CHAR: 0 [ drop 0  ok ] ;case
+  ( as-is      ) nip ok
+;
+
+
+
 : s:each ( s q -- ) # q: ( c -- )
   swap
   [ dup b@ ( q s c )
@@ -927,16 +941,19 @@ COVER
 
   var: source
   var: stream   # q: source -- c source
+  var: peeked
 
-  : take source stream call source! ; # -- c
+  : fetch source stream call source! ; # -- c
+  : peek peeked ?dup [ fetch dup peeked! ] unless ;
+  : take peek no peeked! ;
 
   : space? 0 ;eq 32 ;eq 10 ;eq no ; # c -- yes | c no
 
   : skip_spaces ( -- c )
-    [ take
-      0 [ 0 STOP ] ;case
-      space? [ GO ] ;when
-      STOP
+    [ peek
+      0 [ STOP ] ;case
+      space? [ take drop GO ] ;when
+      drop STOP
     ] while
   ;
 
@@ -948,10 +965,9 @@ COVER
   : read ( -- buf )
     stream [ " No stream" panic ] ;unless
     skip_spaces buf bp!
-    [ ( c -- )
-      0 [ fin STOP ] ;case
+    [ take
       space? [ fin STOP ] ;when
-      >buf take GO
+      >buf GO
     ] while
     buf
   ;
@@ -966,6 +982,24 @@ COVER
     dup b@ CHAR: x = [ drop no ] ;unless inc
     s>hex
   ;
+
+  : parse_string
+    forth:mode [ JMP, here 0 , here swap ] [ here ] if
+    take drop ( skip first " )
+    [ take
+      0  [ " Unclosed string" panic STOP ] ;case
+      CHAR: " [ STOP ] ;case
+      dup CHAR: \\ = [
+        drop ' take c:escaped
+        [ " Escape sequence required" panic STOP ] ;unless
+        b, GO
+      ] ;when
+      b, GO
+    ] while
+    0 b, here:align!
+    forth:mode [ here swap ! LIT, , ] when
+  ;
+
 
 SHOW
 
@@ -989,9 +1023,18 @@ END
   defer: forth:handle_num
   ' handle_num -> forth:handle_num
 
+  defer: forth:parse_string
+  ' parse_string -> forth:parse_string
+
   : forth:run ( source stream -- )
     source >r stream >r stream! source!
-    [ forth:read [ STOP ] ;unless
+    [ skip_spaces
+      # prefix
+      peek
+      CHAR: " [ forth:parse_string GO ] ;case
+      drop
+      # word
+      forth:read [ STOP ] ;unless
       forth:find
       ( found )
       [ dup forth:immed? [
@@ -1012,7 +1055,7 @@ END
   ;
 
   : forth:eval ( s -- )
-    [ ( str -- str+ ) dup b@ tuck IF inc THEN ] forth:run
+    [ ( str -- c str+ ) dup b@ tuck IF inc THEN ] forth:run
   ;
 
 END
@@ -1141,18 +1184,6 @@ LEXI [forth] REFER [core] EDIT
 ( ===== String ===== )
 
 LEXI [forth] REFER [core] EDIT
-
-: c:escaped ( qtake -- c ok | ng )
-  dup >r call r> swap
-  ( no following sequence ) 0 [ drop ng ] ;case
-  ( \b bs      ) CHAR: b [ drop 8  ok ] ;case
-  ( \t htab    ) CHAR: t [ drop 9  ok ] ;case
-  ( \n newline ) CHAR: n [ drop 10 ok ] ;case
-  ( \r cr      ) CHAR: r [ drop 13 ok ] ;case
-  ( \" dquote  ) CHAR: " [ drop 34 ok ] ;case
-  ( \0 null    ) CHAR: 0 [ drop 0  ok ] ;case
-  ( as-is      ) nip ok
-;
 
 
 : CHAR: <IMMED>
