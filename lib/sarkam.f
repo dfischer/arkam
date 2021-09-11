@@ -89,7 +89,7 @@ COVER
 
 SHOW
 
-  : fill_rect ( x y w h )
+  : fill-rect ( x y w h )
     h! w! y! x!
     h [ y +
       w [ ( y dx -- y )
@@ -153,7 +153,7 @@ COVER
 
 SHOW
 
-  : hover_rect? ( x1 y1 x0 y0 w h -- yes | no )
+  : hover-rect? ( x1 y1 x0 y0 w h -- yes | no )
     # point(x1 y1) on rect(x0 y0 w h) ?
     # dx = x1 - x0
     # dy = y1 - y0
@@ -176,8 +176,8 @@ END
 
 COVER
   # usage:
-  #   [ some_draw ] draw_loop:register!
-  #   draw_loop
+  #   [ some-draw ] draw-loop:register!
+  #   draw-loop
 
   var: callback
 
@@ -189,9 +189,9 @@ COVER
 
 SHOW
 
-  : draw_loop:register ( q -- ) callback! ;
+  : draw-loop:register ( q -- ) callback! ;
 
-  : draw_loop draw AGAIN ;
+  : draw-loop draw AGAIN ;
 
 END
 
@@ -248,9 +248,9 @@ COVER
 
 SHOW
 
-  w as: put_text:w
+  w as: put-text:w
 
-  : put_text ( x y s ) s! y! dup x! ox! loop ;
+  : put-text ( x y s ) s! y! dup x! ox! loop ;
 
 END
 
@@ -265,35 +265,35 @@ COVER
   : init buf max + p! ;
   : check buf p > IF " too big num" panic THEN ;
   : put ( n -- ) p 1 - p! p b! ;
-  : put_sign nega IF 45 put THEN ;
+  : put-sign nega IF 45 put THEN ;
   : read ( -- )
     check
     n base /mod r! q!
     r >hex put
     q 0 = IF RET THEN q n! AGAIN
   ;
-  : check_sign n 0 < IF n neg n! yes ELSE no THEN nega! ;
-  : check_min ( n -- )
+  : check-sign n 0 < IF n neg n! yes ELSE no THEN nega! ;
+  : check-min ( n -- )
     # minimum number
-    n 0 = IF x y " 0" put_text rdrop RET THEN
+    n 0 = IF x y " 0" put-text rdrop RET THEN
     n dup neg != IF RET THEN ( 0x80000000 * -1 = 0x80000000 )
-    10 base = IF x y " -2147483648" put_text rdrop RET THEN
-    16 base = IF x y " -80000000"   put_text rdrop RET THEN
+    10 base = IF x y " -2147483648" put-text rdrop RET THEN
+    16 base = IF x y " -80000000"   put-text rdrop RET THEN
     " ?: invalid base" panic
   ;
   : run ( n x y -- ) y! x! n!
-    check_min
-    check_sign
+    check-min
+    check-sign
     init
     read
-    put_sign
-    x y p put_text
+    put-sign
+    x y p put-text
   ;
 
 SHOW
 
-  : put_dec ( n x y -- ) 10 base! run ;
-  : put_hex ( n x y -- ) 16 base! run ;
+  : put-dec ( n x y -- ) 10 base! run ;
+  : put-hex ( n x y -- ) 16 base! run ;
 
 END
 
@@ -307,12 +307,12 @@ COVER
 
 SHOW
 
-  : put_ff ( n x y -- )
+  : put-ff ( n x y -- )
     y! x!
     0xFF and base /mod ( q r )
     >hex buf 1 + b!
     >hex buf     b!
-    x y buf put_text
+    x y buf put-text
   ;
 
 END

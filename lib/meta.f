@@ -51,18 +51,18 @@ no var> verbose
 ( ===== Image area and There pointer ===== )
 
 : kilo 1000 * ;
-256 kilo        as: image_max
-image_max allot as: there
+256 kilo        as: image-max
+image-max allot as: there
 
 
 ( memory layout )
 
-0x04 as: adr_start
-0x08 as: adr_here
-0x0C as: adr_lexicons   ( lexicon order )
-0x10 as: adr_lexisp ( lexicon stack pointer )
-0x14 as: adr_current ( defining lexicon )
-0x18 as: adr_begin
+0x04 as: adr-start
+0x08 as: adr-here
+0x0C as: adr-lexicons   ( lexicon order )
+0x10 as: adr-lexisp ( lexicon stack pointer )
+0x14 as: adr-current ( defining lexicon )
+0x18 as: adr-begin
 
 
 ( relative pointer )
@@ -79,9 +79,9 @@ var: xhere
 
 : xhere! ( xadr -- )
   dup 0             <  [ .. "invalid xhere" panic ] ;when
-  dup image_max - 0 >= [ .. "invalid xhere" panic ] ;when
+  dup image-max - 0 >= [ .. "invalid xhere" panic ] ;when
   dup -> xhere
-  adr_here x!
+  adr-here x!
 ;
 
 
@@ -96,7 +96,7 @@ var: xhere
 
 ( ----- initialize ----- )
 
-adr_begin xhere!
+adr-begin xhere!
 
 
 ( ----- string ----- )
@@ -109,9 +109,9 @@ adr_begin xhere!
 
 ( ===== Save Image ===== )
 
-: entrypoint! ( xadr -- ) adr_start x! ;
+: entrypoint! ( xadr -- ) adr-start x! ;
 
-: image_size xhere x>t there - ;
+: image-size xhere x>t there - ;
 
 
 COVER
@@ -122,7 +122,7 @@ SHOW
 
   : save ( fname -- )
     "wb" file:open! id!
-    there image_size id file:write!
+    there image-size id file:write!
     id file:close!
   ;
 
@@ -151,26 +151,26 @@ END
 # | name
 # | hashtable...
 
-: xlexis  adr_lexicons x@ ;
-: xlexis! adr_lexicons x! ;
-: xlexisp  adr_lexisp x@ ;
-: xlexisp! adr_lexisp x! ;
-: xcurrent  adr_current x@ ;
-: xcurrent! adr_current x! ;
+: xlexis  adr-lexicons x@ ;
+: xlexis! adr-lexicons x! ;
+: xlexisp  adr-lexisp x@ ;
+: xlexisp! adr-lexisp x! ;
+: xcurrent  adr-current x@ ;
+: xcurrent! adr-current x! ;
 : xedit xcurrent! ;
 
 16 cells as: xlexi:size
 xlexi:size xallot xlexis!
 xlexis xlexisp!
 
-16 dup as: hashd_len
-cells as: hashd_size
+16 dup as: hashd-len
+cells as: hashd-size
 
 : xlexi:new ( -- adr )
     xhere:align! xhere
     0 x, ( latest )
     0 x, ( name )
-    hashd_len [ 0 x, ] times ( hashdict )
+    hashd-len [ 0 x, ] times ( hashdict )
 ;
 
 : xlexi:latest  ( lexi -- word ) x@ ;
@@ -201,14 +201,14 @@ cells as: hashd_size
     xlexis xlexisp! [ ?dup [ xalso GO ] [ STOP ] if ] while
 ;
 
-"[core]" xlexi:create as: xlexi_core
-"[root]" xlexi:create as: xlexi_root
+"[core]" xlexi:create as: xlexi-core
+"[root]" xlexi:create as: xlexi-root
 
-xlexi_root xalso
-xlexi_core xalso
-xlexi_core xcurrent!
+xlexi-root xalso
+xlexi-core xalso
+xlexi-core xcurrent!
 
-: xonly ( -- ) xlexis xlexisp! xlexi_root xalso ;
+: xonly ( -- ) xlexis xlexisp! xlexi-root xalso ;
 
 # Cross Dictionary
 #  | name ...
@@ -221,8 +221,8 @@ xlexi_core xcurrent!
 #  | code ...
 #
 # flags:
-0x01 as: immed_flag
-0x02 as: hidden_flag
+0x01 as: immed-flag
+0x02 as: hidden-flag
 
 
 : xlatest  xcurrent xlexi:latest  ;
@@ -235,10 +235,10 @@ xlexi_core xcurrent!
 : xflags  cell + x@ ;
 : xon!  over xflags swap on  swap xflags! ;
 : xoff! over xflags swap off swap xflags! ;
-: x:hide!   hidden_flag xon!       ;  # xword --
-: x:show!   hidden_flag xoff!      ;  # xword --
-: x:hidden? xflags hidden_flag and ;  # xword -- ?
-: x:immed!  immed_flag xon!        ;  # xword --
+: x:hide!   hidden-flag xon!       ;  # xword --
+: x:show!   hidden-flag xoff!      ;  # xword --
+: x:hidden? xflags hidden-flag and ;  # xword -- ?
+: x:immed!  immed-flag xon!        ;  # xword --
 
 : xname! 2 cells + x! ;
 : xname  2 cells + x@ ;
@@ -246,18 +246,18 @@ xlexi_core xcurrent!
 : xxt!   3 cells + x! ;
 : xxt    3 cells + x@ ;
 
-: x:hashd_link ( xlexi s -- xlink )
-    s:hash abs hashd_len mod cells ( offset )
+: x:hashd-link ( xlexi s -- xlink )
+    s:hash abs hashd-len mod cells ( offset )
     swap xlexi:hashd +
 ;
 
-: x:put_hashd ( xlexi xword -- )
-    tuck xname x>t x:hashd_link ( xword xlink )
+: x:put-hashd ( xlexi xword -- )
+    tuck xname x>t x:hashd-link ( xword xlink )
     2dup x@ swap xnext! x!
 ;
 
-: x:find_in ( name lexi -- xword yes | name no )
-    over x:hashd_link x@ [ ( name word )
+: x:find-in ( name lexi -- xword yes | name no )
+    over x:hashd-link x@ [ ( name word )
         0 [ no STOP ] ;case
         2dup xname x>t s= [ nip yes STOP ] ;when
         xnext GO
@@ -267,7 +267,7 @@ xlexi_core xcurrent!
 : x:find ( name -- xword yes | name no )
   xlexisp cell - swap [ ( sp name )
       over xlexis < [ nip no STOP ] ;when
-      over x@ x:find_in [ nip yes STOP ] [ [ cell - ] dip GO ] if
+      over x@ x:find-in [ nip yes STOP ] [ [ cell - ] dip GO ] if
   ] while
 ;
 
@@ -278,7 +278,7 @@ xlexi_core xcurrent!
   ( flags ) 0 x,
   ( name  ) x,
   ( xt    ) xhere cell + x,
-  ( hashd ) xcurrent xlatest x:put_hashd
+  ( hashd ) xcurrent xlatest x:put-hashd
   xlatest
 ;
 
@@ -293,15 +293,15 @@ xlexi_core xcurrent!
 ;
 
 
-: meta? ( s -- ? ) META forth:find_in nip ;
+: meta? ( s -- ? ) META forth:find-in nip ;
 
-: <run_only> <IMMED>
+: <run-only> <IMMED>
   POSTPONE: <IMMED>
   LIT, forth:latest forth:name 2 + ,
   [ forth:mode [ "Do not compile: " epr panic ] [ drop ] if ] ,
 ;
 
-: meta:create_cross ( name -- )
+: meta:create-cross ( name -- )
   x:create drop
   yes forth:mode!
   xlatest x:hide!
@@ -324,23 +324,23 @@ xlexi_core xcurrent!
 
 
 ( for const )
-var: const_link
+var: const-link
 
-: const_link, ( xadr -- )
+: const-link, ( xadr -- )
   # LIT v RET link
-  xhere const_link x, -> const_link
+  xhere const-link x, -> const-link
 ;
 
-: patch_const ( xadr -- )
+: patch-const ( xadr -- )
   # LIT v RET link -> LIT v JMP xadr
-  const_link [ ( adr link )
+  const-link [ ( adr link )
     0 [ STOP ] ;case
     dup x@ >r over swap x! r> GO
   ] while drop
-  -1 -> const_link ( done )
+  -1 -> const-link ( done )
 ;
 
-: const_done const_link -1 = ;
+: const-done const-link -1 = ;
 
 
 
@@ -358,34 +358,34 @@ var: const_link
   ' inc dip
 ;
 
-: compile_only [ "compile only!" panic ] ;
+: compile-only [ "compile only!" panic ] ;
 
 
 
 ( ===== Setup/Finish ===== )
 
-var: m:image_name
+var: m:image-name
 
 : m:finish
   ( const )
     "doconst" x:find [ "doconst definition not found" panic ] ;unless
-    xxt patch_const
-    const_done [ "do patch_const" panic ] ;unless
+    xxt patch-const
+    const-done [ "do patch-const" panic ] ;unless
 
-  m:image_name [ "No image name" panic ] ;unless
+  m:image-name [ "No image name" panic ] ;unless
 
   ( set entrypoint )
   CROSS-CORE ALSO
   "main" x:find [ "word 'main' required in [core]" panic ] ;unless xxt entrypoint!
 
-  m:image_name save
+  m:image-name save
 ;
 
-: m:handle_num ( n -- )
+: m:handle-num ( n -- )
   forth:mode [ xLIT, x, ] [ ( n -- n ) ] if
 ;
 
-: m:parse_string ( -- )
+: m:parse-string ( -- )
   forth:mode [ xJMP, xhere 0 x, xhere swap ] [ xhere ] if
   forth:take drop ( skip first double quote )
   [ forth:take
@@ -405,10 +405,10 @@ var: m:image_name
 [root] EDIT
 
 : metacompile
-  opt:read! [ "Image name required" panic ] ;unless -> m:image_name
+  opt:read! [ "Image name required" panic ] ;unless -> m:image-name
   ( install )
-  ' m:handle_num -> forth:handle_num
-  ' m:parse_string -> forth:parse_string
+  ' m:handle-num -> forth:handle-num
+  ' m:parse-string -> forth:parse-string
   CROSS-CORE EDIT
   LEXI META CROSS-CORE CROSS-ROOT [root] ORDER
   ( start  ) "lib/core.f" include
@@ -426,14 +426,14 @@ var: m:image_name
 # ex. POSTPONE: '(tick) refers tick in core, not in META.
 # so some shared routines must be defined here.
 
-: aux_tick
+: aux-tick
     forth:read [ "Word name required" panic ] ;unless
     x:find [ epr " ?" panic ] ;unless
     xxt
     forth:mode [ xLIT, x, ] when
 ;
 
-: aux_var
+: aux-var
     forth:read [ "Var name required" panic ] ;unless
     30 s:check [ epr ": too long var name" panic ] ;unless
     dup >r
@@ -444,12 +444,12 @@ var: m:image_name
     xLIT, x, x!, xRET,
 ;
 
-: ;aux_compile ( name -- )
+: ;aux-compile ( name -- )
     forth:mode [ rdrop x:find [ epr " ?" panic ] ;unless xxt x, ] ;when
     drop
 ;
 
-: aux_order ( 0 xlexi mlexi .. )
+: aux-order ( 0 xlexi mlexi .. )
     LEXI ORDER
     xonly xprevious
     [ ?dup [ STOP ] ;unless ALSO xalso GO ] while
@@ -468,10 +468,10 @@ COVER
 
 SHOW
 
-    : aux_SHOW public  EDIT xpublic  xcurrent! ;
-    : aux_HIDE private EDIT xprivate xcurrent! ;
+    : aux-SHOW public  EDIT xpublic  xcurrent! ;
+    : aux-HIDE private EDIT xprivate xcurrent! ;
 
-    : aux_COVER ( -- priv pub xpriv xpub q )
+    : aux-COVER ( -- priv pub xpriv xpub q )
         ( prev ) private public xprivate xpublic
 
         ( meta )
@@ -484,7 +484,7 @@ SHOW
             xcurrent  xpublic!
             xprivate xalso xdefinitions
         ( close )
-            [ PREVIOUS PREVIOUS META ALSO xprevious aux_SHOW
+            [ PREVIOUS PREVIOUS META ALSO xprevious aux-SHOW
               xpublic! xprivate! public! private! ]
     ;
 
@@ -507,8 +507,8 @@ META EDIT LEXI [metacompiler] [forth] [core] [root] META ORDER
 PRIMITIVES
 
   [ HALT ] PRIM: HALT
-  compile_only PRIM: LIT
-  compile_only PRIM: RET
+  compile-only PRIM: LIT
+  compile-only PRIM: RET
 
   [ dup  ] PRIM: dup
   [ drop ] PRIM: drop
@@ -525,8 +525,8 @@ PRIMITIVES
   [ >  ] PRIM: >
   [ <  ] PRIM: <
 
-  compile_only PRIM: JMP
-  compile_only PRIM: ZJMP
+  compile-only PRIM: JMP
+  compile-only PRIM: ZJMP
 
   [ @  ] PRIM: @
   [ !  ] PRIM: !
@@ -542,9 +542,9 @@ PRIMITIVES
 
   [ io ] PRIM: io
 
-  compile_only PRIM: >r
-  compile_only PRIM: r>
-  compile_only PRIM: rdrop
+  compile-only PRIM: >r
+  compile-only PRIM: r>
+  compile-only PRIM: rdrop
 
   [ sp  ] PRIM: sp
   [ sp! ] PRIM: sp!
@@ -557,45 +557,45 @@ END
 
 ( ===== Meta Lexicon Words ===== )
 
-xlexi_core as: lexi_core
-xlexi_root as: lexi_root
+xlexi-core as: lexi-core
+xlexi-root as: lexi-root
 
-: [CORE] xlexi_core CROSS-CORE ;
-: [ROOT] xlexi_root CROSS-ROOT ;
+: [CORE] xlexi-core CROSS-CORE ;
+: [ROOT] xlexi-root CROSS-ROOT ;
 
 : [core] <IMMED> ( -- xcore mcore )
-  forth:mode [ xLIT, lexi_core x, ] [ [CORE] ] if
+  forth:mode [ xLIT, lexi-core x, ] [ [CORE] ] if
 ;
 
 : [root] <IMMED> ( -- xcore mcore )
-  forth:mode [ xLIT, lexi_root x, ] [ [ROOT] ] if
+  forth:mode [ xLIT, lexi-root x, ] [ [ROOT] ] if
 ;
 
 
 
 ( ===== Meta Syntax Words ===== )
 
-: : <run_only>
+: : <run-only>
   forth:read [ "Word name required" panic ] ;unless
-  dup meta? [ meta:create_cross ] [ meta:create ] if
+  dup meta? [ meta:create-cross ] [ meta:create ] if
 ;
 
 : ; <IMMED> ( q -- ) >r ;
 
 : <IMMED> <IMMED> xlatest x:immed! ;
 
-: as: ( n name: -- ) <run_only>
+: as: ( n name: -- ) <run-only>
   forth:mode [ "Do not call as: in compile mode" panic ] ;when
   forth:read [ "Const name required" panic ] ;unless
   dup
-  ( x-const ) x:create drop xLIT, over x, xJMP, const_link, xlatest x:immed!
+  ( x-const ) x:create drop xLIT, over x, xJMP, const-link, xlatest x:immed!
   ( m-const )
   forth:create POSTPONE: <IMMED>
   LIT, , JMP,
   [ forth:mode [ xLIT, x, ] when ] ,
 ;
 
-: patch_const ( xadr ) <run_only> patch_const ;
+: patch-const ( xadr ) <run-only> patch-const ;
 
 
 : [ <IMMED>
@@ -632,7 +632,7 @@ xlexi_root as: lexi_root
 : END ( closer -- ) <IMMED> >r ;
 
 
-: defer: ( name: -- ) <run_only>
+: defer: ( name: -- ) <run-only>
   # JMP actual
   forth:read [ "Word name required" panic ] ;unless
   dup x:create m:create
@@ -648,7 +648,7 @@ xlexi_root as: lexi_root
 ;
 
 
-: ' <IMMED> aux_tick ;
+: ' <IMMED> aux-tick ;
 
 
 : POSTPONE: <IMMED>
@@ -661,15 +661,15 @@ xlexi_root as: lexi_root
 
 : COMPILE: <IMMED>
   forth:mode [ "Do not use COMPILE: in run mode" panic ] ;unless
-  aux_tick
+  aux-tick
   "," x:find [ "comma(,) is not defined yet in cross-env" panic ] ;unless
   xxt x,
 ;
 
 
-: var> <run_only> aux_var ;
+: var> <run-only> aux-var ;
 
-: var: <run_only> 0 aux_var ;
+: var: <run-only> 0 aux-var ;
 
 
 : CHAR: <IMMED>
@@ -695,7 +695,7 @@ SHOW
 
   link as: init:link
 
-  : >init <run_only>
+  : >init <run-only>
     xhere link x@ x, link x!
     x,
   ;
@@ -710,55 +710,55 @@ END
 
 ( ----- lexicon ----- )
 
-: lexicon: <run_only>
+: lexicon: <run-only>
     # meta:  ( -- xlexi mlexi )
     # cross: ( -- xlexi )
     forth:read [ "lexicon name required" panic ] ;unless
     >r i lexi:create i xlexi:create ( mlexi xlexi )
-    ( cross ) i x:create drop xLIT, dup x, xJMP, const_link, xlatest x:immed!
+    ( cross ) i x:create drop xLIT, dup x, xJMP, const-link, xlatest x:immed!
     ( meta )
     r> forth:create POSTPONE: <IMMED>
     ( mlexi xlexi ) LIT, , LIT, , JMP, [ forth:mode [ drop xLIT, x, ] when ] ,
 ;
 
 : PREVIOUS <IMMED>
-    "PREVIOUS" ;aux_compile
+    "PREVIOUS" ;aux-compile
     PREVIOUS PREVIOUS META ALSO
     xprevious
 ;
 
 : LEXI <IMMED>
-    "LEXI" ;aux_compile 0
+    "LEXI" ;aux-compile 0
 ;
 
 : REFER <IMMED>
-    "REFER" ;aux_compile [CORE] [ROOT] aux_order
+    "REFER" ;aux-compile [CORE] [ROOT] aux-order
 ;
 
 : ORDER <IMMED>
-    "ORDER" ;aux_compile aux_order
+    "ORDER" ;aux-compile aux-order
 ;
 
 : EDIT <IMMED>
-    "EDIT" ;aux_compile EDIT xcurrent!
+    "EDIT" ;aux-compile EDIT xcurrent!
 ;
 
 : ALSO <IMMED>
-    "ALSO" ;aux_compile
+    "ALSO" ;aux-compile
     PREVIOUS ALSO META ALSO
     xalso
 ;
 
 : TEMPORARY <IMMED> ( -- lexis current xlexis xcurrent q )
-    "TEMPORARY" ;aux_compile
+    "TEMPORARY" ;aux-compile
     CONTEXT CURRENT xcontext xcurrent [ xedit xorder EDIT ORDER ]
 ;
 
-: COVER <IMMED> "COVER" ;aux_compile aux_COVER ;
-: SHOW  <IMMED> "SHOW"  ;aux_compile aux_SHOW ;
-: HIDE  <IMMED> "HIDE"  ;aux_compile aux_HIDE ;
+: COVER <IMMED> "COVER" ;aux-compile aux-COVER ;
+: SHOW  <IMMED> "SHOW"  ;aux-compile aux-SHOW ;
+: HIDE  <IMMED> "HIDE"  ;aux-compile aux-HIDE ;
 
-hashd_len as: mhashd_len
+hashd-len as: mhashd-len
 
 
 ( ----- debug ----- )

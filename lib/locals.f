@@ -96,7 +96,7 @@ COVER
         [local-vars] setter forth:register
     ;
 
-    : def_var ( name -- )
+    : def-var ( name -- )
         localc accessor! remove
         [ getter forth:name s:copy ]
         [ setter forth:name s:copy ] biq
@@ -104,18 +104,18 @@ COVER
         register
     ;
 
-    : def_arg ( name -- )
-        def_var
+    : def-arg ( name -- )
+        def-var
         argc   inc argc!
         localc inc localc!
     ;
 
-    : def_local ( name -- )
-        def_var
+    : def-local ( name -- )
+        def-var
         localc inc localc!
     ;
 
-    : skip_to_close
+    : skip-to-close
         [   forth:take
             0       [ "unclosed locals definition" panic ] ;case
             CHAR: } [ STOP ] ;case
@@ -123,14 +123,14 @@ COVER
         ] while
     ;
 
-    var: old_close
+    var: old-close
 
     : close
         localc [ accessor! remove
             getter setter [ forth:name "" swap s:copy ] bia
             register
         ] for-
-        old_close >r
+        old-close >r
         0 localc! 0 argc!
         PREVIOUS
     ;
@@ -142,11 +142,11 @@ SHOW
     : { <IMMED> ( close -- close )
         localc [ " Do not define nested locals" panic ] ;when
         [local-vars] ALSO
-        old_close! ' close
-        0 argc! 0 localc! ' def_arg -> define
+        old-close! ' close
+        0 argc! 0 localc! ' def-arg -> define
         [   forth:read [ "unclosed locals definition" panic ] ;unless
-            dup "|"  s= [ drop ' def_local -> define GO ] ;when
-            dup "--" s= [ drop skip_to_close STOP ] ;when
+            dup "|"  s= [ drop ' def-local -> define GO ] ;when
+            dup "--" s= [ drop skip-to-close STOP ] ;when
             dup "}"  s= [ drop STOP ] ;when
             define GO
         ] while

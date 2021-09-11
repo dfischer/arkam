@@ -28,7 +28,7 @@ COVER
   ( draw origin ) var: dx  var: dy
   ( mouse ) var: mx  var: my  var: mp
 
-  : hover? mx my id x id y id width id height hover_rect? ;
+  : hover? mx my id x id y id width id height hover-rect? ;
 
   : clicked? mp IF no ELSE id pressed THEN ;
 
@@ -37,7 +37,7 @@ COVER
     id param id callback >r
   ;
 
-  : handle_click
+  : handle-click
     hover? not IF no id >pressed RET THEN
     clicked? IF click THEN
     mp IF
@@ -51,7 +51,7 @@ COVER
   : draw ( id -- )
     id! ( draw-callback can use id )
     id x dx! id y dy!
-    handle_click
+    handle-click
     id dcallback >r
   ;
 
@@ -77,7 +77,7 @@ SHOW
 
   : btn:delete ( id -- ) btn entity:kill ;
 
-  : btn:draw_all ( -- )
+  : btn:draw-all ( -- )
     mouse:x  mx!
     mouse:y  my!
     mouse:lp mp!
@@ -101,9 +101,9 @@ SHOW
 
   : txtbtn:create ( param x y str q -- id )
     # dparam: text
-    over s:len put_text:w * 1 - ( width )
+    over s:len put-text:w * 1 - ( width )
     txtbtn:height
-    [ dx dy id dparam put_text
+    [ dx dy id dparam put-text
       3 ppu:color!
       dx  dy 9 +  dx id width + 1 -  dy 9 + line
     ] create
@@ -117,12 +117,12 @@ END
 
 COVER
 
-  128 as: max_sliders
+  128 as: max-sliders
 
-  3 as: border_color
-  1 as: bar_color
+  3 as: border-color
+  1 as: bar-color
 
-  max_sliders ENTITY: slider
+  max-sliders ENTITY: slider
     COMPONENT: vmax
     COMPONENT: vmin
     COMPONENT: vrange
@@ -155,13 +155,13 @@ COVER
     id callback ?dup IF id v swap id param swap call THEN
   ;
 
-  : draw_border
-    border_color ppu:color!
+  : draw-border
+    border-color ppu:color!
     id x id y id width id height rect
   ;
 
-  : draw_bar
-    bar_color ppu:color!
+  : draw-bar
+    bar-color ppu:color!
     id barpos id x + id y dec  id barpos id x +  id height dec id y inc + line
   ;
 
@@ -173,9 +173,9 @@ COVER
     id v!
   ;
 
-  : hover? mouse:x mouse:y id x id y id width id height hover_rect? ;
+  : hover? mouse:x mouse:y id x id y id width id height hover-rect? ;
 
-  : handle_mouse
+  : handle-mouse
     mouse:lp not IF no id >pressed RET THEN
     hover? IF yes id >pressed press RET THEN
     id pressed IF press RET THEN
@@ -183,9 +183,9 @@ COVER
   ;
 
   : draw ( id -- ) id!
-    handle_mouse
-    draw_border
-    draw_bar
+    handle-mouse
+    draw-border
+    draw-bar
   ;
 
 SHOW
@@ -201,7 +201,7 @@ SHOW
   #    400 880 slider:range!
   #    0       slider:param!
   #    slider:validate!
-  #    as: freq_slider
+  #    as: freq-slider
 
   : slider:new ( -- id )
     slider entity:new [ " Too many sliders" panic ] unless ;
@@ -253,7 +253,7 @@ SHOW
     " vmin " epr dup vmin .
   ;
 
-  : slider:draw_all
+  : slider:draw-all
     slider ' draw entity:each
   ;
 
@@ -262,6 +262,6 @@ END
 
 
 : mgui:update
-  btn:draw_all
-  slider:draw_all
+  btn:draw-all
+  slider:draw-all
 ;

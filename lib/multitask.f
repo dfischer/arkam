@@ -20,10 +20,10 @@ TEMPORARY
         cell: &name
         cell: &sp
         cell: &rp
-        cell: &ds_cells
-        cell: &rs_cells
-        cell: &ds_start
-        cell: &rs_start
+        cell: &ds-cells
+        cell: &rs-cells
+        cell: &ds-start
+        cell: &rs-start
         ( messaging )
         cell: &sender
         cell: &message
@@ -53,40 +53,40 @@ TEMPORARY
         drop
     ;
 
-    : allot_ds ( task -- )
-        dup &ds_cells @ cells allot swap &ds_start !
+    : allot-ds ( task -- )
+        dup &ds-cells @ cells allot swap &ds-start !
     ;
     
-    : allot_rs ( task -- )
-        dup &rs_cells @ cells allot swap &rs_start !    
+    : allot-rs ( task -- )
+        dup &rs-cells @ cells allot swap &rs-start !    
     ;
 
     : >empty ( cells stack -- adr ) swap 1 - cells + ;
 
-    : init_sp ( task -- )
-        dup [ &ds_cells @ ] [ &ds_start @ ] biq >empty swap &sp !
+    : init-sp ( task -- )
+        dup [ &ds-cells @ ] [ &ds-start @ ] biq >empty swap &sp !
     ;
 
-    : init_rp ( xt task -- )
+    : init-rp ( xt task -- )
         swap >r ( task | xt )
-        dup [ &rs_cells @ ] [ &rs_start @ ] biq >empty r> ( task rp xt )
+        dup [ &rs-cells @ ] [ &rs-start @ ] biq >empty r> ( task rp xt )
         over ! cell - swap &rp !
     ;
 
     [multi] EDIT
-    : task:new ( xt rs_cells ds_cells -- adr )
+    : task:new ( xt rs-cells ds-cells -- adr )
         Task allot
         0 over &next !
         0 over &prev !
         0 over &name !
         dup inactive!
         0 over &sp !
-        tuck &ds_cells !
-        tuck &rs_cells !
-        dup allot_ds
-        dup allot_rs
-        dup init_sp
-        tuck init_rp
+        tuck &ds-cells !
+        tuck &rs-cells !
+        dup allot-ds
+        dup allot-rs
+        dup init-sp
+        tuck init-rp
     ;
 
 
@@ -120,21 +120,21 @@ TEMPORARY
     # ----- Setup root task -----
     
     [multi] EDIT
-    Task allot as: root_task
-    root_task   root_task &next !
-    root_task   root_task &prev !
-    0           root_task &sp !
-    0           root_task &rp !
-    sys:ds      root_task &ds_start !
-    sys:rs      root_task &rs_start !
-    sys:ds_size root_task &ds_cells !
-    sys:rs_size root_task &rs_cells !
-    0           root_task &sender !
-    0           root_task &message !
-    0           root_task &parcel !
-    root_task current!
-    root_task active!
-    " root" root_task name!
+    Task allot as: root-task
+    root-task   root-task &next !
+    root-task   root-task &prev !
+    0           root-task &sp !
+    0           root-task &rp !
+    sys:ds      root-task &ds-start !
+    sys:rs      root-task &rs-start !
+    sys:ds-size root-task &ds-cells !
+    sys:rs-size root-task &rs-cells !
+    0           root-task &sender !
+    0           root-task &message !
+    0           root-task &parcel !
+    root-task current!
+    root-task active!
+    " root" root-task name!
 
 
 
@@ -161,8 +161,8 @@ TEMPORARY
         # next task ( round robin )
         current &next @ current!
         # restore state
-        current [ &sp @ ] [ &ds_start @ ] [ &ds_cells @ ] triq sys:dstack!
-        current [ &rp @ ] [ &rs_start @ ] [ &rs_cells @ ] triq sys:rstack!
+        current [ &sp @ ] [ &ds-start @ ] [ &ds-cells @ ] triq sys:dstack!
+        current [ &rp @ ] [ &rs-start @ ] [ &rs-cells @ ] triq sys:rstack!
     ;
 
     : SLEEP current sleep PAUSE ;
@@ -209,11 +209,11 @@ TEMPORARY
     [multi] EDIT
 
     # defaults
-    32 var> task:ds_cells
-    32 var> task:rs_cells
+    32 var> task:ds-cells
+    32 var> task:rs-cells
 
     : spawn ( xt -- task )
-        task:rs_cells task:ds_cells task:new dup activate
+        task:rs-cells task:ds-cells task:new dup activate
     ;
 
     TEMPORARY [forth] ALSO

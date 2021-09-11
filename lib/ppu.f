@@ -4,7 +4,7 @@
 
 ( ----- palette ----- )
 
-: ppu:palette_color! 0 ppu:query ; ( color i -- )
+: ppu:palette-color! 0 ppu:query ; ( color i -- )
 : ppu:color!         1 ppu:query ; ( i -- )
 : ppu:palette!       2 ppu:query ; ( i -- )
 : ppu:palette        3 ppu:query ; ( -- i )
@@ -33,17 +33,17 @@
 : sprite:load 21 ppu:query ; ( addr -- )
 : sprite:plot 22 ppu:query ; ( x y -- )
 
-: sprite:bulk_load ( addr bytes -- )
+: sprite:bulk-load ( addr bytes -- )
   sprite:size / [ ( addr i -- addr )
     sprite:i!
     [ sprite:size + ] [ sprite:load ] biq
   ] for drop
 ;
 
-: sprite:load_blob ( addr -- )
+: sprite:load-blob ( addr -- )
   # addr | size
   #      | data...
-  [ cell + ] [ @ ] biq sprite:bulk_load
+  [ cell + ] [ @ ] biq sprite:bulk-load
 ;
 
 

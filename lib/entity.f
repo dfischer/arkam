@@ -78,10 +78,10 @@ COVER
 
 SHOW
 
-: ecs:new_es ( n -- es )
+: ecs:new-es ( n -- es )
   here swap dup , 0 , allot drop here:align! ;
 
-: entities: ( n name: -- ) ecs:new_es as: ;
+: entities: ( n name: -- ) ecs:new-es as: ;
 
 : ecs:size ( es -- n ) size @ ;
 
@@ -101,19 +101,19 @@ SHOW
   ] for 2drop
 ;
 
-: ecs:new_cs ( es -- cs ) # new components
+: ecs:new-cs ( es -- cs ) # new components
   here swap dup , size @ cells allot drop ;
 
 : components: ( es name: -- )
   forth:read [ " component name required" panic ] unless
   max s:check [ " too long component name" panic ] unless
   getter s:copy
-  ecs:new_cs dup cgetter csetter
+  ecs:new-cs dup cgetter csetter
 ;
 
 ( ----- shorthands ----- )
 
-: ENTITY: ( n name: -- es q ) ecs:new_es dup as: [ drop ] ;
+: ENTITY: ( n name: -- es q ) ecs:new-es dup as: [ drop ] ;
 : COMPONENT: ( es q name: -- es q ) over components: ;
 
 

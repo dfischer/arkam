@@ -307,20 +307,20 @@ COVER
   : query 0 io ;
 SHOW
   : sys:size 0      query ;
-  : sys:ds_size 2   query ;
+  : sys:ds-size 2   query ;
   : sys:ds      3   query ;
-  : sys:rs_size 4   query ;
+  : sys:rs-size 4   query ;
   : sys:rs      5   query ;
-  : sys:cell_size 6 query ;
-  : sys:max_int 7   query ;
-  : sys:min_int 8   query ;
+  : sys:cell-size 6 query ;
+  : sys:max-int 7   query ;
+  : sys:min-int 8   query ;
   : sys:dstack! 9   query ; # sp adr cells --
   : sys:rstack! 10  query ; # rp adr cells --
   ( calculated )
-  : sys:ds_base sys:ds_size cells sys:ds + ;
-  : sys:rs_base sys:rs_size cells sys:rs + ;
-  : sys:depth sp cell + sys:ds_base swap - cell / ; # order matters
-  : sys:ds0! sys:ds_base cell - sp! ;
+  : sys:ds-base sys:ds-size cells sys:ds + ;
+  : sys:rs-base sys:rs-size cells sys:rs + ;
+  : sys:depth sp cell + sys:ds-base swap - cell / ; # order matters
+  : sys:ds0! sys:ds-base cell - sp! ;
 END
 
 
@@ -427,13 +427,13 @@ COVER
   : init buf max + i! ;
   : check buf i > IF "too big num" panic THEN ;
   : put i 1 - dup i! b! ; # c --
-  : put_sign posi IF RET THEN 45 put ;
-  : check_sign n 0 < IF n neg n! no ELSE yes THEN posi! ;
+  : put-sign posi IF RET THEN 45 put ;
+  : check-sign n 0 < IF n neg n! no ELSE yes THEN posi! ;
   : read n base /mod r! q!
     r >hex put
     q 0 = IF RET THEN q n! AGAIN
   ;
-  : check_min ( minimum number )
+  : check-min ( minimum number )
     n 0 = IF "0" rdrop RET THEN
     n dup neg != IF RET THEN ( 0x80000000 * -1 = 0x80000000 )
     10 base = IF "-2147483648" rdrop RET THEN
@@ -446,7 +446,7 @@ COVER
 SHOW
 
   : n>s ( n base -- buf )
-    base! n! check_min check_sign init read put_sign i
+    base! n! check-min check-sign init read put-sign i
   ;
 
   : n>dec ( n -- buf ) 10 n>s ;
@@ -668,7 +668,7 @@ END
 ;
 
 
-COVER # ----- s:each_line! -----
+COVER # ----- s:each-line! -----
 
   # destructive!
   # Every newline in s will be replaced by 0
@@ -685,7 +685,7 @@ COVER # ----- s:each_line! -----
 
 SHOW
 
-  : s:each_line! ( s q -- )
+  : s:each-line! ( s q -- )
     [ >r split not IF rdrop STOP RET THEN
       i swap >r call r> r>  GO
     ] while
@@ -747,10 +747,10 @@ LEXI REFER [core] EDIT
 
 : cli:query 12 io ;
 : cli:argc    0 cli:query ; # -- n
-: cli:get_arg 1 cli:query ; # buf i len -- ?
+: cli:get-arg 1 cli:query ; # buf i len -- ?
 
-: cli:get_arg! ( buf i len -- )
-  cli:get_arg IF RET THEN "Can't get arg!" panic
+: cli:get-arg! ( buf i len -- )
+  cli:get-arg IF RET THEN "Can't get arg!" panic
 ;
 
 
@@ -768,23 +768,23 @@ var: forth:mode
 
 [forth] ALSO [forth] EDIT
 
-1 as: forth:compile_mode
-0 as: forth:run_mode
+1 as: forth:compile-mode
+0 as: forth:run-mode
 
-0x01 as: flag_immed
-0x02 as: flag_hidden
+0x01 as: flag-immed
+0x02 as: flag-hidden
 
 0x0C as: lexicons
 0x10 as: lexisp
 0x14 as: current
 
-mhashd_len as: hashd_len
+mhashd-len as: hashd-len
 
 : lexi:new ( -- adr )
   here:align! here
   ( latest ) 0 ,
   ( name   ) 0 ,
-  ( hashd  ) hashd_len [ 0 , ] times
+  ( hashd  ) hashd-len [ 0 , ] times
 ;
 
 : lexi:latest  @ ;
@@ -803,8 +803,8 @@ mhashd_len as: hashd_len
 
 LEXI [forth] REFER [root] EDIT
 
-lexi_core as: [core]
-lexi_root as: [root]
+lexi-core as: [core]
+lexi-root as: [root]
 : PREVIOUS ( -- ) lexisp @ cell - lexisp ! ;
 : CURRENT ( -- lexi ) current @ ;
 : EDIT    ( lexi -- ) current ! ;
@@ -829,16 +829,16 @@ LEXI [forth] REFER [forth] EDIT
 
 : forth:flags  cell + @ ;
 : forth:flags! cell + ! ;
-: forth:flag_on!  ( &entry flag ) swap cell + dup >r @ swap on  r> ! ;
-: forth:flag_off! ( &entry flag ) swap cell + dup >r @ swap off r> ! ;
+: forth:flag-on!  ( &entry flag ) swap cell + dup >r @ swap on  r> ! ;
+: forth:flag-off! ( &entry flag ) swap cell + dup >r @ swap off r> ! ;
 
-: forth:hide! flag_hidden forth:flag_on!  ; # &entry --
-: forth:show! flag_hidden forth:flag_off! ; # &entry --
-: forth:hidden? forth:flags flag_hidden and ; # &entry -- ?
+: forth:hide! flag-hidden forth:flag-on!  ; # &entry --
+: forth:show! flag-hidden forth:flag-off! ; # &entry --
+: forth:hidden? forth:flags flag-hidden and ; # &entry -- ?
 
-: forth:immed!     flag_immed forth:flag_on!  ; # &entry --
-: forth:non-immed! flag_immed forth:flag_off! ; # &entry --
-: forth:immed? forth:flags flag_immed and ; # &entry -- ?
+: forth:immed!     flag-immed forth:flag-on!  ; # &entry --
+: forth:non-immed! flag-immed forth:flag-off! ; # &entry --
+: forth:immed? forth:flags flag-immed and ; # &entry -- ?
 
 : forth:name  2 cells + @    ; # &entry -- &name
 : forth:name! 2 cells + !    ; # &name -- &entry
@@ -846,13 +846,13 @@ LEXI [forth] REFER [forth] EDIT
 : forth:code  3 cells + @ ; # &entry -- &code
 : forth:code! 3 cells + ! ; # &code &entry --
 
-: hashd_link ( lexi s -- link )
-    s:hash abs hashd_len mod cells ( offset )
+: hashd-link ( lexi s -- link )
+    s:hash abs hashd-len mod cells ( offset )
     swap lexi:hashd +
 ;
 
 : forth:register ( lexi word -- )
-    tuck forth:name hashd_link ( word link )
+    tuck forth:name hashd-link ( word link )
     2dup @ swap forth:next! !
 ;
 
@@ -873,7 +873,7 @@ LEXI [forth] REFER [core] EDIT
 LEXI [forth] REFER [forth] EDIT
 
 : forth:remove ( word lexi -- )
-    over forth:name hashd_link ( target link )
+    over forth:name hashd-link ( target link )
     dup @ [ ( target link word )
         0 [ drop forth:name epr space "?" panic ] ;case
         swap >r 2dup = r> swap ( target word link ? )
@@ -882,8 +882,8 @@ LEXI [forth] REFER [forth] EDIT
     ] while
 ;
 
-: forth:find_in ( name lexi -- name no | word yes )
-  over hashd_link @ [ ( name latest )
+: forth:find-in ( name lexi -- name no | word yes )
+  over hashd-link @ [ ( name latest )
     ( notfound ) 0 [ no STOP ] ;case
     ( hidden   ) dup forth:hidden? [ forth:next GO ] ;when
     ( found    ) 2dup forth:name s= [ nip yes STOP ] ;when
@@ -894,7 +894,7 @@ LEXI [forth] REFER [forth] EDIT
 : forth:(find) ( name -- name no | word yes )
     lexisp @ cell - swap [ ( sp name )
         over lexicons @ < [ nip no STOP ] ;when
-        over @ forth:find_in [ nip yes STOP ] [ [ cell - ] dip GO ] if
+        over @ forth:find-in [ nip yes STOP ] [ [ cell - ] dip GO ] if
     ] while
 ;
 
@@ -949,7 +949,7 @@ COVER
 
   : space? 0 ;eq 32 ;eq 10 ;eq no ; # c -- yes | c no
 
-  : skip_spaces ( -- c )
+  : skip-spaces ( -- c )
     [ peek
       0 [ STOP ] ;case
       space? [ take drop GO ] ;when
@@ -964,7 +964,7 @@ COVER
   
   : read ( -- buf )
     stream [ "No stream" panic ] ;unless
-    skip_spaces buf bp!
+    skip-spaces buf bp!
     [ take
       space? [ fin STOP ] ;when
       >buf GO
@@ -972,7 +972,7 @@ COVER
     buf
   ;
 
-  : handle_num forth:mode [ LIT, , ] [ ( n -- n ) ] if ;
+  : handle-num forth:mode [ LIT, , ] [ ( n -- n ) ] if ;
 
   : notfound ( name -- ) epr " ?" panic ;
 
@@ -983,7 +983,7 @@ COVER
     s>hex
   ;
 
-  : parse_string
+  : parse-string
     forth:mode [ JMP, here 0 , here swap ] [ here ] if
     take drop ( skip first double quote )
     [ take
@@ -1003,7 +1003,7 @@ COVER
 
 SHOW
 
-  max as: forth:max_len
+  max as: forth:max-len
 
   [ buf IF RET THEN len allot buf! buf max + bufmax! ] >init
 
@@ -1020,18 +1020,18 @@ TEMPORARY [core] EDIT
   ;
 END
 
-  defer: forth:handle_num
-  ' handle_num -> forth:handle_num
+  defer: forth:handle-num
+  ' handle-num -> forth:handle-num
 
-  defer: forth:parse_string
-  ' parse_string -> forth:parse_string
+  defer: forth:parse-string
+  ' parse-string -> forth:parse-string
 
   : forth:run ( source stream -- )
     source >r stream >r stream! source!
-    [ skip_spaces
+    [ skip-spaces
       # prefix
       peek
-      CHAR: " [ forth:parse_string GO ] ;case
+      CHAR: " [ forth:parse-string GO ] ;case
       drop
       # word
       forth:read [ STOP ] ;unless
@@ -1045,9 +1045,9 @@ END
       ] ;when
       drop
       ( dec )
-      buf s>dec [ forth:handle_num GO ] ;when
+      buf s>dec [ forth:handle-num GO ] ;when
       ( hex )
-      buf tk>hex [ forth:handle_num GO ] ;when
+      buf tk>hex [ forth:handle-num GO ] ;when
       ( not found )
       buf forth:notfound STOP
     ] while
@@ -1069,13 +1069,13 @@ END
 ;
 
 : lexi:clear ( adr -- )
-    lexi:hashd hashd_len [  ( hashd i )
+    lexi:hashd hashd-len [  ( hashd i )
         cells over + 0 swap !
     ] for drop
 ;
 
-: forth:each_word ( lexi q -- ) # q: &entry --
-  swap lexi:hashd hashd_len [ ( q hashd i )
+: forth:each-word ( lexi q -- ) # q: &entry --
+  swap lexi:hashd hashd-len [ ( q hashd i )
       cells over + @ swap >r [ ( q latest )
         0 [ STOP ] ;case
         2dup forth:next >r >r swap call r> r> GO
@@ -1106,7 +1106,7 @@ LEXI [forth] REFER [root] EDIT
     [ dup "===== " pr lexi:name pr " =====" prn
       [ dup forth:hidden? [ drop ] ;when
         forth:name pr space
-      ] forth:each_word cr
+      ] forth:each-word cr
     ] lexi:each
 ;
 
@@ -1151,31 +1151,31 @@ LEXI [forth] REFER [core] EDIT
 
 : ;0 ( ? -- ) IF ELSE rdrop THEN ;
 
-: forth:read_find ( -- &entry yes | no )
+: forth:read-find ( -- &entry yes | no )
   forth:read [ "Word name required" eprn no ] ;unless
   forth:find [ epr " ?" eprn no ] ;unless
   yes
 ;
 
 : word' <IMMED>
-  forth:read_find ;0
+  forth:read-find ;0
   forth:mode [ LIT, , ] when
 ;
 
 : ' <IMMED>
-  forth:read_find ;0
+  forth:read-find ;0
   forth:code
   forth:mode [ LIT, , ] when
 ;
 
 : POSTPONE: <IMMED>
-  forth:read_find ;0
+  forth:read-find ;0
   forth:code
   forth:mode [ , ] [ call ] if
 ;
 
 : COMPILE: <IMMED>
-  forth:read_find ;0
+  forth:read-find ;0
   forth:code LIT, , ' , ,
 ;
 
@@ -1224,7 +1224,7 @@ COVER
   ;
   END
 
-  : check_circular ( req -- )
+  : check-circular ( req -- )
     fin [
       " | " epr path eprn
       required [
@@ -1242,7 +1242,7 @@ COVER
       dup name path s= [ yes STOP ] ;when
       next GO
     ] while
-    [ check_circular yes ] [ no ] if
+    [ check-circular yes ] [ no ] if
   ;
 
   : create ( fname -- found? )
@@ -1278,20 +1278,20 @@ END
 
 LEXI [forth] REFER [core] EDIT
 
-: _: ( name -- q )
+: (:) ( name -- q )
   forth:create
   forth:latest forth:hide!
-  forth:compile_mode forth:mode!
+  forth:compile-mode forth:mode!
   [
     RET,
     forth:latest forth:show!
-    forth:run_mode forth:mode!
+    forth:run-mode forth:mode!
   ]
 ;
 
 : : ( name: -- q )
   forth:read [ "Word name required" panic ] unless
-  _:
+  (:)
 ;
 
 : ; <IMMED> ( q -- ) >r ;
@@ -1303,7 +1303,7 @@ LEXI [forth] REFER [core] EDIT
 
 : [ <IMMED> ( -- &q &back mode close | &q mode close )
   forth:mode [ JMP, here 0 , here swap ] [ here:align! here ] if
-  forth:mode forth:compile_mode forth:mode!
+  forth:mode forth:compile-mode forth:mode!
   [
     RET,
     dup forth:mode!
@@ -1515,7 +1515,7 @@ LEXI [forth] REFER [core] EDIT
 
 : var>
   forth:read [ "Var name required" panic ] ;unless
-  forth:max_len dec s:check [ epr ": too long var name" panic ] ;unless
+  forth:max-len dec s:check [ epr ": too long var name" panic ] ;unless
   dup >r forth:create
   LIT, here swap , RET,
   r> dup "!" s:append! forth:create
@@ -1535,7 +1535,7 @@ LEXI [forth] REFER [core] EDIT
 : 2nd! ( v xt -- ) cell + ! ;
 
 : -> <IMMED>
-  forth:read_find [ "Word name required" panic ] ;unless
+  forth:read-find [ "Word name required" panic ] ;unless
   forth:code
   forth:mode [ LIT, , COMPILE: 2nd! ] [ 2nd! ] if
 ;
@@ -1548,15 +1548,15 @@ LEXI [forth] REFER [core] EDIT
 
 COVER
 
-    : compile_only ( prim -- ) forth:mode [ prim, ] [ "Compile Only" panic ] if ;
+    : compile-only ( prim -- ) forth:mode [ prim, ] [ "Compile Only" panic ] if ;
     : primitive ( prim q -- ) forth:mode [ drop prim, ] [ nip call ] if ;
 
 SHOW
 
     : noop <IMMED> ;
     : HALT <IMMED> 1 [ HALT ] primitive ;
-    : LIT  <IMMED> 2 compile_only ;
-    : RET  <IMMED> 3 compile_only ;
+    : LIT  <IMMED> 2 compile-only ;
+    : RET  <IMMED> 3 compile-only ;
 
     : dup  <IMMED> 4 [ dup  ] primitive ;
     : drop <IMMED> 5 [ drop ] primitive ;
@@ -1573,8 +1573,8 @@ SHOW
     : >  <IMMED> 14 [ >  ] primitive ;
     : <  <IMMED> 15 [ <  ] primitive ;
 
-    : JMP  <IMMED> 16 compile_only ;
-    : ZJMP <IMMED> 17 compile_only ;
+    : JMP  <IMMED> 16 compile-only ;
+    : ZJMP <IMMED> 17 compile-only ;
 
     : @  <IMMED> 18 [ @  ] primitive ;
     : !  <IMMED> 19 [ !  ] primitive ;
@@ -1591,9 +1591,9 @@ SHOW
 
     : io <IMMED> 28 [ io ] primitive ;
 
-    : >r    <IMMED> 29 compile_only ;
-    : r>    <IMMED> 30 compile_only ;
-    : rdrop <IMMED> 31 compile_only ;
+    : >r    <IMMED> 29 compile-only ;
+    : r>    <IMMED> 30 compile-only ;
+    : rdrop <IMMED> 31 compile-only ;
 
     : sp  <IMMED> 32 [ sp  ] primitive ;
     : sp! <IMMED> 33 [ sp! ] primitive ;
@@ -1661,7 +1661,7 @@ COVER
   var: argc
   var: included
 
-  : read buf swap len cli:get_arg [ "too long option" panic ] unless ;
+  : read buf swap len cli:get-arg [ "too long option" panic ] unless ;
 
   [ buf IF RET THEN len allot buf! ] >init
 
@@ -1670,7 +1670,7 @@ SHOW
   var: opt:repl
   var: opt:argi
 
-  : opt:parse_all
+  : opt:parse-all
     yes opt:repl!
     cli:argc 2 < IF RET THEN
 
@@ -1704,7 +1704,7 @@ COVER
 
   var: id
   defer: main
-  : set_boot! ( adr )
+  : set-boot! ( adr )
     -> main
     [ # Decrement argi: bin/arkam forth.ark app.f => bin/arkam app.ark
       opt:argi dec opt:argi!
@@ -1714,7 +1714,7 @@ COVER
 
 SHOW
 
-  : save_image ( fname -- )
+  : save-image ( fname -- )
     "wb" file:open! id!
     # zero clear 0x00-0x03
     0 here ! here 4 id file:write!
@@ -1724,7 +1724,7 @@ SHOW
   ;
 
   : turnkey ( fname adr -- )
-    set_boot! save_image
+    set-boot! save-image
   ;
 
   : turnkey: ( adr fname: -- )
@@ -1748,12 +1748,12 @@ COVER
   256 as: len
   255 as: max
   var: buf
-  var: show_depth
-  var: show_stack
+  var: show-depth
+  var: show-stack
 
   : prompt
-    show_stack [ "| " pr ?stack ] when
-    show_depth [ sys:depth .. ] when
+    show-stack [ "| " pr ?stack ] when
+    show-depth [ sys:depth .. ] when
     "> " pr
   ;
   : listen buf len getline IF buf ELSE " " THEN forth:eval ;
@@ -1772,10 +1772,10 @@ SHOW
 
   ' notfound -> forth:notfound
   : repl:init len allot buf! lexicons ;
-  : repl:hide_depth! no  show_depth! ;
-  : repl:show_depth! yes show_depth! ;
-  : repl:hide_stack! no  show_stack! ;
-  : repl:show_stack! yes show_stack! ;
+  : repl:hide-depth! no  show-depth! ;
+  : repl:show-depth! yes show-depth! ;
+  : repl:hide-stack! no  show-stack! ;
+  : repl:show-stack! yes show-stack! ;
   : repl [ prompt listen GO ] while ;
 
 END
@@ -1786,10 +1786,10 @@ LEXI [repl] REFER [core] EDIT
 
 : main
   init:run
-  opt:parse_all
+  opt:parse-all
   opt:repl [
     repl:init
-    repl:show_depth!
+    repl:show-depth!
     repl
   ] when
   bye

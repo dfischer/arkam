@@ -7,10 +7,10 @@ LEXI [sprited] [file] REFER
 init:run
 
 
-256           as: spr_max
-8             as: spr_w
-8             as: spr_h
-spr_w spr_h * as: spr_size
+256           as: spr-max
+8             as: spr-w
+8             as: spr-h
+spr-w spr-h * as: spr-size
 
 8 as: spr/line
 8 as: lines
@@ -20,7 +20,7 @@ spr/line lines * as: spr/screen
 
 ( ===== buf and file ===== )
 
-spr_max spr_size * as: spr_bytes
+spr-max spr-size * as: spr-bytes
 
 COVER
 
@@ -35,59 +35,59 @@ SHOW
   max s:check [ "Too long file name" panic ] unless
   fname s:copy
   fname loadfile
-    dup filesize spr_bytes != [ "Invalid sprite file" panic ] when
-    filedata as: spr_buf
+    dup filesize spr-bytes != [ "Invalid sprite file" panic ] when
+    filedata as: spr-buf
 
-  spr_bytes allot as: spr_back
-  spr_buf spr_back spr_bytes memcopy
+  spr-bytes allot as: spr-back
+  spr-buf spr-back spr-bytes memcopy
 
-  : reset_all ( -- ) spr_back spr_buf spr_bytes memcopy ;
+  : reset-all ( -- ) spr-back spr-buf spr-bytes memcopy ;
 
   : save
     fname "wb" file:open! id!
-    spr_buf spr_bytes id file:write!
+    spr-buf spr-bytes id file:write!
     id file:close!
   ;
 
-  : fname:draw 8 8 fname put_text ;
+  : fname:draw 8 8 fname put-text ;
 
 END
 
 
 
 ( view area )
-spr_max dec spr/screen - as: spr_start
+spr-max dec spr/screen - as: spr-start
 
-: load_area ( base -- )
+: load-area ( base -- )
   spr/screen [ ( base i -- base )
-    dup spr_start + sprite:i!
-    over + spr_max mod spr_size * spr_buf + sprite:load
+    dup spr-start + sprite:i!
+    over + spr-max mod spr-size * spr-buf + sprite:load
   ] for drop
 ;
 
 
 ( base )
-var: spr_base  ( start sprite on showcase )
+var: spr-base  ( start sprite on showcase )
 : basealign ( i -- i ) spr/line / spr/line * ;
-: spr_base! ( i -- ) spr_max + spr_max mod basealign dup spr_base! load_area ;
-0 spr_base!
+: spr-base! ( i -- ) spr-max + spr-max mod basealign dup spr-base! load-area ;
+0 spr-base!
 
 
 ( select )
-spr_start dec as: spr_target
+spr-start dec as: spr-target
 var: selected
-var: spr_adr ( target )
+var: spr-adr ( target )
 
 : selected!
   dup selected!
-  spr_size * spr_buf +
-  dup spr_adr!
-  spr_target sprite:i! sprite:load
+  spr-size * spr-buf +
+  dup spr-adr!
+  spr-target sprite:i! sprite:load
 ;
 
 : reset ( -- )
-  selected spr_size * ( offset )
-  [ spr_back + ] [ spr_buf + ] biq spr_size memcopy
+  selected spr-size * ( offset )
+  [ spr-back + ] [ spr-buf + ] biq spr-size memcopy
 ;
 
 0 selected!
@@ -97,22 +97,22 @@ var: spr_adr ( target )
 
 8 as: padding
 
-padding 3 * as: gui_top
+padding 3 * as: gui-top
 
 
 ( ===== showcase ===== )
 
 COVER
 
-  spr_max lines / as: max_lines
+  spr-max lines / as: max-lines
   1 as: border
 
-  spr_w spr/line * as: width
-  spr_h lines *    as: height
+  spr-w spr/line * as: width
+  spr-h lines *    as: height
 
   padding border + as: left
   left width +     as: right
-  gui_top border + as: top
+  gui-top border + as: top
   top height +     as: bottom
 
   left   border -     as: bl
@@ -130,82 +130,82 @@ COVER
   var: rowspr
   var: actual
 
-  : basespr+! ( n -- ) spr_base swap + spr_base! ;
-  : basespr-! ( n -- ) spr_base swap - spr_base! ;
+  : basespr+! ( n -- ) spr-base swap + spr-base! ;
+  : basespr-! ( n -- ) spr-base swap - spr-base! ;
 
   : row! ( row -- )
     dup row!
     dup spr/line * rowspr!
-    spr_h * top + y!
+    spr-h * top + y!
   ;
 
   : col! ( col -- )
     dup col!
-    dup rowspr + spr_start + spr!
-    dup rowspr + spr_base + spr_max mod actual!
-    spr_w * left + x!
+    dup rowspr + spr-start + spr!
+    dup rowspr + spr-base + spr-max mod actual!
+    spr-w * left + x!
   ;
 
   ( scroll buttons )
 
-  bl bw + 4 +  as: btn_left
-  top          as: btn_top
-  btn_top bh + as: btn_bottom
+  bl bw + 4 +  as: btn-left
+  top          as: btn-top
+  btn-top bh + as: btn-bottom
 
   : scrollbtn ( y spr q -- )
-    >r >r >r 0 btn_left r> r> r> sprbtn:create drop
+    >r >r >r 0 btn-left r> r> r> sprbtn:create drop
   ;
 
-  : current! selected spr/line 3 * - spr_base! ;
+  : current! selected spr/line 3 * - spr-base! ;
 
-  btn_top         0x8A [ drop spr/screen basespr-! ] scrollbtn
-  btn_top    9  + 0x8E [ drop spr/line   basespr-! ] scrollbtn
-  btn_top    25 + 0x90 [ drop current!             ] scrollbtn
-  btn_bottom 17 - 0x8F [ drop spr/line   basespr+! ] scrollbtn
-  btn_bottom 8  - 0x8B [ drop spr/screen basespr+! ] scrollbtn
+  btn-top         0x8A [ drop spr/screen basespr-! ] scrollbtn
+  btn-top    9  + 0x8E [ drop spr/line   basespr-! ] scrollbtn
+  btn-top    25 + 0x90 [ drop current!             ] scrollbtn
+  btn-bottom 17 - 0x8F [ drop spr/line   basespr+! ] scrollbtn
+  btn-bottom 8  - 0x8B [ drop spr/screen basespr+! ] scrollbtn
 
   ( draw )
 
-  : draw_cursor
+  : draw-cursor
     3 ppu:color!
     x border - y border -
-    spr_w border + spr_h border +
+    spr-w border + spr-h border +
     rect
   ;
 
-  : draw_showcase
+  : draw-showcase
     8 [ row!
       8 [ col!
         spr sprite:i!
         x y sprite:plot
-        actual selected = IF draw_cursor THEN
+        actual selected = IF draw-cursor THEN
       ] for
     ] for
   ;
 
-  : draw_border 1 ppu:color! bl bt bw bh rect ;
+  : draw-border 1 ppu:color! bl bt bw bh rect ;
 
-  : draw_id selected idx idy put_ff ;
+  : draw-id selected idx idy put-ff ;
 
   ( select )
 
-  : handle_select
+  : handle-select
     mouse:lp not IF RET THEN
-    mouse:x mouse:y left top width height hover_rect? not IF RET THEN
-    mouse:x left - spr_w /   mouse:y top - spr_h /   ( col row )
-    spr/line * + spr_base + spr_max mod selected!
+    mouse:x mouse:y left top width height hover-rect? not IF RET THEN
+    mouse:x left - spr-w /   mouse:y top - spr-h /   ( col row )
+    spr/line * + spr-base + spr-max mod selected!
   ;
 
 SHOW
 
   : showcase:draw ( -- )
-    handle_select
-    draw_border
-    draw_showcase
-    draw_id
+    handle-select
+    draw-border
+    draw-showcase
+    draw-id
   ;
 
-  btn_left spr_w + as: showcase:right
+  btn-left spr-w + as: showcase:right
 
 END
 
@@ -215,14 +215,14 @@ END
 
 COVER
 
-  spr_w dup * as: width
-  spr_h dup * as: height
+  spr-w dup * as: width
+  spr-h dup * as: height
 
   1 as: border
 
   padding 3 * as: leftpad
 
-  gui_top                  border + as: top
+  gui-top                  border + as: top
   showcase:right leftpad + border + as: left
   left width +                      as: right
   top height +                      as: bottom
@@ -233,11 +233,11 @@ COVER
   : dot  adr b@ ;
   : dot! adr b! ;
 
-  : row!  dup row!  spr_h * top + y!  ;
+  : row!  dup row!  spr-h * top + y!  ;
   : col!
     dup col!
-    dup spr_w * left + x!
-    row spr_w * + spr_adr + adr!
+    dup spr-w * left + x!
+    row spr-w * + spr-adr + adr!
   ;
 
   top  border - as: bt
@@ -245,15 +245,15 @@ COVER
   width  border 2 * + as: bw
   height border 2 * + as: bh
 
-  : draw_border
+  : draw-border
     1 ppu:color!
     bl bt bw bh rect
   ;
 
-  : draw_canvas
+  : draw-canvas
     1 ppu:color!
-    spr_h [ row!
-      spr_w [ col!
+    spr-h [ row!
+      spr-w [ col!
         dot sprite:i!
         x y ppu:plot
         x y sprite:plot
@@ -261,12 +261,12 @@ COVER
     ] for
   ;
 
-  bl as: prv_x
-  bt bh + 4 + as: prv_y
+  bl as: prv-x
+  bt bh + 4 + as: prv-y
 
-  : draw_preview
-    spr_target sprite:i!
-    prv_x prv_y sprite:plot
+  : draw-preview
+    spr-target sprite:i!
+    prv-x prv-y sprite:plot
   ;
 
   ( ----- handle mouse ----- )
@@ -275,11 +275,11 @@ COVER
   var: color  ( 0-3 ) 3 color!
   var: curcol ( current color )
 
-  : hover? mouse:x mouse:y left top width height hover_rect? ;
+  : hover? mouse:x mouse:y left top width height hover-rect? ;
 
   : where
-    mouse:y top  - spr_h / row!
-    mouse:x left - spr_w / col!
+    mouse:y top  - spr-h / row!
+    mouse:x left - spr-w / col!
   ;
 
   : press
@@ -292,7 +292,7 @@ COVER
 
   : paint curcol dot! ;
 
-  : handle_mouse
+  : handle-mouse
     mouse:lp not IF no pressed! RET THEN
     hover? not IF RET THEN
     where press paint
@@ -300,35 +300,35 @@ COVER
 
   ( ----- color selector ----- )
 
-  bottom 4 + as: sel_y
+  bottom 4 + as: sel-y
 
-  : selector ( color x -- ) over sel_y swap [ color! ] sprbtn:create drop ;
-  : sel_x ( color -- x ) 9 * 1 - right swap - ;
+  : selector ( color x -- ) over sel-y swap [ color! ] sprbtn:create drop ;
+  : sel-x ( color -- x ) 9 * 1 - right swap - ;
 
-  3 dup sel_x selector
-  2 dup sel_x selector
-  1 dup sel_x selector
+  3 dup sel-x selector
+  2 dup sel-x selector
+  1 dup sel-x selector
 
-  sel_y 9 + as: under_y
+  sel-y 9 + as: under-y
 
-  : draw_selcolor # underline
+  : draw-selcolor # underline
     3 ppu:color!
-    color sel_x dup 7 + under_y swap over line
+    color sel-x dup 7 + under-y swap over line
   ;
 
   ( ----- tools ----- )
-  right padding + as: tool_x
-  top as: tool_y
-  0 tool_x tool_y "reset" [ drop reset ] txtbtn:create drop
+  right padding + as: tool-x
+  top as: tool-y
+  0 tool-x tool-y "reset" [ drop reset ] txtbtn:create drop
 
 SHOW
 
   : editor:draw
-    handle_mouse
-    draw_border
-    draw_canvas
-    draw_preview
-    draw_selcolor
+    handle-mouse
+    draw-border
+    draw-canvas
+    draw-preview
+    draw-selcolor
   ;
 
 END
@@ -346,7 +346,7 @@ COVER
 SHOW
 
   0 left top "save" [ drop save ] txtbtn:create drop
-  0 left 36 + top "reset all" [ drop reset_all ] txtbtn:create drop
+  0 left 36 + top "reset all" [ drop reset-all ] txtbtn:create drop
 
 END
 
@@ -357,6 +357,6 @@ END
   showcase:draw
   editor:draw
   fname:draw
-]  draw_loop:register
+]  draw-loop:register
 
-draw_loop
+draw-loop
