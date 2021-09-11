@@ -26,6 +26,6 @@ END
 ] times
 
 0 $sum counter SEND
-RECV $sum = ASSERT" receive sum from counter"
-parcel ( 3*2 ) 6 = ASSERT" parcel is sum"
+RECV $sum = "receive sum from counter" ASSERT
+parcel ( 3*2 ) 6 = "parcel is sum" ASSERT
 

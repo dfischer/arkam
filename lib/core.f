@@ -134,7 +134,7 @@ ng as: STOP
 
 : if ( ? q1 q2 -- ) >r swap IF rdrop >r ELSE drop THEN ;
   # example:
-  #   yes [ " hello" ] [ " world" ] if pr
+  #   yes [ "hello" ] [ "world" ] if pr
   # => hello
 
 : when   ( ? q -- ) swap IF >r ELSE drop THEN ;
@@ -411,11 +411,11 @@ LEXI REFER [core] EDIT
 
 : >hex ( n -- c ) dup 10 < IF 48 ELSE 55 THEN + ;
 
-: ?h " HERE" prn ;
+: ?h "HERE" prn ;
 
 COVER
 
-  11 as: max ( i32: max " -2147483648" )
+  11 as: max ( i32: max "-2147483648" )
   var: buf
   var: n
   var: posi
@@ -425,7 +425,7 @@ COVER
   var: i
 
   : init buf max + i! ;
-  : check buf i > IF " too big num" panic THEN ;
+  : check buf i > IF "too big num" panic THEN ;
   : put i 1 - dup i! b! ; # c --
   : put_sign posi IF RET THEN 45 put ;
   : check_sign n 0 < IF n neg n! no ELSE yes THEN posi! ;
@@ -434,11 +434,11 @@ COVER
     q 0 = IF RET THEN q n! AGAIN
   ;
   : check_min ( minimum number )
-    n 0 = IF " 0" rdrop RET THEN
+    n 0 = IF "0" rdrop RET THEN
     n dup neg != IF RET THEN ( 0x80000000 * -1 = 0x80000000 )
-    10 base = IF " -2147483648" rdrop RET THEN
-    16 base = IF " -80000000"   rdrop RET THEN
-    " ?: invalid base" panic
+    10 base = IF "-2147483648" rdrop RET THEN
+    16 base = IF "-80000000"   rdrop RET THEN
+    "?: invalid base" panic
   ;
 
   [ buf IF RET THEN max 1 + allot buf! ] >init
@@ -509,16 +509,16 @@ SHOW
   : dump ( adr len ) len! adr!
     len bpl / lines!
     lines [ bpl * adr + base!
-      where " | " pr
+      where "| " pr
       bpl bytes
       bpl text
       cr
     ] for
     len bpl mod 0 [ ( noop ) ] ;case rest!
     lines inc bpl * adr + base!
-    where " | " pr
+    where "| " pr
     rest bytes
-    bpl rest - [ "    " pr ] times
+    bpl rest - [ "   " pr ] times
     rest text
     cr
   ;
@@ -733,10 +733,10 @@ SHOW
   : file:fullpath 9  query ; # path buf max -- ?
   : file:size     10 query ; # id -- n
   ( --- defensive --- )
-  : file:open!  file:open [ " Can't open " epr eprn die ] unless ; # path mode -- id
+  : file:open!  file:open [ "Can't open " epr eprn die ] unless ; # path mode -- id
   : file:close! file:close drop ; # id --
-  : file:read!  file:read  IF RET THEN " Can't read" panic ;
-  : file:write! file:write IF RET THEN " Can't write" panic ;
+  : file:read!  file:read  IF RET THEN "Can't read" panic ;
+  : file:write! file:write IF RET THEN "Can't write" panic ;
 END
 
 
@@ -750,7 +750,7 @@ LEXI REFER [core] EDIT
 : cli:get_arg 1 cli:query ; # buf i len -- ?
 
 : cli:get_arg! ( buf i len -- )
-  cli:get_arg IF RET THEN " Can't get arg!" panic
+  cli:get_arg IF RET THEN "Can't get arg!" panic
 ;
 
 
@@ -793,7 +793,7 @@ mhashd_len as: hashd_len
 : lexi:name! cell + ! ;
 : lexi:hashd 2 cells + ;
 
-: lexi:name lexi:name dup [ drop " ???" ] unless ;  # for anonymous lexicon
+: lexi:name lexi:name dup [ drop "???" ] unless ;  # for anonymous lexicon
 
 : lexi:create ( name -- adr )
     s:put lexi:new tuck lexi:name!
@@ -875,7 +875,7 @@ LEXI [forth] REFER [forth] EDIT
 : forth:remove ( word lexi -- )
     over forth:name hashd_link ( target link )
     dup @ [ ( target link word )
-        0 [ drop forth:name epr space " ?" panic ] ;case
+        0 [ drop forth:name epr space "?" panic ] ;case
         swap >r 2dup = r> swap ( target word link ? )
         [ [ forth:next ] dip ! drop STOP ] ;when
         drop dup forth:next GO
@@ -905,7 +905,7 @@ defer: forth:find
 ' forth:(find) -> forth:find
 
 : forth:find! ( name -- word )
-  forth:find [ epr "  ?" panic ] ;unless
+  forth:find [ epr " ?" panic ] ;unless
 ;
 
 
@@ -959,11 +959,11 @@ COVER
 
   var: bp ( buffer pointer )
   : fin 0 bp b! ;
-  : check bp bufmax > [ fin buf epr "  ...Too long" panic ] ;when ;
+  : check bp bufmax > [ fin buf epr " ...Too long" panic ] ;when ;
   : >buf check bp b! bp inc bp! ;
   
   : read ( -- buf )
-    stream [ " No stream" panic ] ;unless
+    stream [ "No stream" panic ] ;unless
     skip_spaces buf bp!
     [ take
       space? [ fin STOP ] ;when
@@ -974,7 +974,7 @@ COVER
 
   : handle_num forth:mode [ LIT, , ] [ ( n -- n ) ] if ;
 
-  : notfound ( name -- ) epr "  ?" panic ;
+  : notfound ( name -- ) epr " ?" panic ;
 
   : tk>hex ( tk -- n yes | no )
     # prefix: 0x
@@ -985,13 +985,13 @@ COVER
 
   : parse_string
     forth:mode [ JMP, here 0 , here swap ] [ here ] if
-    take drop ( skip first " )
+    take drop ( skip first double quote )
     [ take
-      0  [ " Unclosed string" panic STOP ] ;case
+      0  [ "Unclosed string" panic STOP ] ;case
       CHAR: " [ STOP ] ;case
       dup CHAR: \\ = [
         drop ' take c:escaped
-        [ " Escape sequence required" panic STOP ] ;unless
+        [ "Escape sequence required" panic STOP ] ;unless
         b, GO
       ] ;when
       b, GO
@@ -1102,8 +1102,8 @@ LEXI [forth] REFER [root] EDIT
 ;
 
 : ?words
-    " current: " pr CURRENT lexi:name prn
-    [ dup " ===== " pr lexi:name pr "  =====" prn
+    "current: " pr CURRENT lexi:name prn
+    [ dup "===== " pr lexi:name pr " =====" prn
       [ dup forth:hidden? [ drop ] ;when
         forth:name pr space
       ] forth:each_word cr
@@ -1111,11 +1111,11 @@ LEXI [forth] REFER [root] EDIT
 ;
 
 : ?lexi
-    " LEXI" pr space
+    "LEXI" pr space
     [ lexi:name pr space ] lexi:each
-    " ORDER" pr space
+    "ORDER" pr space
     CURRENT lexi:name pr space
-    " EDIT" prn
+    "EDIT" prn
 ;
 
 : LEXI ( -- 0 ) 0 ;
@@ -1132,14 +1132,14 @@ LEXI [forth] REFER [core] EDIT
 
 TEMPORARY [file] ALSO
 : include ( fname -- )
-  " r" file:open! dup >r
+  "r" file:open! dup >r
   [ ( id -- c id ) dup file:getc swap ] forth:run
   r> file:close!
 ;
 END
 
 : include:
-  forth:read [ " File name required" panic ] ;unless
+  forth:read [ "File name required" panic ] ;unless
   include
 ;
 
@@ -1152,8 +1152,8 @@ LEXI [forth] REFER [core] EDIT
 : ;0 ( ? -- ) IF ELSE rdrop THEN ;
 
 : forth:read_find ( -- &entry yes | no )
-  forth:read [ " Word name required" eprn no ] ;unless
-  forth:find [ epr "  ?" eprn no ] ;unless
+  forth:read [ "Word name required" eprn no ] ;unless
+  forth:find [ epr " ?" eprn no ] ;unless
   yes
 ;
 
@@ -1187,10 +1187,10 @@ LEXI [forth] REFER [core] EDIT
 
 
 : CHAR: <IMMED>
-  forth:read [ " A character required" panic ] ;unless
+  forth:read [ "A character required" panic ] ;unless
   dup b@ dup CHAR: \\ = [ drop inc
     [ [ inc ] [ b@ ] biq ] c:escaped
-    [ " Escape sequence required" panic ] ;unless
+    [ "Escape sequence required" panic ] ;unless
   ] when nip
   forth:mode [ LIT, , ] when
 ;
@@ -1199,11 +1199,11 @@ LEXI [forth] REFER [core] EDIT
 : " <IMMED>
   forth:mode [ JMP, here 0 , here swap ] [ here ] if
   [ forth:take
-    0  [ " Unclosed string" panic STOP ] ;case
+    0  [ "Unclosed string" panic STOP ] ;case
     CHAR: " [ STOP ] ;case
     dup CHAR: \\ = [
       drop ' forth:take c:escaped
-      [ " Escape sequence required" panic STOP ] ;unless
+      [ "Escape sequence required" panic STOP ] ;unless
       b, GO
     ] ;when
     b, GO
@@ -1213,7 +1213,7 @@ LEXI [forth] REFER [core] EDIT
 ;
 
 
-: panic" <IMMED>
+: panic"  <IMMED>
   POSTPONE: " forth:mode [ COMPILE: panic ] [ panic ] if
 ;
 
@@ -1254,20 +1254,20 @@ COVER
 
   TEMPORARY [file] ALSO
   : >path ( fname -- )
-    dup file:exists? [ epr " : not found" panic ] ;unless
-    path len file:fullpath [ path epr " : not found" panic ] ;unless
+    dup file:exists? [ epr ": not found" panic ] ;unless
+    path len file:fullpath [ path epr ": not found" panic ] ;unless
   ;
   END
 
   : check_circular ( req -- )
     fin [
-      "  | " epr path eprn
+      " | " epr path eprn
       required [
         0 [ STOP ] ;case
-        "  | " epr dup name eprn
+        " | " epr dup name eprn
         next GO
       ] while
-      " Circular dependency detected" panic
+      "Circular dependency detected" panic
     ] unless
   ;
 
@@ -1301,7 +1301,7 @@ SHOW
   : require ( fname -- ) start ;
 
   : require: ( fname: -- )
-    forth:read [ " Source name required" panic ] ;unless
+    forth:read [ "Source name required" panic ] ;unless
     require
   ;
 
@@ -1325,7 +1325,7 @@ LEXI [forth] REFER [core] EDIT
 ;
 
 : : ( name: -- q )
-  forth:read [ " Word name required" panic ] unless
+  forth:read [ "Word name required" panic ] unless
   _:
 ;
 
@@ -1366,7 +1366,7 @@ LEXI [forth] REFER [core] EDIT
 ;
 
 : as:
-  forth:read [ " Const name required" panic ] ;unless
+  forth:read [ "Const name required" panic ] ;unless
   forth:create
   forth:latest forth:immed!
   LIT, , JMP, ' doconst ,
@@ -1377,7 +1377,7 @@ LEXI [forth] REFER [core] EDIT
 ;
 
 : defer:
-  forth:read [ " Defered name required" panic ] ;unless
+  forth:read [ "Defered name required" panic ] ;unless
   forth:create
   JMP, 0 ,
 ;
@@ -1392,7 +1392,7 @@ LEXI REFER [root] EDIT
 
 : ( <IMMED>
   [ forth:take
-    0 [ " Unclosed comment" panic STOP ] ;case
+    0 [ "Unclosed comment" panic STOP ] ;case
     CHAR: ) [ STOP ] ;case
     drop GO
   ] while
@@ -1468,7 +1468,7 @@ COVER
 
   var: latest
 
-  " 01234567890123456789012345678901" as: buf
+  "01234567890123456789012345678901" as: buf
 
   : close ( -- &back offset ) swap ! ;
 
@@ -1476,20 +1476,20 @@ COVER
   : copy   name buf s:copy ;
   : offset latest forth:code cell + @ ;
   : getter copy buf ;
-  : setter getter dup " !" s:append! ;
+  : setter getter dup "!" s:append! ;
 
 SHOW
 
   : STRUCT: ( -- &back offset q )
     # LIT n RET
-    forth:read [ " struct name required" panic ] ;unless
+    forth:read [ "struct name required" panic ] ;unless
     forth:create
     LIT, here 0 , RET,
     0 ' close
   ;
 
   : field: ( offset q n -- offset+n q)
-    forth:read [ " field name required" panic ] ;unless
+    forth:read [ "field name required" panic ] ;unless
     forth:create
     swap >r over
     LIT, , JMP, [ + ] ,
@@ -1512,7 +1512,7 @@ END
 LEXI REFER [core] EDIT
 
 : ASSERT ( v s )
-  swap IF drop ELSE " Assertion failed: " epr panic THEN
+  swap IF drop ELSE "Assertion failed: " epr panic THEN
 ;
 
 : ASSERT" <IMMED>
@@ -1529,10 +1529,10 @@ LEXI REFER [core] EDIT
 
   # check stack balacne first to avoid invalid result
   sp cell + ( sp + result )
-  r> != IF " Stack imbalance: " epr r> panic THEN
+  r> != IF "Stack imbalance: " epr r> panic THEN
 
   # check result
-  not IF " Failed: " epr r> panic THEN
+  not IF "Failed: " epr r> panic THEN
 
   # drop description
   rdrop
@@ -1558,19 +1558,19 @@ LEXI REFER [core] EDIT
 LEXI [forth] REFER [core] EDIT
 
 : var>
-  forth:read [ " Var name required" panic ] ;unless
-  forth:max_len dec s:check [ epr " : too long var name" panic ] ;unless
+  forth:read [ "Var name required" panic ] ;unless
+  forth:max_len dec s:check [ epr ": too long var name" panic ] ;unless
   dup >r forth:create
   LIT, here swap , RET,
-  r> dup " !" s:append! forth:create
+  r> dup "!" s:append! forth:create
   LIT, , !, RET,
 ;
 
 : var: 0 ' var> call ;
 
 : var' <IMMED>
-  forth:read [ " Var name required" panic ] ;unless
-  forth:find [ "  ?" epr panic ] ;unless
+  forth:read [ "Var name required" panic ] ;unless
+  forth:find [ " ?" epr panic ] ;unless
   forth:code cell +
   forth:mode [ LIT, , ] ;when
 ;
@@ -1579,7 +1579,7 @@ LEXI [forth] REFER [core] EDIT
 : 2nd! ( v xt -- ) cell + ! ;
 
 : -> <IMMED>
-  forth:read_find [ " Word name required" panic ] ;unless
+  forth:read_find [ "Word name required" panic ] ;unless
   forth:code
   forth:mode [ LIT, , COMPILE: 2nd! ] [ 2nd! ] if
 ;
@@ -1592,7 +1592,7 @@ LEXI [forth] REFER [core] EDIT
 
 COVER
 
-    : compile_only ( prim -- ) forth:mode [ prim, ] [ " Compile Only" panic ] if ;
+    : compile_only ( prim -- ) forth:mode [ prim, ] [ "Compile Only" panic ] if ;
     : primitive ( prim q -- ) forth:mode [ drop prim, ] [ nip call ] if ;
 
 SHOW
@@ -1670,7 +1670,7 @@ SHOW
 
   TEMPORARY [file] ALSO
   : loadfile ( path -- addr )
-    " rb" file:open! id!
+    "rb" file:open! id!
     id file:size size!
     here addr!
     size ,
@@ -1683,7 +1683,7 @@ SHOW
   END
 
   : loadfile: ( :path -- addr )
-    forth:read [ " file name required" ] ;unless
+    forth:read [ "file name required" ] ;unless
     loadfile
   ;
 
@@ -1705,7 +1705,7 @@ COVER
   var: argc
   var: included
 
-  : read buf swap len cli:get_arg [ " too long option" panic ] unless ;
+  : read buf swap len cli:get_arg [ "too long option" panic ] unless ;
 
   [ buf IF RET THEN len allot buf! ] >init
 
@@ -1723,8 +1723,8 @@ SHOW
     cli:argc dec argc!
     argc [ included [ drop ] ;when
       inc dup read inc opt:argi!
-      buf " --repl" s= [ yes opt:repl! ] ;when
-      buf " --quit" s= [ no  opt:repl! ] ;when
+      buf "--repl" s= [ yes opt:repl! ] ;when
+      buf "--quit" s= [ no  opt:repl! ] ;when
       buf include
       yes included!
     ] for
@@ -1759,7 +1759,7 @@ COVER
 SHOW
 
   : save_image ( fname -- )
-    " wb" file:open! id!
+    "wb" file:open! id!
     # zero clear 0x00-0x03
     0 here ! here 4 id file:write!
     # write current image
@@ -1772,7 +1772,7 @@ SHOW
   ;
 
   : turnkey: ( adr fname: -- )
-    forth:read [ " Image name required" panic ] ;unless
+    forth:read [ "Image name required" panic ] ;unless
     swap turnkey
   ;
 
@@ -1796,19 +1796,19 @@ COVER
   var: show_stack
 
   : prompt
-    show_stack [ " | " pr ?stack ] when
+    show_stack [ "| " pr ?stack ] when
     show_depth [ sys:depth .. ] when
-    " > " pr
+    "> " pr
   ;
   : listen buf len getline IF buf ELSE " " THEN forth:eval ;
 
-  : notfound ( name -- ) epr "  ?" eprn ;
+  : notfound ( name -- ) epr " ?" eprn ;
 
   : lexicons
     # create [user] lexicon into [core] then refer and switch to it
     LEXI REFER [core] EDIT
-    " [user]" lexi:create
-    dup " [user]" forth:create LIT, , RET,
+    "[user]" lexi:create
+    dup "[user]" forth:create LIT, , RET,
     dup ALSO EDIT
   ;
 

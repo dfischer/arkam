@@ -1,41 +1,41 @@
 # ----- Test tools -----
 
-ok ASSERT" ASSERT"
+ok "ASSERT" ASSERT
 
-ok ASSERT" ASSERT\""
+ok "ASSERT" ASSERT
 
-" CHECK" [ ok ] CHECK
+"CHECK" [ ok ] CHECK
 
-[ ] CLEAN" clean 0-0"
-1 [ drop 0 ] CLEAN" clean 1-1"
+[ ] "clean 0-0" CLEAN
+1 [ drop 0 ] "clean 1-1" CLEAN
 
 
 
-# ( ng ASSERT" COMMENT"
-( ng ASSERT" COMMENT" )
+# ( ng "COMMENT" ASSERT
+( ng "COMMENT" ASSERT )
 
 
 
 # ----- Stack -----
 
-" tuck" [ 1 2 tuck 2drop 2 = ] CHECK
+"tuck" [ 1 2 tuck 2drop 2 = ] CHECK
 
-" ?dup 0" [ 0 ?dup 0 = ] CHECK
-" ?dup 1" [ 1 ?dup + 2 = ] CHECK
+"?dup 0" [ 0 ?dup 0 = ] CHECK
+"?dup 1" [ 1 ?dup + 2 = ] CHECK
 
-" pullup" [
+"pullup" [
   1 2 3 pullup
-  1 = ASSERT" pullup TOS"
-  3 = ASSERT" pullup 2nd"
-  2 = ASSERT" pullup 3rd"
+  1 = "pullup TOS" ASSERT
+  3 = "pullup 2nd" ASSERT
+  2 = "pullup 3rd" ASSERT
   ok
 ] CHECK
 
-" pushdown" [
+"pushdown" [
   1 2 3 pushdown
-  2 = ASSERT" pushdown TOS"
-  1 = ASSERT" pushdown 2nd"
-  3 = ASSERT" pushdown 3rd"
+  2 = "pushdown TOS" ASSERT
+  1 = "pushdown 2nd" ASSERT
+  3 = "pushdown 3rd" ASSERT
   ok
 ] CHECK
 
@@ -46,15 +46,15 @@ ok ASSERT" ASSERT\""
 : test;when   [ yes ] ;when   no ;
 : test;unless [ yes ] ;unless no ;
 
-" ;when" [
-  yes test;when     ASSERT" ;when yes"
-  no  test;when not ASSERT" ;when no"
+";when" [
+  yes test;when     ";when yes" ASSERT
+  no  test;when not ";when no" ASSERT
   ok
 ] CHECK
 
-" ;unless" [
-  yes test;unless not ASSERT" ;unless yes"
-  no  test;unless     ASSERT" ;unless no"
+";unless" [
+  yes test;unless not ";unless yes" ASSERT
+  no  test;unless     ";unless no" ASSERT
   ok
 ] CHECK
 
@@ -64,28 +64,28 @@ ok ASSERT" ASSERT\""
 
 : foo [do 3 LIT, , RET, ] ;
 
-" LIT, and RET," [ foo 3 = ] CHECK
+"LIT, and RET," [ foo 3 = ] CHECK
 
 
 
 # ----- Num -----
 
-" clamp" [
-  0 1 4 clamp 1 = ASSERT" clamp under"
-  1 1 4 clamp 1 = ASSERT" clamp min"
-  2 1 4 clamp 2 = ASSERT" clamp middle"
-  3 1 4 clamp 3 = ASSERT" clamp max"
-  4 1 4 clamp 3 = ASSERT" clamp over"
+"clamp" [
+  0 1 4 clamp 1 = "clamp under" ASSERT
+  1 1 4 clamp 1 = "clamp min" ASSERT
+  2 1 4 clamp 2 = "clamp middle" ASSERT
+  3 1 4 clamp 3 = "clamp max" ASSERT
+  4 1 4 clamp 3 = "clamp over" ASSERT
   ok
 ] CHECK
 
-" within?" [
-  0 1 4 within? not ASSERT" within lt"
-  4 1 4 within? not ASSERT" within gt"
+"within?" [
+  0 1 4 within? not "within lt" ASSERT
+  4 1 4 within? not "within gt" ASSERT
 
-  1 1 4 within? ASSERT" within min limit"
-  2 1 4 within? ASSERT" within mid"
-  3 1 4 within? ASSERT" within max limit"
+  1 1 4 within? "within min limit" ASSERT
+  2 1 4 within? "within mid" ASSERT
+  3 1 4 within? "within max limit" ASSERT
   ok
 ] CHECK
 
@@ -99,21 +99,21 @@ COVER
   234 as: x
 SHOW
   123 as: y
-  x 234 = ASSERT" in module"
+  x 234 = "in module" ASSERT
 END
 
-x 123 = ASSERT" out of module"
-y 123 = ASSERT" module exposed"
+x 123 = "out of module" ASSERT
+y 123 = "module exposed" ASSERT
 
 
 ( ----- no exposed ----- )
 
 COVER
   234 as: x
-  x 234 = ASSERT" in module - no exposed"
+  x 234 = "in module - no exposed" ASSERT
 END
 
-x 123 = ASSERT" out of module - no exposed"
+x 123 = "out of module - no exposed" ASSERT
 
 
 ( ----- no content ----- )
@@ -123,40 +123,40 @@ COVER END
 
 # ----- String -----
 
-" s= same" [ " foo" " foo" s=     ] CHECK
-" s= diff" [ " foo" " bar" s= not ] CHECK
+"s= same" [ "foo" "foo" s=     ] CHECK
+"s= diff" [ "foo" "bar" s= not ] CHECK
 
-" s>dec positive" [ " 123"  s>dec IF  123 = ELSE no THEN ] CHECK
-" s>dec negative" [ " -123" s>dec IF -123 = ELSE no THEN ] CHECK
-" s>dec ng1" [ " "  s>dec not ] CHECK
-" s>dec ng2" [ " -" s>dec not ] CHECK
-" s>dec ng3" [ " 0a" s>dec not ] CHECK
+"s>dec positive" [ "123"  s>dec IF  123 = ELSE no THEN ] CHECK
+"s>dec negative" [ "-123" s>dec IF -123 = ELSE no THEN ] CHECK
+"s>dec ng1" [ " "  s>dec not ] CHECK
+"s>dec ng2" [ "-" s>dec not ] CHECK
+"s>dec ng3" [ "0a" s>dec not ] CHECK
 
 
-" s:len" [
+"s:len" [
   ok
 ] CHECK
 
 
 : scheck s:check nip ; # str max -- ?
-" s:check" [
-  " foo" 3 scheck not ASSERT" s:check exclude null"
-  " foo" 4 scheck     ASSERT" s:check include null"
+"s:check" [
+  "foo" 3 scheck not "s:check exclude null" ASSERT
+  "foo" 4 scheck     "s:check include null" ASSERT
 
-  " " 0 scheck not ASSERT" s:check 0 exc.null"
-  " " 1 scheck     ASSERT" s:check 0 inc.null"
+  " " 0 scheck not "s:check 0 exc.null" ASSERT
+  "" 1 scheck     "s:check 0 inc.null" ASSERT
 
   ok
 ] CHECK
 
 
-" s:start?" [
-  " foo" " foo"  s:start?     ASSERT" s:start foo/foo"
-  " foo" " f"    s:start?     ASSERT" s:start foo/f"
-  " foo" " "     s:start?     ASSERT" s:start foo/0"
-  " "    " "     s:start?     ASSERT" s:start 0/0"
-  " foo" " fooo" s:start? not ASSERT" s:start foo/fooo"
-  " "    " foo"  s:start? not ASSERT" s:start 0/foo"
+"s:start?" [
+  "foo" "foo"  s:start?     "s:start foo/foo" ASSERT
+  "foo" "f"    s:start?     "s:start foo/f" ASSERT
+  "foo" ""    s:start?     "s:start foo/0" ASSERT
+  " "   " "    s:start?     "s:start 0/0" ASSERT
+  "foo" "fooo" s:start? not "s:start foo/fooo" ASSERT
+  " "   " foo" s:start? not "s:start 0/foo" ASSERT
   ok
 ] CHECK
 
@@ -170,74 +170,74 @@ len dec as: max
 : clear buf len memclear ;
 
 
-" memclear" [
+"memclear" [
   1 buf max + b!
   clear
-  buf max + b@ 0 = ASSERT" after memclear"
+  buf max + b@ 0 = "after memclear" ASSERT
   ok
 ] CHECK
 
 : >buf clear buf swap s:append! ;
 
-" memcopy" [
+"memcopy" [
   clear
-  " foo" >buf
-  " bar" buf 3 + 4 memcopy
-  buf " foobar" s= ASSERT" memcopy"
+  "foo" >buf
+  "bar" buf 3 + 4 memcopy
+  buf "foobar" s= "memcopy" ASSERT
 
-  " xxx" buf 3 + 0 memcopy
-  buf " foobar" s= ASSERT" no memcopy"
+  "xxx" buf 3 + 0 memcopy
+  buf "foobar" s= "no memcopy" ASSERT
   ok
 ] CHECK
 
-" s:append!" [
+"s:append!" [
   clear
-  buf " foo" s:append!
-  buf " foo" s= ASSERT" 0+foo"
+  buf "foo" s:append!
+  buf "foo" s= "0+foo" ASSERT
 
-  " foo" >buf
-  buf " bar" s:append!
-  buf " foobar" s= ASSERT" foo+bar"
+  "foo" >buf
+  buf "bar" s:append!
+  buf "foobar" s= "foo+bar" ASSERT
 
-  " foo" >buf
-  buf " " s:append!
-  buf " foo" s= ASSERT" foo+0"
-
-  clear
-  buf s:len 0 = ASSERT" 0+0"
-
-  ok
-] CHECK
-
-
-" s:append" [
-  " foo" >buf
-  buf " " max s:append ASSERT" s:append foo+0 len"
-  buf " foo" s= ASSERT" s:append foo+0"
+  "foo" >buf
+  buf "" s:append!
+  buf "foo" s= "foo+0" ASSERT
 
   clear
-  buf " " max s:append ASSERT" s:append 0+0"
-
-  " foo" >buf
-  buf " bar" 6 s:append not ASSERT" s:append exclude null"
-  buf " bar" 7 s:append     ASSERT" s:append include null"
+  buf s:len 0 = "0+0" ASSERT
 
   ok
 ] CHECK
 
 
-" s:each_line!" [
-  " foo" >buf
-  buf [ " foo" s= ASSERT" foo 1" ] s:each_line!
+"s:append" [
+  "foo" >buf
+  buf "" max s:append "s:append foo+0 len" ASSERT
+  buf "foo" s= "s:append foo+0" ASSERT
 
-  " " >buf
-  buf [ panic" do not reach here" ] s:each_line!
+  clear
+  buf " "max s:append "s:append 0+0" ASSERT
 
-  " foo\nfoo" >buf
-  buf [ " foo" s= ASSERT" foo 2" ] s:each_line!
+  "foo" >buf
+  buf "bar" 6 s:append not "s:append exclude null" ASSERT
+  buf "bar" 7 s:append     "s:append include null" ASSERT
 
-  " foo\nfoo\n" >buf
-  buf [ " foo" s= ASSERT" ignore trailing newline" ] s:each_line!
+  ok
+] CHECK
+
+
+"s:each_line!" [
+  "foo" >buf
+  buf [ "foo" s= "foo 1" ASSERT ] s:each_line!
+
+  "" >buf
+  buf [ "do not reach here" panic ] s:each_line!
+
+  "foo\nfoo" >buf
+  buf [ "foo" s= "foo 2" ASSERT ] s:each_line!
+
+  "foo\nfoo\n" >buf
+  buf [ "foo" s= "ignore trailing newline" ASSERT ] s:each_line!
 
   ok
 ] CHECK
@@ -246,34 +246,34 @@ len dec as: max
 
 # ----- Combinator -----
 
-" dip 1" [ 1 2 [ inc ] dip + ( => 2 2 + ) 4 = ] CHECK
+"dip 1" [ 1 2 [ inc ] dip + ( => 2 2 + ) 4 = ] CHECK
 
 
-" sip 1" [ 1 [ inc ] sip + ( => 2 1 + ) 3 = ] CHECK
+"sip 1" [ 1 [ inc ] sip + ( => 2 1 + ) 3 = ] CHECK
 
 
-" biq 1" [ 1 [ 1 + ] [ 2 + ] biq + ( => 2 3 +     ) 5 = ] CHECK
-" biq 2" [ 1 [ 1   ] [ + + ] biq   ( => 1 1 1 + + ) 3 = ] CHECK
+"biq 1" [ 1 [ 1 + ] [ 2 + ] biq + ( => 2 3 +     ) 5 = ] CHECK
+"biq 2" [ 1 [ 1   ] [ + + ] biq   ( => 1 1 1 + + ) 3 = ] CHECK
 
 
-" bia 1" [ 1 2 [ inc ] bia + ( => 2 3 + )     5 = ] CHECK
-" bia 2" [ 1 2 3 [ + ] bia   ( => 1 2 + 3 + ) 6 = ] CHECK
+"bia 1" [ 1 2 [ inc ] bia + ( => 2 3 + )     5 = ] CHECK
+"bia 2" [ 1 2 3 [ + ] bia   ( => 1 2 + 3 + ) 6 = ] CHECK
 
 
-" bi* 1" [ 1 2 [ 1 + ] [ 2 + ] bi* + ( => 2 4 + )     6 = ] CHECK
-" bi* 2" [ 2 3 [ 1   ] [ + + ] bi*   ( => 2 1 3 + + ) 6 = ] CHECK
+"bi* 1" [ 1 2 [ 1 + ] [ 2 + ] bi* + ( => 2 4 + )     6 = ] CHECK
+"bi* 2" [ 2 3 [ 1   ] [ + + ] bi*   ( => 2 1 3 + + ) 6 = ] CHECK
 
 
-" bibi 1" [ 1 2 [ + ] [ 1 + + ] bibi + ( => 3 4 + ) 7 = ] CHECK
+"bibi 1" [ 1 2 [ + ] [ 1 + + ] bibi + ( => 3 4 + ) 7 = ] CHECK
 
 
-" triq 1" [ 1 [ 1 + ] [ 2 + ] [ 3 + ] triq + + ( => 2 3 4 + + ) 9 = ] CHECK
+"triq 1" [ 1 [ 1 + ] [ 2 + ] [ 3 + ] triq + + ( => 2 3 4 + + ) 9 = ] CHECK
 
 
-" tria 1" [ 1 2 3 [ inc ] tria + + ( => 2 3 4 + + ) 9 = ] CHECK
+"tria 1" [ 1 2 3 [ inc ] tria + + ( => 2 3 4 + + ) 9 = ] CHECK
 
 
-" tri* 1" [ 1 2 3 [ inc ] [ inc ] [ inc ] tri* + + ( => 2 3 4 + + ) 9 = ] CHECK
+"tri* 1" [ 1 2 3 [ inc ] [ inc ] [ inc ] tri* + + ( => 2 3 4 + + ) 9 = ] CHECK
 
 
 
@@ -281,30 +281,30 @@ len dec as: max
 
 var: x
 
-" var" [
+"var" [
   yes x!
-  x ASSERT" var set/get"
+  x "var set/get" ASSERT
 
   123 x!
-  var' x @ 123 = ASSERT" var addr"
+  var' x @ 123 = "var addr" ASSERT
 
   234 ' x! call
-  x 234 = ASSERT" var setter reference"
+  x 234 = "var setter reference" ASSERT
 
   ok
 ] CHECK
 
-" var update" [
+"var update" [
   123 x!
 
   var' x inc!
-  x 124 = ASSERT" &var inc!"
+  x 124 = "&var inc!" ASSERT
 
   var' x dec!
-  x 123 = ASSERT" &var dec!"
+  x 123 = "&var dec!" ASSERT
 
   var' x [ inc ] update!
-  x 124 = ASSERT" &var update!"
+  x 124 = "&var update!" ASSERT
 
   ok
 ] CHECK
@@ -315,12 +315,12 @@ var: x
 
 64 as: atmark
 
-" char:" [
-  CHAR: @ atmark = ASSERT" char: in compile mode"
+"char:" [
+  CHAR: @ atmark = "char: in compile mode" ASSERT
   ok
 ] CHECK
 
-CHAR: @ atmark = ASSERT" char: in run mode"
+CHAR: @ atmark = "char: in run mode" ASSERT
 
 
 
@@ -332,12 +332,12 @@ STRUCT: foo
   cell: c
 END
 
-" struct" [
-  foo 11 = ASSERT" struct size"
+"struct" [
+  foo 11 = "struct size" ASSERT
 
-  foo a  foo       = ASSERT" struct 1st field"
-  foo b  foo 3 +   = ASSERT" struct 2nd field"
-  foo c  foo b 4 + = ASSERT" struct 3rd field"
+  foo a  foo       = "struct 1st field" ASSERT
+  foo b  foo 3 +   = "struct 2nd field" ASSERT
+  foo c  foo b 4 + = "struct 3rd field" ASSERT
 
   ok
 ] CHECK
@@ -349,9 +349,9 @@ END
 
 %foo allot as: foo
 
-" struct accessor" [
+"struct accessor" [
   123 foo bar!
-  foo bar  123  = ASSERT" get/set"
+  foo bar  123  = "get/set" ASSERT
 ok ] CHECK
 
 
@@ -374,8 +374,8 @@ var: xs here xs!
     0 10 [ cells xs + @ + ] for
 ;
 
-sum 45 = ASSERT" shuffle1"
-sum 45 = ASSERT" shuffle1"
-sum 45 = ASSERT" shuffle1"
-sum 45 = ASSERT" shuffle1"
-sum 45 = ASSERT" shuffle1"
+sum 45 = "shuffle1" ASSERT
+sum 45 = "shuffle1" ASSERT
+sum 45 = "shuffle1" ASSERT
+sum 45 = "shuffle1" ASSERT
+sum 45 = "shuffle1" ASSERT
