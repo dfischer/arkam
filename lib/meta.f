@@ -167,10 +167,10 @@ xlexis xlexisp!
 cells as: hashd-size
 
 : xlexi:new ( -- adr )
-    xhere:align! xhere
-    0 x, ( latest )
-    0 x, ( name )
-    hashd-len [ 0 x, ] times ( hashdict )
+  xhere:align! xhere
+  0 x, ( latest )
+  0 x, ( name )
+  hashd-len [ 0 x, ] times ( hashdict )
 ;
 
 : xlexi:latest  ( lexi -- word ) x@ ;
@@ -180,16 +180,16 @@ cells as: hashd-size
 : xlexi:hashd   ( lexi -- adr  ) 2 cells + ;
 
 : xlexi:create ( name -- adr )
-     xhere swap x:sput ( name )
-     xlexi:new tuck xlexi:name!
+  xhere swap x:sput ( name )
+  xlexi:new tuck xlexi:name!
 ;
 
 : xlexi:each ( q -- ) # q: xlexi --
-    xlexisp cell - [ ( q sp )
-        dup xlexis < [ 2drop STOP ] ;when
-        2dup >r >r x@ swap call
-        r> r> cell - GO
-    ] while
+  xlexisp cell - [ ( q sp )
+    dup xlexis < [ 2drop STOP ] ;when
+    2dup >r >r x@ swap call
+    r> r> cell - GO
+  ] while
 ;
 
 : xalso ( lexi -- ) xlexisp x! xlexisp cell + xlexisp! ;
@@ -198,7 +198,7 @@ cells as: hashd-size
 
 : xcontext 0 [ ( no-op ) ] xlexi:each ;
 : xorder ( 0 xlexi ... )
-    xlexis xlexisp! [ ?dup [ xalso GO ] [ STOP ] if ] while
+  xlexis xlexisp! [ ?dup [ xalso GO ] [ STOP ] if ] while
 ;
 
 "[core]" xlexi:create as: xlexi-core
@@ -247,27 +247,27 @@ xlexi-core xcurrent!
 : xxt    3 cells + x@ ;
 
 : x:hashd-link ( xlexi s -- xlink )
-    s:hash abs hashd-len mod cells ( offset )
-    swap xlexi:hashd +
+  s:hash abs hashd-len mod cells ( offset )
+  swap xlexi:hashd +
 ;
 
 : x:put-hashd ( xlexi xword -- )
-    tuck xname x>t x:hashd-link ( xword xlink )
-    2dup x@ swap xnext! x!
+  tuck xname x>t x:hashd-link ( xword xlink )
+  2dup x@ swap xnext! x!
 ;
 
 : x:find-in ( name lexi -- xword yes | name no )
-    over x:hashd-link x@ [ ( name word )
-        0 [ no STOP ] ;case
-        2dup xname x>t s= [ nip yes STOP ] ;when
-        xnext GO
-    ] while
+  over x:hashd-link x@ [ ( name word )
+    0 [ no STOP ] ;case
+    2dup xname x>t s= [ nip yes STOP ] ;when
+    xnext GO
+  ] while
 ;
 
 : x:find ( name -- xword yes | name no )
   xlexisp cell - swap [ ( sp name )
-      over xlexis < [ nip no STOP ] ;when
-      over x@ x:find-in [ nip yes STOP ] [ [ cell - ] dip GO ] if
+    over xlexis < [ nip no STOP ] ;when
+    over x@ x:find-in [ nip yes STOP ] [ [ cell - ] dip GO ] if
   ] while
 ;
 
@@ -368,9 +368,9 @@ var: m:image-name
 
 : m:finish
   ( const )
-    "doconst" x:find [ "doconst definition not found" panic ] ;unless
-    xxt patch-const
-    const-done [ "do patch-const" panic ] ;unless
+  "doconst" x:find [ "doconst definition not found" panic ] ;unless
+  xxt patch-const
+  const-done [ "do patch-const" panic ] ;unless
 
   m:image-name [ "No image name" panic ] ;unless
 
@@ -427,33 +427,33 @@ var: m:image-name
 # so some shared routines must be defined here.
 
 : aux-tick
-    forth:read [ "Word name required" panic ] ;unless
-    x:find [ epr " ?" panic ] ;unless
-    xxt
-    forth:mode [ xLIT, x, ] when
+  forth:read [ "Word name required" panic ] ;unless
+  x:find [ epr " ?" panic ] ;unless
+  xxt
+  forth:mode [ xLIT, x, ] when
 ;
 
 : aux-var
-    forth:read [ "Var name required" panic ] ;unless
-    30 s:check [ epr ": too long var name" panic ] ;unless
-    dup >r
-    dup x:create m:create
-    xLIT, xhere swap x, xRET, r>
-    dup "!" s:append!
-    dup x:create m:create
-    xLIT, x, x!, xRET,
+  forth:read [ "Var name required" panic ] ;unless
+  30 s:check [ epr ": too long var name" panic ] ;unless
+  dup >r
+  dup x:create m:create
+  xLIT, xhere swap x, xRET, r>
+  dup "!" s:append!
+  dup x:create m:create
+  xLIT, x, x!, xRET,
 ;
 
 : ;aux-compile ( name -- )
-    forth:mode [ rdrop x:find [ epr " ?" panic ] ;unless xxt x, ] ;when
-    drop
+  forth:mode [ rdrop x:find [ epr " ?" panic ] ;unless xxt x, ] ;when
+  drop
 ;
 
 : aux-order ( 0 xlexi mlexi .. )
-    LEXI ORDER
-    xonly xprevious
-    [ ?dup [ STOP ] ;unless ALSO xalso GO ] while
-    META ALSO
+  LEXI ORDER
+  xonly xprevious
+  [ ?dup [ STOP ] ;unless ALSO xalso GO ] while
+  META ALSO
 ;
 
 
@@ -461,32 +461,35 @@ var: m:image-name
 
 COVER
 
-    var: public
-    var: private
-    var: xpublic
-    var: xprivate
+  var: public
+  var: private
+  var: xpublic
+  var: xprivate
 
 SHOW
 
-    : aux-SHOW public  EDIT xpublic  xcurrent! ;
-    : aux-HIDE private EDIT xprivate xcurrent! ;
+  : aux-SHOW public  EDIT xpublic  xcurrent! ;
+  : aux-HIDE private EDIT xprivate xcurrent! ;
 
-    : aux-COVER ( -- priv pub xpriv xpub q )
-        ( prev ) private public xprivate xpublic
+  : aux-COVER ( -- priv pub xpriv xpub q )
+    ( prev ) private public xprivate xpublic
 
-        ( meta )
-            lexi:new private!
-            CURRENT  public!
-            ( META -> private META )
-            PREVIOUS private dup ALSO EDIT META ALSO
-        ( cross )
-            xlexi:new xprivate!
-            xcurrent  xpublic!
-            xprivate xalso xdefinitions
-        ( close )
-            [ PREVIOUS PREVIOUS META ALSO xprevious aux-SHOW
-              xpublic! xprivate! public! private! ]
-    ;
+    ( meta )
+    lexi:new private!
+    CURRENT  public!
+
+    ( META -> private META )
+    PREVIOUS private dup ALSO EDIT META ALSO
+
+    ( cross )
+    xlexi:new xprivate!
+    xcurrent  xpublic!
+    xprivate xalso xdefinitions
+
+    ( close )
+    [ PREVIOUS PREVIOUS META ALSO xprevious aux-SHOW
+      xpublic! xprivate! public! private! ]
+  ;
 
 END
 
@@ -711,47 +714,47 @@ END
 ( ----- lexicon ----- )
 
 : lexicon: <run-only>
-    # meta:  ( -- xlexi mlexi )
-    # cross: ( -- xlexi )
-    forth:read [ "lexicon name required" panic ] ;unless
-    >r i lexi:create i xlexi:create ( mlexi xlexi )
-    ( cross ) i x:create drop xLIT, dup x, xJMP, const-link, xlatest x:immed!
-    ( meta )
-    r> forth:create POSTPONE: <IMMED>
-    ( mlexi xlexi ) LIT, , LIT, , JMP, [ forth:mode [ drop xLIT, x, ] when ] ,
+  # meta:  ( -- xlexi mlexi )
+  # cross: ( -- xlexi )
+  forth:read [ "lexicon name required" panic ] ;unless
+  >r i lexi:create i xlexi:create ( mlexi xlexi )
+  ( cross ) i x:create drop xLIT, dup x, xJMP, const-link, xlatest x:immed!
+  ( meta )
+  r> forth:create POSTPONE: <IMMED>
+  ( mlexi xlexi ) LIT, , LIT, , JMP, [ forth:mode [ drop xLIT, x, ] when ] ,
 ;
 
 : PREVIOUS <IMMED>
-    "PREVIOUS" ;aux-compile
-    PREVIOUS PREVIOUS META ALSO
-    xprevious
+  "PREVIOUS" ;aux-compile
+  PREVIOUS PREVIOUS META ALSO
+  xprevious
 ;
 
 : LEXI <IMMED>
-    "LEXI" ;aux-compile 0
+  "LEXI" ;aux-compile 0
 ;
 
 : REFER <IMMED>
-    "REFER" ;aux-compile [CORE] [ROOT] aux-order
+  "REFER" ;aux-compile [CORE] [ROOT] aux-order
 ;
 
 : ORDER <IMMED>
-    "ORDER" ;aux-compile aux-order
+  "ORDER" ;aux-compile aux-order
 ;
 
 : EDIT <IMMED>
-    "EDIT" ;aux-compile EDIT xcurrent!
+  "EDIT" ;aux-compile EDIT xcurrent!
 ;
 
 : ALSO <IMMED>
-    "ALSO" ;aux-compile
-    PREVIOUS ALSO META ALSO
-    xalso
+  "ALSO" ;aux-compile
+  PREVIOUS ALSO META ALSO
+  xalso
 ;
 
 : TEMPORARY <IMMED> ( -- lexis current xlexis xcurrent q )
-    "TEMPORARY" ;aux-compile
-    CONTEXT CURRENT xcontext xcurrent [ xedit xorder EDIT ORDER ]
+  "TEMPORARY" ;aux-compile
+  CONTEXT CURRENT xcontext xcurrent [ xedit xorder EDIT ORDER ]
 ;
 
 : COVER <IMMED> "COVER" ;aux-compile aux-COVER ;

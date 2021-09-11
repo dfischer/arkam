@@ -543,12 +543,12 @@ END
 : s:len ( s -- n ) dup s:end swap - ;
 
 : s:hash ( s -- n )
-    # DJB2 algorithm
-    5381 [
-        over b@ ( s hash c )
-        0 [ nip STOP ] ;case
-        over 5 << + + [ inc ] dip GO
-    ] while
+  # DJB2 algorithm
+  5381 [
+    over b@ ( s hash c )
+    0 [ nip STOP ] ;case
+    over 5 << + + [ inc ] dip GO
+  ] while
 ;
 
 : s= ( s1 s2 -- ? )
@@ -1382,21 +1382,21 @@ LEXI [forth] REFER [core] EDIT
 
 COVER
 
-    var: public
-    var: private
+  var: public
+  var: private
 
 SHOW
 
-    : SHOW public  EDIT ;
-    : HIDE private EDIT ;
+  : SHOW public  EDIT ;
+  : HIDE private EDIT ;
 
-    : COVER ( -- prev-priv pre-pub q )
-        private public
-        lexi:new private!
-        CURRENT  public!
-        private dup ALSO EDIT
-        [ PREVIOUS SHOW public! private! ]
-    ;
+  : COVER ( -- prev-priv pre-pub q )
+    private public
+    lexi:new private!
+    CURRENT  public!
+    private dup ALSO EDIT
+    [ PREVIOUS SHOW public! private! ]
+  ;
 
 END
 
@@ -1550,57 +1550,57 @@ LEXI [forth] REFER [core] EDIT
 
 COVER
 
-    : compile-only ( prim -- ) forth:mode [ prim, ] [ "Compile Only" panic ] if ;
-    : primitive ( prim q -- ) forth:mode [ drop prim, ] [ nip call ] if ;
+  : compile-only ( prim -- ) forth:mode [ prim, ] [ "Compile Only" panic ] if ;
+  : primitive ( prim q -- ) forth:mode [ drop prim, ] [ nip call ] if ;
 
 SHOW
 
-    : noop <IMMED> ;
-    : HALT <IMMED> 1 [ HALT ] primitive ;
-    : LIT  <IMMED> 2 compile-only ;
-    : RET  <IMMED> 3 compile-only ;
+  : noop <IMMED> ;
+  : HALT <IMMED> 1 [ HALT ] primitive ;
+  : LIT  <IMMED> 2 compile-only ;
+  : RET  <IMMED> 3 compile-only ;
 
-    : dup  <IMMED> 4 [ dup  ] primitive ;
-    : drop <IMMED> 5 [ drop ] primitive ;
-    : swap <IMMED> 6 [ swap ] primitive ;
-    : over <IMMED> 7 [ over ] primitive ;
+  : dup  <IMMED> 4 [ dup  ] primitive ;
+  : drop <IMMED> 5 [ drop ] primitive ;
+  : swap <IMMED> 6 [ swap ] primitive ;
+  : over <IMMED> 7 [ over ] primitive ;
 
-    : +    <IMMED> 8  [ +    ] primitive ;
-    : -    <IMMED> 9  [ -    ] primitive ;
-    : *    <IMMED> 10 [ *    ] primitive ;
-    : /mod <IMMED> 11 [ /mod ] primitive ;
+  : +    <IMMED> 8  [ +    ] primitive ;
+  : -    <IMMED> 9  [ -    ] primitive ;
+  : *    <IMMED> 10 [ *    ] primitive ;
+  : /mod <IMMED> 11 [ /mod ] primitive ;
 
-    : =  <IMMED> 12 [ =  ] primitive ;
-    : != <IMMED> 13 [ != ] primitive ;
-    : >  <IMMED> 14 [ >  ] primitive ;
-    : <  <IMMED> 15 [ <  ] primitive ;
+  : =  <IMMED> 12 [ =  ] primitive ;
+  : != <IMMED> 13 [ != ] primitive ;
+  : >  <IMMED> 14 [ >  ] primitive ;
+  : <  <IMMED> 15 [ <  ] primitive ;
 
-    : JMP  <IMMED> 16 compile-only ;
-    : ZJMP <IMMED> 17 compile-only ;
+  : JMP  <IMMED> 16 compile-only ;
+  : ZJMP <IMMED> 17 compile-only ;
 
-    : @  <IMMED> 18 [ @  ] primitive ;
-    : !  <IMMED> 19 [ !  ] primitive ;
-    : b@ <IMMED> 20 [ b@ ] primitive ;
-    : b! <IMMED> 21 [ b! ] primitive ;
+  : @  <IMMED> 18 [ @  ] primitive ;
+  : !  <IMMED> 19 [ !  ] primitive ;
+  : b@ <IMMED> 20 [ b@ ] primitive ;
+  : b! <IMMED> 21 [ b! ] primitive ;
 
-    : and <IMMED> 22 [ and ] primitive ;
-    : or  <IMMED> 23 [ or  ] primitive ;
-    : inv <IMMED> 24 [ inv ] primitive ;
-    : xor <IMMED> 25 [ xor ] primitive ;
+  : and <IMMED> 22 [ and ] primitive ;
+  : or  <IMMED> 23 [ or  ] primitive ;
+  : inv <IMMED> 24 [ inv ] primitive ;
+  : xor <IMMED> 25 [ xor ] primitive ;
 
-    : lsft <IMMED> 26 [ lsft ] primitive ;
-    : asft <IMMED> 27 [ asft ] primitive ;
+  : lsft <IMMED> 26 [ lsft ] primitive ;
+  : asft <IMMED> 27 [ asft ] primitive ;
 
-    : io <IMMED> 28 [ io ] primitive ;
+  : io <IMMED> 28 [ io ] primitive ;
 
-    : >r    <IMMED> 29 compile-only ;
-    : r>    <IMMED> 30 compile-only ;
-    : rdrop <IMMED> 31 compile-only ;
+  : >r    <IMMED> 29 compile-only ;
+  : r>    <IMMED> 30 compile-only ;
+  : rdrop <IMMED> 31 compile-only ;
 
-    : sp  <IMMED> 32 [ sp  ] primitive ;
-    : sp! <IMMED> 33 [ sp! ] primitive ;
-    : rp  <IMMED> 34 [ rp  ] primitive ;
-    : rp! <IMMED> 35 [ rp! ] primitive ;
+  : sp  <IMMED> 32 [ sp  ] primitive ;
+  : sp! <IMMED> 33 [ sp! ] primitive ;
+  : rp  <IMMED> 34 [ rp  ] primitive ;
+  : rp! <IMMED> 35 [ rp! ] primitive ;
 
 END
 
