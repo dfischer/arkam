@@ -1213,10 +1213,6 @@ LEXI [forth] REFER [core] EDIT
 ;
 
 
-: panic"  <IMMED>
-  POSTPONE: " forth:mode [ COMPILE: panic ] [ panic ] if
-;
-
 
 : ." <IMMED>
   forth:mode [ here ] unless
@@ -1515,10 +1511,6 @@ LEXI REFER [core] EDIT
   swap IF drop ELSE "Assertion failed: " epr panic THEN
 ;
 
-: ASSERT" <IMMED>
-  POSTPONE: " forth:mode [ ' ASSERT , ] [ ASSERT ] if
-;
-
 : CHECK ( s q -- ) # q: -- ok?
   # Call q then check TOS is true and sp is balanced
   # or die with printing s.
@@ -1544,11 +1536,6 @@ LEXI REFER [core] EDIT
 
 : CLEAN ( q s -- )
     >r clean? r> swap [ drop ] [ panic ] if
-;
-
-: CLEAN" ( q name: -- ) <IMMED>
-    POSTPONE: "
-    forth:mode [ ' CLEAN , ] [ CLEAN ] if
 ;
 
 

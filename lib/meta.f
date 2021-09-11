@@ -78,8 +78,8 @@ var: xhere
 : bx! x>t b! ;
 
 : xhere! ( xadr -- )
-  dup 0             <  [ .. panic" invalid xhere" ] ;when
-  dup image_max - 0 >= [ .. panic" invalid xhere" ] ;when
+  dup 0             <  [ .. "invalid xhere" panic ] ;when
+  dup image_max - 0 >= [ .. "invalid xhere" panic ] ;when
   dup -> xhere
   adr_here x!
 ;
@@ -350,7 +350,7 @@ var: const_link
 
 : PRIM: ( n closer q name: -- n+ )
   # : name <IMMED> LIT code LIT q JMP handler
-  forth:read [ panic" Primitive name required" ] ;unless
+  forth:read [ "Primitive name required" panic ] ;unless
   forth:create
   POSTPONE: <IMMED>
   >r over prim>code LIT, , r> LIT, , JMP,
@@ -358,7 +358,7 @@ var: const_link
   ' inc dip
 ;
 
-: compile_only [ panic" compile only!" ] ;
+: compile_only [ "compile only!" panic ] ;
 
 
 
@@ -368,15 +368,15 @@ var: m:image_name
 
 : m:finish
   ( const )
-    "doconst" x:find [ panic" doconst definition not found" ] ;unless
+    "doconst" x:find [ "doconst definition not found" panic ] ;unless
     xxt patch_const
-    const_done [ panic" do patch_const" ] ;unless
+    const_done [ "do patch_const" panic ] ;unless
 
-  m:image_name [ panic" No image name" ] ;unless
+  m:image_name [ "No image name" panic ] ;unless
 
   ( set entrypoint )
   CROSS-CORE ALSO
-  "main" x:find [ panic" word 'main' required in [core]" ] ;unless xxt entrypoint!
+  "main" x:find [ "word 'main' required in [core]" panic ] ;unless xxt entrypoint!
 
   m:image_name save
 ;
@@ -389,11 +389,11 @@ var: m:image_name
   forth:mode [ xJMP, xhere 0 x, xhere swap ] [ xhere ] if
   forth:take drop ( skip first double quote )
   [ forth:take
-    0  [ panic" Unclosed string" STOP ] ;case
+    0  [ "Unclosed string" panic STOP ] ;case
     CHAR: " [ STOP ] ;case
     dup CHAR: \\ = [
       drop ' forth:take c:escaped
-      [ panic" Escape sequence required" STOP ] ;unless
+      [ "Escape sequence required" panic STOP ] ;unless
       bx, GO
     ] ;when
     bx, GO
@@ -405,7 +405,7 @@ var: m:image_name
 [root] EDIT
 
 : metacompile
-  opt:read! [ panic" Image name required" ] ;unless -> m:image_name
+  opt:read! [ "Image name required" panic ] ;unless -> m:image_name
   ( install )
   ' m:handle_num -> forth:handle_num
   ' m:parse_string -> forth:parse_string
@@ -427,15 +427,15 @@ var: m:image_name
 # so some shared routines must be defined here.
 
 : aux_tick
-    forth:read [ panic" Word name required" ] ;unless
+    forth:read [ "Word name required" panic ] ;unless
     x:find [ epr " ?" panic ] ;unless
     xxt
     forth:mode [ xLIT, x, ] when
 ;
 
 : aux_var
-    forth:read [ panic" Var name required" ] ;unless
-    30 s:check [ epr panic" : too long var name" ] ;unless
+    forth:read [ "Var name required" panic ] ;unless
+    30 s:check [ epr ": too long var name" panic ] ;unless
     dup >r
     dup x:create m:create
     xLIT, xhere swap x, xRET, r>
@@ -445,7 +445,7 @@ var: m:image_name
 ;
 
 : ;aux_compile ( name -- )
-    forth:mode [ rdrop x:find [ epr panic"  ?" ] ;unless xxt x, ] ;when
+    forth:mode [ rdrop x:find [ epr " ?" panic ] ;unless xxt x, ] ;when
     drop
 ;
 
@@ -576,7 +576,7 @@ xlexi_root as: lexi_root
 ( ===== Meta Syntax Words ===== )
 
 : : <run_only>
-  forth:read [ panic" Word name required" ] ;unless
+  forth:read [ "Word name required" panic ] ;unless
   dup meta? [ meta:create_cross ] [ meta:create ] if
 ;
 
@@ -585,8 +585,8 @@ xlexi_root as: lexi_root
 : <IMMED> <IMMED> xlatest x:immed! ;
 
 : as: ( n name: -- ) <run_only>
-  forth:mode [ panic" Do not call as: in compile mode" ] ;when
-  forth:read [ panic" Const name required" ] ;unless
+  forth:mode [ "Do not call as: in compile mode" panic ] ;when
+  forth:read [ "Const name required" panic ] ;unless
   dup
   ( x-const ) x:create drop xLIT, over x, xJMP, const_link, xlatest x:immed!
   ( m-const )
@@ -634,13 +634,13 @@ xlexi_root as: lexi_root
 
 : defer: ( name: -- ) <run_only>
   # JMP actual
-  forth:read [ panic" Word name required" ] ;unless
+  forth:read [ "Word name required" panic ] ;unless
   dup x:create m:create
   xJMP, 0 x,
 ;
 
 : -> <IMMED> ( v &code -- )
-  forth:read [ panic" Word name required" ] ;unless
+  forth:read [ "Word name required" panic ] ;unless
   x:find [ epr "?" panic ] ;unless
   xxt
   # replace as `JMP|LIT v`
@@ -652,17 +652,17 @@ xlexi_root as: lexi_root
 
 
 : POSTPONE: <IMMED>
-  forth:mode [ panic" Do not use POSTPONE: in run mode" ] ;unless
-  forth:read [ panic" Word name required" ] ;unless
-  x:find [ epr panic"  ?" ] ;unless
+  forth:mode [ "Do not use POSTPONE: in run mode" panic ] ;unless
+  forth:read [ "Word name required" panic ] ;unless
+  x:find [ epr " ?" panic ] ;unless
   xxt x,
 ;
 
 
 : COMPILE: <IMMED>
-  forth:mode [ panic" Do not use COMPILE: in run mode" ] ;unless
+  forth:mode [ "Do not use COMPILE: in run mode" panic ] ;unless
   aux_tick
-  "," x:find [ panic" comma(,) is not defined yet in cross-env" ] ;unless
+  "," x:find [ "comma(,) is not defined yet in cross-env" panic ] ;unless
   xxt x,
 ;
 
@@ -673,10 +673,10 @@ xlexi_root as: lexi_root
 
 
 : CHAR: <IMMED>
-  forth:read [ panic" A character required" ] ;unless
+  forth:read [ "A character required" panic ] ;unless
   dup b@ dup CHAR: \\ = [ drop inc
     [ [ inc ] [ b@ ] biq ] c:escaped
-    [ panic" Escape sequence required" ] ;unless
+    [ "Escape sequence required" panic ] ;unless
   ] when nip
   forth:mode [ xLIT, x, ] when
 ;
@@ -685,11 +685,11 @@ xlexi_root as: lexi_root
 : " <IMMED>
   forth:mode [ xJMP, xhere 0 x, xhere swap ] [ xhere ] if
   [ forth:take
-    0  [ panic" Unclosed string" STOP ] ;case
+    0  [ "Unclosed string" panic STOP ] ;case
     CHAR: " [ STOP ] ;case
     dup CHAR: \\ = [
       drop ' forth:take c:escaped
-      [ panic" Escape sequence required" STOP ] ;unless
+      [ "Escape sequence required" panic STOP ] ;unless
       bx, GO
     ] ;when
     bx, GO
@@ -716,7 +716,7 @@ SHOW
   ;
 
   : init:run <IMMED>
-    "init:run" x:find [ drop panic" Define init:run" ] ;unless
+    "init:run" x:find [ drop "Define init:run" panic ] ;unless
     xxt x,
   ;
 
@@ -728,7 +728,7 @@ END
 : lexicon: <run_only>
     # meta:  ( -- xlexi mlexi )
     # cross: ( -- xlexi )
-    forth:read [ panic" lexicon name required" ] ;unless
+    forth:read [ "lexicon name required" panic ] ;unless
     >r i lexi:create i xlexi:create ( mlexi xlexi )
     ( cross ) i x:create drop xLIT, dup x, xJMP, const_link, xlatest x:immed!
     ( meta )

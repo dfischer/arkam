@@ -6,7 +6,7 @@
 
 
 : CATCH ( q -- 0 | exc ) <IMMED>
-    forth:mode [ panic" Do not use CATCH in run mode" ] ;unless
+    forth:mode [ "Do not use CATCH in run mode" panic ] ;unless
     [ # r: -- sp prev
       >r sp r> swap >r  ( q | r: sp )
       exc-handler >r    ( q | r: sp prev )
@@ -30,25 +30,25 @@
 ( --- test --- )
 
 : foo
-    ." before foo"
-    " error in foo" THROW
-    ." after foo"
+    ."before foo"
+    "error in foo" THROW
+    ."after foo"
 ;
 
 : bar
-    ." before bar"
+    ."before bar"
     foo
-    ." after bar"
+    ."after bar"
 ;
 
 : baz
-    ." before baz"
+    ."before baz"
     bar
-    ." after baz"
+    ."after baz"
 ;
 
 : main
-    [ baz ] CATCH ?dup IF " Error: " pr prn THEN
+    [ baz ] CATCH ?dup IF "Error: " pr prn THEN
 ;
 
 main
