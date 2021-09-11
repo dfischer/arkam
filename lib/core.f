@@ -919,9 +919,11 @@ LEXI [forth] REFER [forth] EDIT
 
 COVER
 
+  ( ----- token buffer ----- )
   32      as: len
   len 1 - as: max
   var: buf
+  var: bufmax
 
   var: source
   var: stream   # q: source -- c source
@@ -938,15 +940,20 @@ COVER
     ] while
   ;
 
+  var: bp ( buffer pointer )
+  : fin 0 bp b! ;
+  : check bp bufmax > [ fin buf epr "  ...Too long" panic ] ;when ;
+  : >buf check bp b! bp inc bp! ;
+  
   : read ( -- buf )
     stream [ " No stream" panic ] ;unless
-    skip_spaces max swap buf swap ( n buf c )
-    [ >r over r> ( n buf+ n c )
-      0 [ drop 0 swap b! drop buf STOP ] ;case
-      swap 0 = [ 3drop buf epr "  ...Too long" panic STOP ] ;when
-      space? [ 0 swap b! drop buf STOP ] ;when
-      over b! ' dec ' inc bi* take GO
+    skip_spaces buf bp!
+    [ ( c -- )
+      0 [ fin STOP ] ;case
+      space? [ fin STOP ] ;when
+      >buf take GO
     ] while
+    buf
   ;
 
   : handle_num forth:mode [ LIT, , ] [ ( n -- n ) ] if ;
@@ -964,20 +971,16 @@ SHOW
 
   max as: forth:max_len
 
-  [ buf IF RET THEN len allot buf! ] >init
+  [ buf IF RET THEN len allot buf! buf max + bufmax! ] >init
 
 TEMPORARY [core] EDIT
   defer: forth:notfound ( name -- )
   ' notfound -> forth:notfound
 END
 
-  : forth:stream  stream  ;
-  : forth:stream! stream! ;
-  : forth:source  source  ;
-  : forth:source! source! ;
 
 TEMPORARY [core] EDIT
-  : forth:take    take ;
+  : forth:take take ;
   : forth:read ( -- buf yes | no )
     read dup b@ IF yes ELSE drop no THEN
   ;
