@@ -1278,6 +1278,7 @@ END
 
 LEXI [forth] REFER [core] EDIT
 
+TEMPORARY [forth] EDIT
 : (:) ( name -- q )
   forth:create
   forth:latest forth:hide!
@@ -1288,6 +1289,7 @@ LEXI [forth] REFER [core] EDIT
     forth:run-mode forth:mode!
   ]
 ;
+END
 
 : : ( name: -- q )
   forth:read [ "Word name required" panic ] unless

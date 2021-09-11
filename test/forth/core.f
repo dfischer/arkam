@@ -226,18 +226,18 @@ len dec as: max
 ] CHECK
 
 
-"s:each_line!" [
+"s:each-line!" [
   "foo" >buf
-  buf [ "foo" s= "foo 1" ASSERT ] s:each_line!
+  buf [ "foo" s= "foo 1" ASSERT ] s:each-line!
 
   "" >buf
-  buf [ "do not reach here" panic ] s:each_line!
+  buf [ "do not reach here" panic ] s:each-line!
 
   "foo\nfoo" >buf
-  buf [ "foo" s= "foo 2" ASSERT ] s:each_line!
+  buf [ "foo" s= "foo 2" ASSERT ] s:each-line!
 
   "foo\nfoo\n" >buf
-  buf [ "foo" s= "ignore trailing newline" ASSERT ] s:each_line!
+  buf [ "foo" s= "ignore trailing newline" ASSERT ] s:each-line!
 
   ok
 ] CHECK
