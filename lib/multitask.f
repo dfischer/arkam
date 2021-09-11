@@ -94,7 +94,7 @@ TEMPORARY
     # ----- Inspect -----
     
     [multi:private] EDIT
-    : label ( task -- ) dup name pr .." @" .. ;
+    : label ( task -- ) dup name pr "@" pr .. ;
     : sep space space ;
     : tab sep sep ;
     
@@ -102,8 +102,8 @@ TEMPORARY
     : ?task ( task -- task )
         >r
         i label cr
-        tab .." <- " i &prev @ label
-        sep i &next @ label ." ->"
+        tab "<- " pr i &prev @ label
+        sep i &next @ label "->" prn
         r>
     ;
 

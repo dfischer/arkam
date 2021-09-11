@@ -1196,37 +1196,6 @@ LEXI [forth] REFER [core] EDIT
 ;
 
 
-: " <IMMED>
-  forth:mode [ JMP, here 0 , here swap ] [ here ] if
-  [ forth:take
-    0  [ "Unclosed string" panic STOP ] ;case
-    CHAR: " [ STOP ] ;case
-    dup CHAR: \\ = [
-      drop ' forth:take c:escaped
-      [ "Escape sequence required" panic STOP ] ;unless
-      b, GO
-    ] ;when
-    b, GO
-  ] while
-  0 b, here:align!
-  forth:mode [ here swap ! LIT, , ] when
-;
-
-
-
-: ." <IMMED>
-  forth:mode [ here ] unless
-  POSTPONE: "
-  forth:mode [ COMPILE: prn ] [ prn here! ] if
-;
-
-: .." <IMMED>
-  forth:mode [ here ] unless
-  POSTPONE: "
-  forth:mode [ COMPILE: pr ] [ pr here! ] if
-;
-
-
 
 ( ===== Require ===== )
 

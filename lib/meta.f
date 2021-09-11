@@ -682,21 +682,6 @@ xlexi_root as: lexi_root
 ;
 
 
-: " <IMMED>
-  forth:mode [ xJMP, xhere 0 x, xhere swap ] [ xhere ] if
-  [ forth:take
-    0  [ "Unclosed string" panic STOP ] ;case
-    CHAR: " [ STOP ] ;case
-    dup CHAR: \\ = [
-      drop ' forth:take c:escaped
-      [ "Escape sequence required" panic STOP ] ;unless
-      bx, GO
-    ] ;when
-    bx, GO
-  ] while
-  0 bx, xhere:align!
-  forth:mode [ xhere swap x! xLIT, x, ] when
-;
 
 : ( <IMMED> POSTPONE: ( ;
 : # <IMMED> POSTPONE: # ;

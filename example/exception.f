@@ -30,21 +30,21 @@
 ( --- test --- )
 
 : foo
-    ."before foo"
+    "before foo" prn
     "error in foo" THROW
-    ."after foo"
+    "after foo" prn
 ;
 
 : bar
-    ."before bar"
+    "before bar" prn
     foo
-    ."after bar"
+    "after bar" prn
 ;
 
 : baz
-    ."before baz"
+    "before baz" prn
     bar
-    ."after baz"
+    "after baz" prn
 ;
 
 : main
