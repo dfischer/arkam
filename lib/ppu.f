@@ -34,16 +34,16 @@
 : sprite:plot 22 ppu:query ; ( x y -- )
 
 : sprite:bulk-load ( addr bytes -- )
-  sprite:size / [ ( addr i -- addr )
-    sprite:i!
-    [ sprite:size + ] [ sprite:load ] biq
-  ] for drop
+    sprite:size / [ ( addr i -- addr )
+        sprite:i!
+        [ sprite:size + ] [ sprite:load ] biq
+    ] for drop
 ;
 
 : sprite:load-blob ( addr -- )
-  # addr | size
-  #      | data...
-  [ cell + ] [ @ ] biq sprite:bulk-load
+    # addr | size
+    #      | data...
+    [ cell + ] [ @ ] biq sprite:bulk-load
 ;
 
 
@@ -51,8 +51,8 @@
 ( ----- utils ----- )
 
 : ppu:0clear
-  0 ppu:palette!
-  0 ppu:color!
-  ppu:clear!
+    0 ppu:palette!
+    0 ppu:color!
+    ppu:clear!
 ;
 

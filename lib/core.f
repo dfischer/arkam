@@ -43,7 +43,7 @@ LEXI REFER [core] EDIT
 ( ===== Boolean ===== )
 
 -1 as: ok
- 0 as: ng
+  0 as: ng
 
 ok as: yes
 ng as: no
@@ -93,15 +93,15 @@ ng as: STOP
 : dec 1 - ;
 
 : clamp ( n min max -- min<=n<max )
-  >r 2dup < IF rdrop nip RET THEN # -- min
-  drop r> 2dup < IF drop RET THEN # -- n
-  nip dec # -- max-1
+    >r 2dup < IF rdrop nip RET THEN # -- min
+    drop r> 2dup < IF drop RET THEN # -- n
+    nip dec # -- max-1
 ;
 
 
 : within? ( n min max -- min<=n<max? )
-  >r over > IF rdrop drop no RET THEN
-  r> <
+    >r over > IF rdrop drop no RET THEN
+    r> <
 ;
 
 
@@ -133,9 +133,9 @@ ng as: STOP
 : call ( q -- ) >r ;
 
 : if ( ? q1 q2 -- ) >r swap IF rdrop >r ELSE drop THEN ;
-  # example:
-  #   yes [ "hello" ] [ "world" ] if pr
-  # => hello
+    # example:
+    #   yes [ "hello" ] [ "world" ] if pr
+    # => hello
 
 : when   ( ? q -- ) swap IF >r ELSE drop THEN ;
 : unless ( ? q -- ) swap IF drop ELSE >r THEN ;
@@ -148,14 +148,14 @@ ng as: STOP
 
 
 : ;case ( a b q -- ... | a )
-  # if a=b call q and escape from caller
-  # or ramain a
-  >r over = IF drop r> rdrop >r RET THEN rdrop
+    # if a=b call q and escape from caller
+    # or ramain a
+    >r over = IF drop r> rdrop >r RET THEN rdrop
 ;
 
 : ;eq ( a b -- yes | a )
-  # same as [ yes ] ;case
-  over = IF drop rdrop yes THEN
+    # same as [ yes ] ;case
+    over = IF drop rdrop yes THEN
 ;
 
 
@@ -163,23 +163,23 @@ ng as: STOP
 ( ===== Stack 2 ===== )
 
 : pick ( n -- v ) 2 + cells sp + @ ;
-  # example:
-  #   1 2 3 0 pick => 1 2 3 3
-  #   1 2 3 2 pick => 1 2 3 1
-  # stack:
-  #   sp: |
-  #       | n
-  #       | ...
-  # target address: sp + (n+2)*cells
+    # example:
+    #   1 2 3 0 pick => 1 2 3 3
+    #   1 2 3 2 pick => 1 2 3 1
+    # stack:
+    #   sp: |
+    #       | n
+    #       | ...
+    # target address: sp + (n+2)*cells
 
 
 : rpick ( n -- v ) 2 + cells rp + @ ;
-  # rstack:
-  #   rp: |
-  #       | caller
-  #   n=0 | ...
-  #   n=1 | ...
-  # target address: rp + (n+2)*cells
+    # rstack:
+    #   rp: |
+    #       | caller
+    #   n=0 | ...
+    #   n=1 | ...
+    # target address: rp + (n+2)*cells
 
 
 : i ( -- v ) 2 cells rp + @ ;
@@ -196,8 +196,8 @@ ng as: STOP
 : -! ( v adr -- ) swap over @ - swap ! ;
 
 : update! ( adr q -- )
-  # q: v -- v
-  over >r swap @ swap call r> !
+    # q: v -- v
+    over >r swap @ swap call r> !
 ;
 
 : on  or      ; # n -- n
@@ -211,89 +211,89 @@ ng as: STOP
 ( ===== Combinator ===== )
 
 : dip ( a q -- ... ) swap >r call r> ;
-  # escape a, call q, then restore a
-  # example:
-  #   1 3 [ inc ] dip  => 2 3
+    # escape a, call q, then restore a
+    # example:
+    #   1 3 [ inc ] dip  => 2 3
 
 
 : sip ( a q -- ... a ) over >r call r> ;
-  # copy & restore a
-  # eample:
-  #   1 [ inc ] => 2 1
+    # copy & restore a
+    # eample:
+    #   1 [ inc ] => 2 1
 
 
 : biq ( a q1 q2 -- aq1 aq2 ) >r over >r call r> ; ( return to quotation )
-  # biq - bi quotations application
+    # biq - bi quotations application
 
 
 : bia ( a b q -- aq bq ) swap over >r >r call r> ; ( return to quotation )
-  # bia - bi arguments application
+    # bia - bi arguments application
 
 
 : bi* ( a b q1 q2 -- aq1 bq2 ) >r swap >r call r> ; ( return to quotation )
 
 
 : bibi ( a b q1 q2 -- abq1 abq2 )
-  >r >r 2dup ( a b a b | q2 q1 )
-  r> swap >r ( a b a q1 | q2 b )
-  swap >r    ( a b q1 | q2 b a )
-  call r> r> ; ( return to quotation )
+    >r >r 2dup ( a b a b | q2 q1 )
+    r> swap >r ( a b a q1 | q2 b )
+    swap >r    ( a b q1 | q2 b a )
+    call r> r> ; ( return to quotation )
 
 
 : triq ( a q1 q2 q3 -- aq1 aq2 aq3 )
-  >r >r over r> swap >r ( a q1 q2 | q3 a )
-  biq r> ; ( return to quotation )
-  # triq - tri quotations application
+    >r >r over r> swap >r ( a q1 q2 | q3 a )
+    biq r> ; ( return to quotation )
+    # triq - tri quotations application
 
 
 : tria ( a b c q -- aq bq cq )
-  swap over >r >r ( a b q | q c )
-  bia r> ; ( return to quotation )
-  # tria - tri arguments application
+    swap over >r >r ( a b q | q c )
+    bia r> ; ( return to quotation )
+    # tria - tri arguments application
 
 
 : tri* ( a b c q1 q2 q3 -- aq1 bq2 cq3 )
-  >r >r swap r> swap >r ( a b q1 q2 | q3 c )
-  bi* r> ; ( return to quotation )
+    >r >r swap r> swap >r ( a b q1 q2 | q3 c )
+    bi* r> ; ( return to quotation )
 
 
 
 ( ===== Iterator ===== )
 
 COVER
-  : loop ( q n ) dup 1 < IF 2drop RET THEN
-    1 - over swap >r >r call r> r> AGAIN
-  ;
+    : loop ( q n ) dup 1 < IF 2drop RET THEN
+        1 - over swap >r >r call r> r> AGAIN
+    ;
 SHOW
-  : times ( n q -- ) swap loop ;
+    : times ( n q -- ) swap loop ;
 END
 
 
 COVER
-  : loop ( q n i )
-    2dup <= IF 3drop RET THEN
-    swap over 1 +     # q i n i+1
-    >r >r swap dup >r # i q | i+1 n q
-    call r> r> r> AGAIN
-  ;
+    : loop ( q n i )
+        2dup <= IF 3drop RET THEN
+        swap over 1 +     # q i n i+1
+        >r >r swap dup >r # i q | i+1 n q
+        call r> r> r> AGAIN
+    ;
 SHOW
- : for ( n q -- ) swap 0 loop ;
+  : for ( n q -- ) swap 0 loop ;
 END
 
 
 COVER
-  : loop ( q n )
-    dup 1 < IF 2drop RET THEN
-    dec 2dup >r >r swap call r> r> AGAIN
-  ;
+    : loop ( q n )
+        dup 1 < IF 2drop RET THEN
+        dec 2dup >r >r swap call r> r> AGAIN
+    ;
 SHOW
-  : for- ( n q -- ) swap loop ;
+    : for- ( n q -- ) swap loop ;
 END
 
 
 : while ( q -- )
-  # loop while q put yes to TOS
-  dup >r call IF r> AGAIN THEN rdrop
+    # loop while q put yes to TOS
+    dup >r call IF r> AGAIN THEN rdrop
 ;
 
 
@@ -304,23 +304,23 @@ lexicon: [sys]
 [sys] ALSO [sys] EDIT
 
 COVER
-  : query 0 io ;
+    : query 0 io ;
 SHOW
-  : sys:size 0      query ;
-  : sys:ds-size 2   query ;
-  : sys:ds      3   query ;
-  : sys:rs-size 4   query ;
-  : sys:rs      5   query ;
-  : sys:cell-size 6 query ;
-  : sys:max-int 7   query ;
-  : sys:min-int 8   query ;
-  : sys:dstack! 9   query ; # sp adr cells --
-  : sys:rstack! 10  query ; # rp adr cells --
-  ( calculated )
-  : sys:ds-base sys:ds-size cells sys:ds + ;
-  : sys:rs-base sys:rs-size cells sys:rs + ;
-  : sys:depth sp cell + sys:ds-base swap - cell / ; # order matters
-  : sys:ds0! sys:ds-base cell - sp! ;
+    : sys:size 0      query ;
+    : sys:ds-size 2   query ;
+    : sys:ds      3   query ;
+    : sys:rs-size 4   query ;
+    : sys:rs      5   query ;
+    : sys:cell-size 6 query ;
+    : sys:max-int 7   query ;
+    : sys:min-int 8   query ;
+    : sys:dstack! 9   query ; # sp adr cells --
+    : sys:rstack! 10  query ; # rp adr cells --
+    ( calculated )
+    : sys:ds-base sys:ds-size cells sys:ds + ;
+    : sys:rs-base sys:rs-size cells sys:rs + ;
+    : sys:depth sp cell + sys:ds-base swap - cell / ; # order matters
+    : sys:ds0! sys:ds-base cell - sp! ;
 END
 
 
@@ -360,8 +360,8 @@ defer: getc  ' (getc) -> getc
 : space 32 putc ;
 
 : pr ( s -- )
-  dup b@ dup 0 = [ 2drop ] ;when
-  putc 1 + AGAIN
+    dup b@ dup 0 = [ 2drop ] ;when
+    putc 1 + AGAIN
 ;
 
 : prn ( s -- ) pr cr ;
@@ -369,11 +369,11 @@ defer: getc  ' (getc) -> getc
 
 [stdio] EDIT
 : call/putc ( &putc q -- )
-    # call-with-putc
-    # call q with &putc then restore previous port
-    ' putc defered >r
-    swap -> putc call
-    r> -> putc
+        # call-with-putc
+        # call q with &putc then restore previous port
+        ' putc defered >r
+        swap -> putc call
+        r> -> putc
 ;
 
 
@@ -387,13 +387,13 @@ defer: getc  ' (getc) -> getc
 : eprn ( s -- ) [ prn ] >stderr ;
 
 : getline ( buf len -- success? )
-  swap ( len buf )
-  [ over 1 < [ ng STOP ] ;when
-    getc ( len buf c )
-    0  [ 0 swap b! drop ok STOP ] ;case
-    10 [ 0 swap b! drop ok STOP ] ;case
-    over b! ' dec ' inc bi* GO
-  ] while
+    swap ( len buf )
+    [ over 1 < [ ng STOP ] ;when
+        getc ( len buf c )
+        0  [ 0 swap b! drop ok STOP ] ;case
+        10 [ 0 swap b! drop ok STOP ] ;case
+        over b! ' dec ' inc bi* GO
+    ] while
 ;
 
 
@@ -415,45 +415,45 @@ LEXI REFER [core] EDIT
 
 COVER
 
-  11 as: max ( i32: max "-2147483648" )
-  var: buf
-  var: n
-  var: posi
-  var: base
-  var: q
-  var: r
-  var: i
+    11 as: max ( i32: max "-2147483648" )
+    var: buf
+    var: n
+    var: posi
+    var: base
+    var: q
+    var: r
+    var: i
 
-  : init buf max + i! ;
-  : check buf i > IF "too big num" panic THEN ;
-  : put i 1 - dup i! b! ; # c --
-  : put-sign posi IF RET THEN 45 put ;
-  : check-sign n 0 < IF n neg n! no ELSE yes THEN posi! ;
-  : read n base /mod r! q!
-    r >hex put
-    q 0 = IF RET THEN q n! AGAIN
-  ;
-  : check-min ( minimum number )
-    n 0 = IF "0" rdrop RET THEN
-    n dup neg != IF RET THEN ( 0x80000000 * -1 = 0x80000000 )
-    10 base = IF "-2147483648" rdrop RET THEN
-    16 base = IF "-80000000"   rdrop RET THEN
-    "?: invalid base" panic
-  ;
+    : init buf max + i! ;
+    : check buf i > IF "too big num" panic THEN ;
+    : put i 1 - dup i! b! ; # c --
+    : put-sign posi IF RET THEN 45 put ;
+    : check-sign n 0 < IF n neg n! no ELSE yes THEN posi! ;
+    : read n base /mod r! q!
+        r >hex put
+        q 0 = IF RET THEN q n! AGAIN
+    ;
+    : check-min ( minimum number )
+        n 0 = IF "0" rdrop RET THEN
+        n dup neg != IF RET THEN ( 0x80000000 * -1 = 0x80000000 )
+        10 base = IF "-2147483648" rdrop RET THEN
+        16 base = IF "-80000000"   rdrop RET THEN
+        "?: invalid base" panic
+    ;
 
-  [ buf IF RET THEN max 1 + allot buf! ] >init
+    [ buf IF RET THEN max 1 + allot buf! ] >init
 
 SHOW
 
-  : n>s ( n base -- buf )
-    base! n! check-min check-sign init read put-sign i
-  ;
+    : n>s ( n base -- buf )
+        base! n! check-min check-sign init read put-sign i
+    ;
 
-  : n>dec ( n -- buf ) 10 n>s ;
-  : n>hex ( n -- buf ) 16 n>s ;
+    : n>dec ( n -- buf ) 10 n>s ;
+    : n>hex ( n -- buf ) 16 n>s ;
 
-  : ?    dup n>dec pr space ;
-  : ?hex dup n>hex pr space ;
+    : ?    dup n>dec pr space ;
+    : ?hex dup n>hex pr space ;
 
 END
 
@@ -464,12 +464,12 @@ END
 
 [sys] ALSO
 : ?stack ( -- )
-  [ sp cell + ( adr )
-    sys:depth dec [ ( adr i )
-      cells over + @ ..
-    ] for- drop
-    cr
-  ] >stderr
+    [ sp cell + ( adr )
+        sys:depth dec [ ( adr i )
+            cells over + @ ..
+        ] for- drop
+        cr
+    ] >stderr
 ;
 PREVIOUS
 
@@ -477,51 +477,51 @@ PREVIOUS
 
 
 COVER
-  16 as: bpl ( bytes per line )
-  var: adr
-  var: len
-  var: base
-  var: lines
-  var: rest
+    16 as: bpl ( bytes per line )
+    var: adr
+    var: len
+    var: base
+    var: lines
+    var: rest
 
-  : ascii ( n -- )
-    dup 32  < [ drop CHAR: . putc ] ;when
-    dup 126 > [ drop CHAR: . putc ] ;when
-    putc
-  ;
+    : ascii ( n -- )
+        dup 32  < [ drop CHAR: . putc ] ;when
+        dup 126 > [ drop CHAR: . putc ] ;when
+        putc
+    ;
 
-  : where
-    base 24 >> ff
-    base 16 >> ff
-    base  8 >> ff
-    base       ff
-  ;
+    : where
+        base 24 >> ff
+        base 16 >> ff
+        base  8 >> ff
+        base       ff
+    ;
 
-  : bytes ( n -- )
-    [ base + b@ ff space ] for
-  ;
+    : bytes ( n -- )
+        [ base + b@ ff space ] for
+    ;
 
-  : text ( n -- )
-    [ base + b@ ascii ] for
-  ;
+    : text ( n -- )
+        [ base + b@ ascii ] for
+    ;
 
 SHOW
-  : dump ( adr len ) len! adr!
-    len bpl / lines!
-    lines [ bpl * adr + base!
-      where "| " pr
-      bpl bytes
-      bpl text
-      cr
-    ] for
-    len bpl mod 0 [ ( noop ) ] ;case rest!
-    lines inc bpl * adr + base!
-    where "| " pr
-    rest bytes
-    bpl rest - [ "   " pr ] times
-    rest text
-    cr
-  ;
+    : dump ( adr len ) len! adr!
+        len bpl / lines!
+        lines [ bpl * adr + base!
+            where "| " pr
+            bpl bytes
+            bpl text
+            cr
+        ] for
+        len bpl mod 0 [ ( noop ) ] ;case rest!
+        lines inc bpl * adr + base!
+        where "| " pr
+        rest bytes
+        bpl rest - [ "   " pr ] times
+        rest text
+        cr
+    ;
 END
 
 
@@ -529,11 +529,11 @@ END
 ( ===== Memory and String ===== )
 
 : memcopy ( src dst len -- )
-  dup 1 < IF 3drop RET THEN
-  1 - >r
-  over b@ over b!
-  1 + swap 1 + swap
-  r> AGAIN
+    dup 1 < IF 3drop RET THEN
+    1 - >r
+    over b@ over b!
+    1 + swap 1 + swap
+    r> AGAIN
 ;
 
 : memclear ( adr len -- ) [ 0 over b! inc ] times drop ;
@@ -543,20 +543,20 @@ END
 : s:len ( s -- n ) dup s:end swap - ;
 
 : s:hash ( s -- n )
-  # DJB2 algorithm
-  5381 [
-    over b@ ( s hash c )
-    0 [ nip STOP ] ;case
-    over 5 << + + [ inc ] dip GO
-  ] while
+    # DJB2 algorithm
+    5381 [
+        over b@ ( s hash c )
+        0 [ nip STOP ] ;case
+        over 5 << + + [ inc ] dip GO
+    ] while
 ;
 
 : s= ( s1 s2 -- ? )
-  [ 2dup [ b@ ] bia over != # s1 s2 c diff?
-    ( diff ) [ 3drop no STOP ] ;when
-    ( end  ) 0 [ 2drop yes STOP ] ;case drop
-    ( next ) ' inc bia GO
-  ] while
+    [ 2dup [ b@ ] bia over != # s1 s2 c diff?
+        ( diff ) [ 3drop no STOP ] ;when
+        ( end  ) 0 [ 2drop yes STOP ] ;case drop
+        ( next ) ' inc bia GO
+    ] while
 ;
 
 
@@ -565,131 +565,131 @@ END
 : c:lower? ( c -- ? ) dup CHAR: a < [ drop no ] [ CHAR: z <= ] if ;
 
 : c>dec ( c -- n yes | no )
-  dup c:digit? [ CHAR: 0 - yes ] [ drop no ] if
+    dup c:digit? [ CHAR: 0 - yes ] [ drop no ] if
 ;
 
 : c>hex ( c -- n yes | no )
-  dup CHAR: 0 <  [ drop no  ] ;when  # < 0
-  dup CHAR: 9 <= [ 48 - yes ] ;when  # 0-9
-  dup CHAR: A <  [ drop no  ] ;when  # 9 < c < A
-  dup CHAR: G <  [ 55 - yes ] ;when  # A-F
-  dup CHAR: a <  [ drop no  ] ;when  # A < c < a
-  CHAR: a - dup 6 > [ drop no ] [ 10 + yes ] if
+    dup CHAR: 0 <  [ drop no  ] ;when  # < 0
+    dup CHAR: 9 <= [ 48 - yes ] ;when  # 0-9
+    dup CHAR: A <  [ drop no  ] ;when  # 9 < c < A
+    dup CHAR: G <  [ 55 - yes ] ;when  # A-F
+    dup CHAR: a <  [ drop no  ] ;when  # A < c < a
+    CHAR: a - dup 6 > [ drop no ] [ 10 + yes ] if
 ;
 
 
 
 COVER
-  var: base
+    var: base
 SHOW
-  : s>n ( s base -- n yes | no )
-    base!
-    dup b@ CHAR: - = IF inc -1 ELSE 1 THEN swap ( sign s )
-    dup b@ [ 2drop no ] ;unless ( null string )
-    0 swap ( sign acc s )
-    [ dup b@
-      ( done      ) 0 [ drop yes STOP ] ;case
-      ( NaN       ) c>hex [ drop no STOP ] ;unless
-      ( over base ) dup base >= [ 2drop no STOP ] ;when
-      ( ok        ) pullup base * + swap inc GO
-    ] while ( sign acc dec? )
-    IF * yes ELSE 2drop no THEN
-  ;
-  : s>dec 10 s>n ;  # s -- n yes | no
-  : s>hex 16 s>n ;  # s -- n yes | no
+    : s>n ( s base -- n yes | no )
+        base!
+        dup b@ CHAR: - = IF inc -1 ELSE 1 THEN swap ( sign s )
+        dup b@ [ 2drop no ] ;unless ( null string )
+        0 swap ( sign acc s )
+        [ dup b@
+            ( done      ) 0 [ drop yes STOP ] ;case
+            ( NaN       ) c>hex [ drop no STOP ] ;unless
+            ( over base ) dup base >= [ 2drop no STOP ] ;when
+            ( ok        ) pullup base * + swap inc GO
+        ] while ( sign acc dec? )
+        IF * yes ELSE 2drop no THEN
+    ;
+    : s>dec 10 s>n ;  # s -- n yes | no
+    : s>hex 16 s>n ;  # s -- n yes | no
 END
 
 
 
 : c:escaped ( qtake -- c ok | ng )
-  dup >r call r> swap
-  ( no following sequence ) 0 [ drop ng ] ;case
-  ( \b bs      ) CHAR: b [ drop 8  ok ] ;case
-  ( \t htab    ) CHAR: t [ drop 9  ok ] ;case
-  ( \n newline ) CHAR: n [ drop 10 ok ] ;case
-  ( \r cr      ) CHAR: r [ drop 13 ok ] ;case
-  ( \" dquote  ) CHAR: " [ drop 34 ok ] ;case
-  ( \0 null    ) CHAR: 0 [ drop 0  ok ] ;case
-  ( as-is      ) nip ok
+    dup >r call r> swap
+    ( no following sequence ) 0 [ drop ng ] ;case
+    ( \b bs      ) CHAR: b [ drop 8  ok ] ;case
+    ( \t htab    ) CHAR: t [ drop 9  ok ] ;case
+    ( \n newline ) CHAR: n [ drop 10 ok ] ;case
+    ( \r cr      ) CHAR: r [ drop 13 ok ] ;case
+    ( \" dquote  ) CHAR: " [ drop 34 ok ] ;case
+    ( \0 null    ) CHAR: 0 [ drop 0  ok ] ;case
+    ( as-is      ) nip ok
 ;
 
 
 
 : s:each ( s q -- ) # q: ( c -- )
-  swap
-  [ dup b@ ( q s c )
-    0 [ 2drop STOP ] ;case
-    swap inc >r swap dup >r call r> r> GO
-  ] while
+    swap
+    [ dup b@ ( q s c )
+        0 [ 2drop STOP ] ;case
+        swap inc >r swap dup >r call r> r> GO
+    ] while
 ;
 
 : s:put ( s -- adr )
-  here >r [ b, ] s:each 0 b, r>
+    here >r [ b, ] s:each 0 b, r>
 ;
 
 : s:copy ( src dst )
-  swap [ over b! inc ] s:each
-  0 swap b!
+    swap [ over b! inc ] s:each
+    0 swap b!
 ;
 
 
 : s:check ( str max -- str ok? )
-  # check length
-  # max includes null termination
-  over s:len 1 + >=
+    # check length
+    # max includes null termination
+    over s:len 1 + >=
 ;
 
 
 : s:append! ( dst what -- )
-  ( no check )
-  ' s:end dip ( dst+ what )
-  [ 2dup b@ swap over swap b!
-    [ ' inc bia GO ] [ 2drop STOP ] if
-  ] while
+    ( no check )
+    ' s:end dip ( dst+ what )
+    [ 2dup b@ swap over swap b!
+        [ ' inc bia GO ] [ 2drop STOP ] if
+    ] while
 ;
 
 : s:append ( dst what max -- ? )
-  # max includes null termination
-  ( check )
-  >r 2dup ' s:len bia + inc r>
-  > [ 2drop ng ] ;when
-  s:append! ok
+    # max includes null termination
+    ( check )
+    >r 2dup ' s:len bia + inc r>
+    > [ 2drop ng ] ;when
+    s:append! ok
 ;
 
 
 : s:start? ( src what -- ? )
-  # src starts with what?
-  [ 2dup [ b@ ] bia
-    0      [ 3drop yes STOP ] ;case
-    swap 0 [ 3drop no  STOP ] ;case
-    =      [ ' inc bia GO    ] ;when
-    2drop no STOP
-  ] while
+    # src starts with what?
+    [ 2dup [ b@ ] bia
+        0      [ 3drop yes STOP ] ;case
+        swap 0 [ 3drop no  STOP ] ;case
+        =      [ ' inc bia GO    ] ;when
+        2drop no STOP
+    ] while
 ;
 
 
 COVER # ----- s:each-line! -----
 
-  # destructive!
-  # Every newline in s will be replaced by 0
+    # destructive!
+    # Every newline in s will be replaced by 0
 
-  : split ( src -- line src+ yes | no )
-    dup b@ [ drop no ] ;unless
-    dup ( line src )
-    [ dup b@
-      0  [ yes STOP ] ;case
-      10 [ [ inc ] [ 0 swap b! ] biq yes STOP ] ;case
-      drop inc GO
-    ] while
-  ;
+    : split ( src -- line src+ yes | no )
+        dup b@ [ drop no ] ;unless
+        dup ( line src )
+        [ dup b@
+            0  [ yes STOP ] ;case
+            10 [ [ inc ] [ 0 swap b! ] biq yes STOP ] ;case
+            drop inc GO
+        ] while
+    ;
 
 SHOW
 
-  : s:each-line! ( s q -- )
-    [ >r split not IF rdrop STOP RET THEN
-      i swap >r call r> r>  GO
-    ] while
-  ;
+    : s:each-line! ( s q -- )
+        [ >r split not IF rdrop STOP RET THEN
+            i swap >r call r> r>  GO
+        ] while
+    ;
 
 END
 
@@ -702,10 +702,10 @@ END
 : rand:init  2 2 io ;
 
 : shuffle ( adr len -- )
-    tuck [ ( len adr i -- )
-        cells >r over rand cells over + over r> + ( len adr src dst )
-        [ dup @ ] bia >r ! r> swap !
-    ] for 2drop
+        tuck [ ( len adr i -- )
+                cells >r over rand cells over + over r> + ( len adr src dst )
+                [ dup @ ] bia >r ! r> swap !
+        ] for 2drop
 ;
 
 
@@ -718,25 +718,25 @@ LEXI [file] REFER [file] EDIT
 
 
 COVER
-  : query    8 io ;
+    : query    8 io ;
 SHOW
-  : file:ready?  -1  query ; # -- ?
-  : file:open     0  query ; # path mode -- id ok | ng
-  : file:close    1  query ; # id -- ?
-  : file:read     2  query ; # buf len id -- ?
-  : file:write    3  query ; # buf len id -- ?
-  : file:seek     4  query ; # id offset origin -- ?
-  : file:exists?  5  query ; # path -- ?
-  : file:getc     6  query ; # id -- c | 0
-  : file:putc     7  query ; # c id --
-  : file:peek     8  query ; # id -- c | 0
-  : file:fullpath 9  query ; # path buf max -- ?
-  : file:size     10 query ; # id -- n
-  ( --- defensive --- )
-  : file:open!  file:open [ "Can't open " epr eprn die ] unless ; # path mode -- id
-  : file:close! file:close drop ; # id --
-  : file:read!  file:read  IF RET THEN "Can't read" panic ;
-  : file:write! file:write IF RET THEN "Can't write" panic ;
+    : file:ready?  -1  query ; # -- ?
+    : file:open     0  query ; # path mode -- id ok | ng
+    : file:close    1  query ; # id -- ?
+    : file:read     2  query ; # buf len id -- ?
+    : file:write    3  query ; # buf len id -- ?
+    : file:seek     4  query ; # id offset origin -- ?
+    : file:exists?  5  query ; # path -- ?
+    : file:getc     6  query ; # id -- c | 0
+    : file:putc     7  query ; # c id --
+    : file:peek     8  query ; # id -- c | 0
+    : file:fullpath 9  query ; # path buf max -- ?
+    : file:size     10 query ; # id -- n
+    ( --- defensive --- )
+    : file:open!  file:open [ "Can't open " epr eprn die ] unless ; # path mode -- id
+    : file:close! file:close drop ; # id --
+    : file:read!  file:read  IF RET THEN "Can't read" panic ;
+    : file:write! file:write IF RET THEN "Can't write" panic ;
 END
 
 
@@ -750,7 +750,7 @@ LEXI REFER [core] EDIT
 : cli:get-arg 1 cli:query ; # buf i len -- ?
 
 : cli:get-arg! ( buf i len -- )
-  cli:get-arg IF RET THEN "Can't get arg!" panic
+    cli:get-arg IF RET THEN "Can't get arg!" panic
 ;
 
 
@@ -781,10 +781,10 @@ var: forth:mode
 mhashd-len as: hashd-len
 
 : lexi:new ( -- adr )
-  here:align! here
-  ( latest ) 0 ,
-  ( name   ) 0 ,
-  ( hashd  ) hashd-len [ 0 , ] times
+    here:align! here
+    ( latest ) 0 ,
+    ( name   ) 0 ,
+    ( hashd  ) hashd-len [ 0 , ] times
 ;
 
 : lexi:latest  @ ;
@@ -796,7 +796,7 @@ mhashd-len as: hashd-len
 : lexi:name lexi:name dup [ drop "???" ] unless ;  # for anonymous lexicon
 
 : lexi:create ( name -- adr )
-    s:put lexi:new tuck lexi:name!
+        s:put lexi:new tuck lexi:name!
 ;
 
 
@@ -847,55 +847,55 @@ LEXI [forth] REFER [forth] EDIT
 : forth:code! 3 cells + ! ; # &code &entry --
 
 : hashd-link ( lexi s -- link )
-    s:hash abs hashd-len mod cells ( offset )
-    swap lexi:hashd +
+        s:hash abs hashd-len mod cells ( offset )
+        swap lexi:hashd +
 ;
 
 : forth:register ( lexi word -- )
-    tuck forth:name hashd-link ( word link )
-    2dup @ swap forth:next! !
+        tuck forth:name hashd-link ( word link )
+        2dup @ swap forth:next! !
 ;
 
 
 LEXI [forth] REFER [core] EDIT
 
 : forth:create ( name -- )
-  here:align! s:put here:align! ( &name )
-  ( latest ) here forth:latest!
-  ( next   ) 0 ,
-  ( flags  ) 0 ,
-  ( &name  ) ,
-  ( &code  ) here cell + ,
-  CURRENT forth:latest forth:register
+    here:align! s:put here:align! ( &name )
+    ( latest ) here forth:latest!
+    ( next   ) 0 ,
+    ( flags  ) 0 ,
+    ( &name  ) ,
+    ( &code  ) here cell + ,
+    CURRENT forth:latest forth:register
 ;
 
 
 LEXI [forth] REFER [forth] EDIT
 
 : forth:remove ( word lexi -- )
-    over forth:name hashd-link ( target link )
-    dup @ [ ( target link word )
-        0 [ drop forth:name epr space "?" panic ] ;case
-        swap >r 2dup = r> swap ( target word link ? )
-        [ [ forth:next ] dip ! drop STOP ] ;when
-        drop dup forth:next GO
-    ] while
+        over forth:name hashd-link ( target link )
+        dup @ [ ( target link word )
+                0 [ drop forth:name epr space "?" panic ] ;case
+                swap >r 2dup = r> swap ( target word link ? )
+                [ [ forth:next ] dip ! drop STOP ] ;when
+                drop dup forth:next GO
+        ] while
 ;
 
 : forth:find-in ( name lexi -- name no | word yes )
-  over hashd-link @ [ ( name latest )
-    ( notfound ) 0 [ no STOP ] ;case
-    ( hidden   ) dup forth:hidden? [ forth:next GO ] ;when
-    ( found    ) 2dup forth:name s= [ nip yes STOP ] ;when
-    ( next     ) forth:next GO
-  ] while
+    over hashd-link @ [ ( name latest )
+        ( notfound ) 0 [ no STOP ] ;case
+        ( hidden   ) dup forth:hidden? [ forth:next GO ] ;when
+        ( found    ) 2dup forth:name s= [ nip yes STOP ] ;when
+        ( next     ) forth:next GO
+    ] while
 ;
 
 : forth:(find) ( name -- name no | word yes )
-    lexisp @ cell - swap [ ( sp name )
-        over lexicons @ < [ nip no STOP ] ;when
-        over @ forth:find-in [ nip yes STOP ] [ [ cell - ] dip GO ] if
-    ] while
+        lexisp @ cell - swap [ ( sp name )
+                over lexicons @ < [ nip no STOP ] ;when
+                over @ forth:find-in [ nip yes STOP ] [ [ cell - ] dip GO ] if
+        ] while
 ;
 
 
@@ -905,7 +905,7 @@ defer: forth:find
 ' forth:(find) -> forth:find
 
 : forth:find! ( name -- word )
-  forth:find [ epr " ?" panic ] ;unless
+    forth:find [ epr " ?" panic ] ;unless
 ;
 
 
@@ -933,154 +933,154 @@ LEXI [forth] REFER [forth] EDIT
 
 COVER
 
-  ( ----- token buffer ----- )
-  32      as: len
-  len 1 - as: max
-  var: buf
-  var: bufmax
+    ( ----- token buffer ----- )
+    32      as: len
+    len 1 - as: max
+    var: buf
+    var: bufmax
 
-  var: source
-  var: stream   # q: source -- c source
-  var: peeked
+    var: source
+    var: stream   # q: source -- c source
+    var: peeked
 
-  : fetch source stream call source! ; # -- c
-  : peek peeked ?dup [ fetch dup peeked! ] unless ;
-  : take peek no peeked! ;
+    : fetch source stream call source! ; # -- c
+    : peek peeked ?dup [ fetch dup peeked! ] unless ;
+    : take peek no peeked! ;
 
-  : space? 0 ;eq 32 ;eq 10 ;eq no ; # c -- yes | c no
+    : space? 0 ;eq 32 ;eq 10 ;eq no ; # c -- yes | c no
 
-  : skip-spaces ( -- c )
-    [ peek
-      0 [ STOP ] ;case
-      space? [ take drop GO ] ;when
-      drop STOP
-    ] while
-  ;
+    : skip-spaces ( -- c )
+        [ peek
+            0 [ STOP ] ;case
+            space? [ take drop GO ] ;when
+            drop STOP
+        ] while
+    ;
 
-  var: bp ( buffer pointer )
-  : fin 0 bp b! ;
-  : check bp bufmax > [ fin buf epr " ...Too long" panic ] ;when ;
-  : >buf check bp b! bp inc bp! ;
-  
-  : read ( -- buf )
-    stream [ "No stream" panic ] ;unless
-    skip-spaces buf bp!
-    [ take
-      space? [ fin STOP ] ;when
-      >buf GO
-    ] while
-    buf
-  ;
+    var: bp ( buffer pointer )
+    : fin 0 bp b! ;
+    : check bp bufmax > [ fin buf epr " ...Too long" panic ] ;when ;
+    : >buf check bp b! bp inc bp! ;
+    
+    : read ( -- buf )
+        stream [ "No stream" panic ] ;unless
+        skip-spaces buf bp!
+        [ take
+            space? [ fin STOP ] ;when
+            >buf GO
+        ] while
+        buf
+    ;
 
-  : handle-num forth:mode [ LIT, , ] [ ( n -- n ) ] if ;
+    : handle-num forth:mode [ LIT, , ] [ ( n -- n ) ] if ;
 
-  : notfound ( name -- ) epr " ?" panic ;
+    : notfound ( name -- ) epr " ?" panic ;
 
-  : tk>hex ( tk -- n yes | no )
-    # prefix: 0x
-    dup b@ CHAR: 0 = [ drop no ] ;unless inc
-    dup b@ CHAR: x = [ drop no ] ;unless inc
-    s>hex
-  ;
+    : tk>hex ( tk -- n yes | no )
+        # prefix: 0x
+        dup b@ CHAR: 0 = [ drop no ] ;unless inc
+        dup b@ CHAR: x = [ drop no ] ;unless inc
+        s>hex
+    ;
 
-  : parse-string
-    forth:mode [ JMP, here 0 , here swap ] [ here ] if
-    take drop ( skip first double quote )
-    [ take
-      0  [ "Unclosed string" panic STOP ] ;case
-      CHAR: " [ STOP ] ;case
-      dup CHAR: \\ = [
-        drop ' take c:escaped
-        [ "Escape sequence required" panic STOP ] ;unless
-        b, GO
-      ] ;when
-      b, GO
-    ] while
-    0 b, here:align!
-    forth:mode [ here swap ! LIT, , ] when
-  ;
+    : parse-string
+        forth:mode [ JMP, here 0 , here swap ] [ here ] if
+        take drop ( skip first double quote )
+        [ take
+            0  [ "Unclosed string" panic STOP ] ;case
+            CHAR: " [ STOP ] ;case
+            dup CHAR: \\ = [
+                drop ' take c:escaped
+                [ "Escape sequence required" panic STOP ] ;unless
+                b, GO
+            ] ;when
+            b, GO
+        ] while
+        0 b, here:align!
+        forth:mode [ here swap ! LIT, , ] when
+    ;
 
 
 SHOW
 
-  max as: forth:max-len
+    max as: forth:max-len
 
-  [ buf IF RET THEN len allot buf! buf max + bufmax! ] >init
+    [ buf IF RET THEN len allot buf! buf max + bufmax! ] >init
 
 TEMPORARY [core] EDIT
-  defer: forth:notfound ( name -- )
-  ' notfound -> forth:notfound
+    defer: forth:notfound ( name -- )
+    ' notfound -> forth:notfound
 END
 
 
 TEMPORARY [core] EDIT
-  : forth:take take ;
-  : forth:read ( -- buf yes | no )
-    read dup b@ IF yes ELSE drop no THEN
-  ;
+    : forth:take take ;
+    : forth:read ( -- buf yes | no )
+        read dup b@ IF yes ELSE drop no THEN
+    ;
 END
 
-  defer: forth:handle-num
-  ' handle-num -> forth:handle-num
+    defer: forth:handle-num
+    ' handle-num -> forth:handle-num
 
-  defer: forth:parse-string
-  ' parse-string -> forth:parse-string
+    defer: forth:parse-string
+    ' parse-string -> forth:parse-string
 
-  : forth:run ( source stream -- )
-    source >r stream >r stream! source!
-    [ skip-spaces
-      # prefix
-      peek
-      CHAR: " [ forth:parse-string GO ] ;case
-      drop
-      # word
-      forth:read [ STOP ] ;unless
-      forth:find
-      ( found )
-      [ dup forth:immed? [
-          forth:code call GO
-        ] [
-          forth:code forth:mode IF , ELSE call THEN GO
-        ] if
-      ] ;when
-      drop
-      ( dec )
-      buf s>dec [ forth:handle-num GO ] ;when
-      ( hex )
-      buf tk>hex [ forth:handle-num GO ] ;when
-      ( not found )
-      buf forth:notfound STOP
-    ] while
-    r> stream! r> source!
-  ;
+    : forth:run ( source stream -- )
+        source >r stream >r stream! source!
+        [ skip-spaces
+            # prefix
+            peek
+            CHAR: " [ forth:parse-string GO ] ;case
+            drop
+            # word
+            forth:read [ STOP ] ;unless
+            forth:find
+            ( found )
+            [ dup forth:immed? [
+                    forth:code call GO
+                ] [
+                    forth:code forth:mode IF , ELSE call THEN GO
+                ] if
+            ] ;when
+            drop
+            ( dec )
+            buf s>dec [ forth:handle-num GO ] ;when
+            ( hex )
+            buf tk>hex [ forth:handle-num GO ] ;when
+            ( not found )
+            buf forth:notfound STOP
+        ] while
+        r> stream! r> source!
+    ;
 
-  : forth:eval ( s -- )
-    [ ( str -- c str+ ) dup b@ tuck IF inc THEN ] forth:run
-  ;
+    : forth:eval ( s -- )
+        [ ( str -- c str+ ) dup b@ tuck IF inc THEN ] forth:run
+    ;
 
 END
 
 : lexi:each ( q -- ) # q: lexi --
-    lexisp @ cell - [ ( q sp )
-        dup lexicons @ < [ 2drop STOP ] ;when
-        2dup >r >r @ swap call
-        r> r> cell - GO
-    ] while
+        lexisp @ cell - [ ( q sp )
+                dup lexicons @ < [ 2drop STOP ] ;when
+                2dup >r >r @ swap call
+                r> r> cell - GO
+        ] while
 ;
 
 : lexi:clear ( adr -- )
-    lexi:hashd hashd-len [  ( hashd i )
-        cells over + 0 swap !
-    ] for drop
+        lexi:hashd hashd-len [  ( hashd i )
+                cells over + 0 swap !
+        ] for drop
 ;
 
 : forth:each-word ( lexi q -- ) # q: &entry --
-  swap lexi:hashd hashd-len [ ( q hashd i )
-      cells over + @ swap >r [ ( q latest )
-        0 [ STOP ] ;case
-        2dup forth:next >r >r swap call r> r> GO
-      ] while r>
-  ] for 2drop
+    swap lexi:hashd hashd-len [ ( q hashd i )
+            cells over + @ swap >r [ ( q latest )
+                0 [ STOP ] ;case
+                2dup forth:next >r >r swap call r> r> GO
+            ] while r>
+    ] for 2drop
 ;
 
 
@@ -1090,32 +1090,32 @@ END
 LEXI [forth] REFER [root] EDIT
 
 : CONTEXT ( -- 0 lexi ... )
-    0 [ ( no-op ) ] lexi:each
+        0 [ ( no-op ) ] lexi:each
 ;
 
 : MORE ( 0 lexi ... -- )
-    [ ?dup [ ALSO GO ] [ STOP ] if ] while
+        [ ?dup [ ALSO GO ] [ STOP ] if ] while
 ;
 
 : ORDER ( 0 lexi ... -- )
-    lexicons @ lexisp ! MORE
+        lexicons @ lexisp ! MORE
 ;
 
 : ?words
-    "current: " pr CURRENT lexi:name prn
-    [ dup "===== " pr lexi:name pr " =====" prn
-      [ dup forth:hidden? [ drop ] ;when
-        forth:name pr space
-      ] forth:each-word cr
-    ] lexi:each
+        "current: " pr CURRENT lexi:name prn
+        [ dup "===== " pr lexi:name pr " =====" prn
+            [ dup forth:hidden? [ drop ] ;when
+                forth:name pr space
+            ] forth:each-word cr
+        ] lexi:each
 ;
 
 : ?lexi
-    "LEXI" pr space
-    [ lexi:name pr space ] lexi:each
-    "ORDER" pr space
-    CURRENT lexi:name pr space
-    "EDIT" prn
+        "LEXI" pr space
+        [ lexi:name pr space ] lexi:each
+        "ORDER" pr space
+        CURRENT lexi:name pr space
+        "EDIT" prn
 ;
 
 : LEXI ( -- 0 ) 0 ;
@@ -1132,15 +1132,15 @@ LEXI [forth] REFER [core] EDIT
 
 TEMPORARY [file] ALSO
 : include ( fname -- )
-  "r" file:open! dup >r
-  [ ( id -- c id ) dup file:getc swap ] forth:run
-  r> file:close!
+    "r" file:open! dup >r
+    [ ( id -- c id ) dup file:getc swap ] forth:run
+    r> file:close!
 ;
 END
 
 : include:
-  forth:read [ "File name required" panic ] ;unless
-  include
+    forth:read [ "File name required" panic ] ;unless
+    include
 ;
 
 
@@ -1152,31 +1152,31 @@ LEXI [forth] REFER [core] EDIT
 : ;0 ( ? -- ) IF ELSE rdrop THEN ;
 
 : forth:read-find ( -- &entry yes | no )
-  forth:read [ "Word name required" eprn no ] ;unless
-  forth:find [ epr " ?" eprn no ] ;unless
-  yes
+    forth:read [ "Word name required" eprn no ] ;unless
+    forth:find [ epr " ?" eprn no ] ;unless
+    yes
 ;
 
 : word' <IMMED>
-  forth:read-find ;0
-  forth:mode [ LIT, , ] when
+    forth:read-find ;0
+    forth:mode [ LIT, , ] when
 ;
 
 : ' <IMMED>
-  forth:read-find ;0
-  forth:code
-  forth:mode [ LIT, , ] when
+    forth:read-find ;0
+    forth:code
+    forth:mode [ LIT, , ] when
 ;
 
 : POSTPONE: <IMMED>
-  forth:read-find ;0
-  forth:code
-  forth:mode [ , ] [ call ] if
+    forth:read-find ;0
+    forth:code
+    forth:mode [ , ] [ call ] if
 ;
 
 : COMPILE: <IMMED>
-  forth:read-find ;0
-  forth:code LIT, , ' , ,
+    forth:read-find ;0
+    forth:code LIT, , ' , ,
 ;
 
 
@@ -1187,12 +1187,12 @@ LEXI [forth] REFER [core] EDIT
 
 
 : CHAR: <IMMED>
-  forth:read [ "A character required" panic ] ;unless
-  dup b@ dup CHAR: \\ = [ drop inc
-    [ [ inc ] [ b@ ] biq ] c:escaped
-    [ "Escape sequence required" panic ] ;unless
-  ] when nip
-  forth:mode [ LIT, , ] when
+    forth:read [ "A character required" panic ] ;unless
+    dup b@ dup CHAR: \\ = [ drop inc
+        [ [ inc ] [ b@ ] biq ] c:escaped
+        [ "Escape sequence required" panic ] ;unless
+    ] when nip
+    forth:mode [ LIT, , ] when
 ;
 
 
@@ -1203,72 +1203,72 @@ LEXI REFER [core] EDIT
 
 COVER
 
-  var: len
-  var: path
-  [ len IF RET THEN 256 dup len! allot path! ] >init
+    var: len
+    var: path
+    [ len IF RET THEN 256 dup len! allot path! ] >init
 
-  0 var> required
+    0 var> required
 
-  : next  @ ;
-  : next! ! ;
-  : name  cell + @ ;
-  : name! cell + ! ;
-  : fin  2 cells + @ ;
-  : fin! 2 cells + ! ;
-  : req 3 cells ;
+    : next  @ ;
+    : next! ! ;
+    : name  cell + @ ;
+    : name! cell + ! ;
+    : fin  2 cells + @ ;
+    : fin! 2 cells + ! ;
+    : req 3 cells ;
 
-  TEMPORARY [file] ALSO
-  : >path ( fname -- )
-    dup file:exists? [ epr ": not found" panic ] ;unless
-    path len file:fullpath [ path epr ": not found" panic ] ;unless
-  ;
-  END
+    TEMPORARY [file] ALSO
+    : >path ( fname -- )
+        dup file:exists? [ epr ": not found" panic ] ;unless
+        path len file:fullpath [ path epr ": not found" panic ] ;unless
+    ;
+    END
 
-  : check-circular ( req -- )
-    fin [
-      " | " epr path eprn
-      required [
-        0 [ STOP ] ;case
-        " | " epr dup name eprn
-        next GO
-      ] while
-      "Circular dependency detected" panic
-    ] unless
-  ;
+    : check-circular ( req -- )
+        fin [
+            " | " epr path eprn
+            required [
+                0 [ STOP ] ;case
+                " | " epr dup name eprn
+                next GO
+            ] while
+            "Circular dependency detected" panic
+        ] unless
+    ;
 
-  : find ( -- yes:found | req no )
-    required [
-      0 [ no STOP ] ;case
-      dup name path s= [ yes STOP ] ;when
-      next GO
-    ] while
-    [ check-circular yes ] [ no ] if
-  ;
+    : find ( -- yes:found | req no )
+        required [
+            0 [ no STOP ] ;case
+            dup name path s= [ yes STOP ] ;when
+            next GO
+        ] while
+        [ check-circular yes ] [ no ] if
+    ;
 
-  : create ( fname -- found? )
-    >path
-    find [ no ] ;when
-    path s:put here:align!
-    req allot tuck name!
-    no over fin!
-    required over next! required!
-    yes
-  ;
+    : create ( fname -- found? )
+        >path
+        find [ no ] ;when
+        path s:put here:align!
+        req allot tuck name!
+        no over fin!
+        required over next! required!
+        yes
+    ;
 
-  : start ( fname -- )
-    create [ ( noop ) ] ;unless
-    required >r path include r> yes swap fin!
-  ;
+    : start ( fname -- )
+        create [ ( noop ) ] ;unless
+        required >r path include r> yes swap fin!
+    ;
 
 
 SHOW
 
-  : require ( fname -- ) start ;
+    : require ( fname -- ) start ;
 
-  : require: ( fname: -- )
-    forth:read [ "Source name required" panic ] ;unless
-    require
-  ;
+    : require: ( fname: -- )
+        forth:read [ "Source name required" panic ] ;unless
+        require
+    ;
 
 END
 
@@ -1280,20 +1280,20 @@ LEXI [forth] REFER [core] EDIT
 
 TEMPORARY [forth] EDIT
 : (:) ( name -- q )
-  forth:create
-  forth:latest forth:hide!
-  forth:compile-mode forth:mode!
-  [
-    RET,
-    forth:latest forth:show!
-    forth:run-mode forth:mode!
-  ]
+    forth:create
+    forth:latest forth:hide!
+    forth:compile-mode forth:mode!
+    [
+        RET,
+        forth:latest forth:show!
+        forth:run-mode forth:mode!
+    ]
 ;
 END
 
 : : ( name: -- q )
-  forth:read [ "Word name required" panic ] unless
-  (:)
+    forth:read [ "Word name required" panic ] unless
+    (:)
 ;
 
 : ; <IMMED> ( q -- ) >r ;
@@ -1304,13 +1304,13 @@ END
 
 
 : [ <IMMED> ( -- &q &back mode close | &q mode close )
-  forth:mode [ JMP, here 0 , here swap ] [ here:align! here ] if
-  forth:mode forth:compile-mode forth:mode!
-  [
-    RET,
-    dup forth:mode!
-    [ here swap ! LIT, , ] when
-  ]
+    forth:mode [ JMP, here 0 , here swap ] [ here:align! here ] if
+    forth:mode forth:compile-mode forth:mode!
+    [
+        RET,
+        dup forth:mode!
+        [ here swap ! LIT, , ] when
+    ]
 ;
 
 : ] <IMMED> ( q -- ) >r ;
@@ -1328,25 +1328,25 @@ END
 
 
 : doconst ( v -- )
-  # will be used for patching const
-  forth:mode [ LIT, , ] when
+    # will be used for patching const
+    forth:mode [ LIT, , ] when
 ;
 
 : as:
-  forth:read [ "Const name required" panic ] ;unless
-  forth:create
-  forth:latest forth:immed!
-  LIT, , JMP, ' doconst ,
+    forth:read [ "Const name required" panic ] ;unless
+    forth:create
+    forth:latest forth:immed!
+    LIT, , JMP, ' doconst ,
 ;
 
 : lexicon:
-    lexi:new dup POSTPONE: as: forth:latest forth:name swap lexi:name!
+        lexi:new dup POSTPONE: as: forth:latest forth:name swap lexi:name!
 ;
 
 : defer:
-  forth:read [ "Defered name required" panic ] ;unless
-  forth:create
-  JMP, 0 ,
+    forth:read [ "Defered name required" panic ] ;unless
+    forth:create
+    JMP, 0 ,
 ;
 
 : END <IMMED> ( q -- ) >r ;
@@ -1358,20 +1358,20 @@ END
 LEXI REFER [root] EDIT
 
 : ( <IMMED>
-  [ forth:take
-    0 [ "Unclosed comment" panic STOP ] ;case
-    CHAR: ) [ STOP ] ;case
-    drop GO
-  ] while
+    [ forth:take
+        0 [ "Unclosed comment" panic STOP ] ;case
+        CHAR: ) [ STOP ] ;case
+        drop GO
+    ] while
 ;
 
 
 : # <IMMED>
-  [ forth:take
-    0  [ STOP ] ;case
-    10 [ STOP ] ;case
-    drop GO
-  ] while
+    [ forth:take
+        0  [ STOP ] ;case
+        10 [ STOP ] ;case
+        drop GO
+    ] while
 ;
 
 
@@ -1382,21 +1382,21 @@ LEXI [forth] REFER [core] EDIT
 
 COVER
 
-  var: public
-  var: private
+    var: public
+    var: private
 
 SHOW
 
-  : SHOW public  EDIT ;
-  : HIDE private EDIT ;
+    : SHOW public  EDIT ;
+    : HIDE private EDIT ;
 
-  : COVER ( -- prev-priv pre-pub q )
-    private public
-    lexi:new private!
-    CURRENT  public!
-    private dup ALSO EDIT
-    [ PREVIOUS SHOW public! private! ]
-  ;
+    : COVER ( -- prev-priv pre-pub q )
+        private public
+        lexi:new private!
+        CURRENT  public!
+        private dup ALSO EDIT
+        [ PREVIOUS SHOW public! private! ]
+    ;
 
 END
 
@@ -1408,20 +1408,20 @@ LEXI REFER [core] EDIT
 
 COVER
 
-  init:link as: link
+    init:link as: link
 
 SHOW
 
-  : >init ( xt -- )
-    here link @ , link ! ,
-  ;
+    : >init ( xt -- )
+        here link @ , link ! ,
+    ;
 
-  : init:run
-    link @ [
-      0 [ STOP ] ;case
-      dup cell + @ call @ GO
-    ] while
-  ;
+    : init:run
+        link @ [
+            0 [ STOP ] ;case
+            dup cell + @ call @ GO
+        ] while
+    ;
 
 END
 
@@ -1433,42 +1433,42 @@ LEXI [forth] REFER [core] EDIT
 
 COVER
 
-  var: latest
+    var: latest
 
-  "01234567890123456789012345678901" as: buf
+    "01234567890123456789012345678901" as: buf
 
-  : close ( -- &back offset ) swap ! ;
+    : close ( -- &back offset ) swap ! ;
 
-  : name   latest forth:name 1 + ;
-  : copy   name buf s:copy ;
-  : offset latest forth:code cell + @ ;
-  : getter copy buf ;
-  : setter getter dup "!" s:append! ;
+    : name   latest forth:name 1 + ;
+    : copy   name buf s:copy ;
+    : offset latest forth:code cell + @ ;
+    : getter copy buf ;
+    : setter getter dup "!" s:append! ;
 
 SHOW
 
-  : STRUCT: ( -- &back offset q )
-    # LIT n RET
-    forth:read [ "struct name required" panic ] ;unless
-    forth:create
-    LIT, here 0 , RET,
-    0 ' close
-  ;
+    : STRUCT: ( -- &back offset q )
+        # LIT n RET
+        forth:read [ "struct name required" panic ] ;unless
+        forth:create
+        LIT, here 0 , RET,
+        0 ' close
+    ;
 
-  : field: ( offset q n -- offset+n q)
-    forth:read [ "field name required" panic ] ;unless
-    forth:create
-    swap >r over
-    LIT, , JMP, [ + ] ,
-    + r>
-    forth:latest latest!
-  ;
+    : field: ( offset q n -- offset+n q)
+        forth:read [ "field name required" panic ] ;unless
+        forth:create
+        swap >r over
+        LIT, , JMP, [ + ] ,
+        + r>
+        forth:latest latest!
+    ;
 
-  : cell: ( offset q -- offset+n q ) cell field: ;
+    : cell: ( offset q -- offset+n q ) cell field: ;
 
-  : :get getter forth:create LIT, offset , JMP, [ + @ ] , ;
-  : :set setter forth:create LIT, offset , JMP, [ + ! ] , ;
-  : :access :get :set ;
+    : :get getter forth:create LIT, offset , JMP, [ + @ ] , ;
+    : :set setter forth:create LIT, offset , JMP, [ + ! ] , ;
+    : :access :get :set ;
 
 END
 
@@ -1479,34 +1479,34 @@ END
 LEXI REFER [core] EDIT
 
 : ASSERT ( v s )
-  swap IF drop ELSE "Assertion failed: " epr panic THEN
+    swap IF drop ELSE "Assertion failed: " epr panic THEN
 ;
 
 : CHECK ( s q -- ) # q: -- ok?
-  # Call q then check TOS is true and sp is balanced
-  # or die with printing s.
-  # Quotation q should not remain values on rstack
+    # Call q then check TOS is true and sp is balanced
+    # or die with printing s.
+    # Quotation q should not remain values on rstack
 
-  swap >r >r sp r> swap >r ( r: s sp )
-  call
+    swap >r >r sp r> swap >r ( r: s sp )
+    call
 
-  # check stack balacne first to avoid invalid result
-  sp cell + ( sp + result )
-  r> != IF "Stack imbalance: " epr r> panic THEN
+    # check stack balacne first to avoid invalid result
+    sp cell + ( sp + result )
+    r> != IF "Stack imbalance: " epr r> panic THEN
 
-  # check result
-  not IF "Failed: " epr r> panic THEN
+    # check result
+    not IF "Failed: " epr r> panic THEN
 
-  # drop description
-  rdrop
+    # drop description
+    rdrop
 ;
 
 : clean? ( q -- )
-    >r sp r> swap >r call sp r> =
+        >r sp r> swap >r call sp r> =
 ;
 
 : CLEAN ( q s -- )
-    >r clean? r> swap [ drop ] [ panic ] if
+        >r clean? r> swap [ drop ] [ panic ] if
 ;
 
 
@@ -1516,30 +1516,30 @@ LEXI REFER [core] EDIT
 LEXI [forth] REFER [core] EDIT
 
 : var>
-  forth:read [ "Var name required" panic ] ;unless
-  forth:max-len dec s:check [ epr ": too long var name" panic ] ;unless
-  dup >r forth:create
-  LIT, here swap , RET,
-  r> dup "!" s:append! forth:create
-  LIT, , !, RET,
+    forth:read [ "Var name required" panic ] ;unless
+    forth:max-len dec s:check [ epr ": too long var name" panic ] ;unless
+    dup >r forth:create
+    LIT, here swap , RET,
+    r> dup "!" s:append! forth:create
+    LIT, , !, RET,
 ;
 
 : var: 0 ' var> call ;
 
 : var' <IMMED>
-  forth:read [ "Var name required" panic ] ;unless
-  forth:find [ " ?" epr panic ] ;unless
-  forth:code cell +
-  forth:mode [ LIT, , ] ;when
+    forth:read [ "Var name required" panic ] ;unless
+    forth:find [ " ?" epr panic ] ;unless
+    forth:code cell +
+    forth:mode [ LIT, , ] ;when
 ;
 
 
 : 2nd! ( v xt -- ) cell + ! ;
 
 : -> <IMMED>
-  forth:read-find [ "Word name required" panic ] ;unless
-  forth:code
-  forth:mode [ LIT, , COMPILE: 2nd! ] [ 2nd! ] if
+    forth:read-find [ "Word name required" panic ] ;unless
+    forth:code
+    forth:mode [ LIT, , COMPILE: 2nd! ] [ 2nd! ] if
 ;
 
 
@@ -1550,57 +1550,57 @@ LEXI [forth] REFER [core] EDIT
 
 COVER
 
-  : compile-only ( prim -- ) forth:mode [ prim, ] [ "Compile Only" panic ] if ;
-  : primitive ( prim q -- ) forth:mode [ drop prim, ] [ nip call ] if ;
+    : compile-only ( prim -- ) forth:mode [ prim, ] [ "Compile Only" panic ] if ;
+    : primitive ( prim q -- ) forth:mode [ drop prim, ] [ nip call ] if ;
 
 SHOW
 
-  : noop <IMMED> ;
-  : HALT <IMMED> 1 [ HALT ] primitive ;
-  : LIT  <IMMED> 2 compile-only ;
-  : RET  <IMMED> 3 compile-only ;
+    : noop <IMMED> ;
+    : HALT <IMMED> 1 [ HALT ] primitive ;
+    : LIT  <IMMED> 2 compile-only ;
+    : RET  <IMMED> 3 compile-only ;
 
-  : dup  <IMMED> 4 [ dup  ] primitive ;
-  : drop <IMMED> 5 [ drop ] primitive ;
-  : swap <IMMED> 6 [ swap ] primitive ;
-  : over <IMMED> 7 [ over ] primitive ;
+    : dup  <IMMED> 4 [ dup  ] primitive ;
+    : drop <IMMED> 5 [ drop ] primitive ;
+    : swap <IMMED> 6 [ swap ] primitive ;
+    : over <IMMED> 7 [ over ] primitive ;
 
-  : +    <IMMED> 8  [ +    ] primitive ;
-  : -    <IMMED> 9  [ -    ] primitive ;
-  : *    <IMMED> 10 [ *    ] primitive ;
-  : /mod <IMMED> 11 [ /mod ] primitive ;
+    : +    <IMMED> 8  [ +    ] primitive ;
+    : -    <IMMED> 9  [ -    ] primitive ;
+    : *    <IMMED> 10 [ *    ] primitive ;
+    : /mod <IMMED> 11 [ /mod ] primitive ;
 
-  : =  <IMMED> 12 [ =  ] primitive ;
-  : != <IMMED> 13 [ != ] primitive ;
-  : >  <IMMED> 14 [ >  ] primitive ;
-  : <  <IMMED> 15 [ <  ] primitive ;
+    : =  <IMMED> 12 [ =  ] primitive ;
+    : != <IMMED> 13 [ != ] primitive ;
+    : >  <IMMED> 14 [ >  ] primitive ;
+    : <  <IMMED> 15 [ <  ] primitive ;
 
-  : JMP  <IMMED> 16 compile-only ;
-  : ZJMP <IMMED> 17 compile-only ;
+    : JMP  <IMMED> 16 compile-only ;
+    : ZJMP <IMMED> 17 compile-only ;
 
-  : @  <IMMED> 18 [ @  ] primitive ;
-  : !  <IMMED> 19 [ !  ] primitive ;
-  : b@ <IMMED> 20 [ b@ ] primitive ;
-  : b! <IMMED> 21 [ b! ] primitive ;
+    : @  <IMMED> 18 [ @  ] primitive ;
+    : !  <IMMED> 19 [ !  ] primitive ;
+    : b@ <IMMED> 20 [ b@ ] primitive ;
+    : b! <IMMED> 21 [ b! ] primitive ;
 
-  : and <IMMED> 22 [ and ] primitive ;
-  : or  <IMMED> 23 [ or  ] primitive ;
-  : inv <IMMED> 24 [ inv ] primitive ;
-  : xor <IMMED> 25 [ xor ] primitive ;
+    : and <IMMED> 22 [ and ] primitive ;
+    : or  <IMMED> 23 [ or  ] primitive ;
+    : inv <IMMED> 24 [ inv ] primitive ;
+    : xor <IMMED> 25 [ xor ] primitive ;
 
-  : lsft <IMMED> 26 [ lsft ] primitive ;
-  : asft <IMMED> 27 [ asft ] primitive ;
+    : lsft <IMMED> 26 [ lsft ] primitive ;
+    : asft <IMMED> 27 [ asft ] primitive ;
 
-  : io <IMMED> 28 [ io ] primitive ;
+    : io <IMMED> 28 [ io ] primitive ;
 
-  : >r    <IMMED> 29 compile-only ;
-  : r>    <IMMED> 30 compile-only ;
-  : rdrop <IMMED> 31 compile-only ;
+    : >r    <IMMED> 29 compile-only ;
+    : r>    <IMMED> 30 compile-only ;
+    : rdrop <IMMED> 31 compile-only ;
 
-  : sp  <IMMED> 32 [ sp  ] primitive ;
-  : sp! <IMMED> 33 [ sp! ] primitive ;
-  : rp  <IMMED> 34 [ rp  ] primitive ;
-  : rp! <IMMED> 35 [ rp! ] primitive ;
+    : sp  <IMMED> 32 [ sp  ] primitive ;
+    : sp! <IMMED> 33 [ sp! ] primitive ;
+    : rp  <IMMED> 34 [ rp  ] primitive ;
+    : rp! <IMMED> 35 [ rp! ] primitive ;
 
 END
 
@@ -1620,33 +1620,33 @@ LEXI REFER [core] EDIT
 
 COVER
 
-  var: id
-  var: addr
-  var: size
+    var: id
+    var: addr
+    var: size
 
 SHOW
 
-  TEMPORARY [file] ALSO
-  : loadfile ( path -- addr )
-    "rb" file:open! id!
-    id file:size size!
-    here addr!
-    size ,
-    here size id file:read!
-    here size + here!
-    0 b, here:align!
-    id file:close!
-    addr
-  ;
-  END
+    TEMPORARY [file] ALSO
+    : loadfile ( path -- addr )
+        "rb" file:open! id!
+        id file:size size!
+        here addr!
+        size ,
+        here size id file:read!
+        here size + here!
+        0 b, here:align!
+        id file:close!
+        addr
+    ;
+    END
 
-  : loadfile: ( :path -- addr )
-    forth:read [ "file name required" ] ;unless
-    loadfile
-  ;
+    : loadfile: ( :path -- addr )
+        forth:read [ "file name required" ] ;unless
+        loadfile
+    ;
 
-  : filesize @ ;      # & -- n
-  : filedata cell + ; # & -- &data
+    : filesize @ ;      # & -- n
+    : filedata cell + ; # & -- &data
 
 END
 
@@ -1658,41 +1658,41 @@ LEXI REFER [core] EDIT
 
 COVER
 
-  256 as: len
-  var: buf
-  var: argc
-  var: included
+    256 as: len
+    var: buf
+    var: argc
+    var: included
 
-  : read buf swap len cli:get-arg [ "too long option" panic ] unless ;
+    : read buf swap len cli:get-arg [ "too long option" panic ] unless ;
 
-  [ buf IF RET THEN len allot buf! ] >init
+    [ buf IF RET THEN len allot buf! ] >init
 
 SHOW
 
-  var: opt:repl
-  var: opt:argi
+    var: opt:repl
+    var: opt:argi
 
-  : opt:parse-all
-    yes opt:repl!
-    cli:argc 2 < IF RET THEN
+    : opt:parse-all
+        yes opt:repl!
+        cli:argc 2 < IF RET THEN
 
-    no opt:repl!
-    no included!
-    cli:argc dec argc!
-    argc [ included [ drop ] ;when
-      inc dup read inc opt:argi!
-      buf "--repl" s= [ yes opt:repl! ] ;when
-      buf "--quit" s= [ no  opt:repl! ] ;when
-      buf include
-      yes included!
-    ] for
-  ;
+        no opt:repl!
+        no included!
+        cli:argc dec argc!
+        argc [ included [ drop ] ;when
+            inc dup read inc opt:argi!
+            buf "--repl" s= [ yes opt:repl! ] ;when
+            buf "--quit" s= [ no  opt:repl! ] ;when
+            buf include
+            yes included!
+        ] for
+    ;
 
-  : opt:read! ( -- buf yes | no )
-    opt:argi cli:argc >= [ no ] ;when
-    opt:argi read buf yes
-    opt:argi inc opt:argi!
-  ;
+    : opt:read! ( -- buf yes | no )
+        opt:argi cli:argc >= [ no ] ;when
+        opt:argi read buf yes
+        opt:argi inc opt:argi!
+    ;
 
 END
 
@@ -1704,35 +1704,35 @@ LEXI [forth] [file] REFER [core] EDIT
 
 COVER
 
-  var: id
-  defer: main
-  : set-boot! ( adr )
-    -> main
-    [ # Decrement argi: bin/arkam forth.ark app.f => bin/arkam app.ark
-      opt:argi dec opt:argi!
-      main bye
-    ] 0x04 !
-  ;
+    var: id
+    defer: main
+    : set-boot! ( adr )
+        -> main
+        [ # Decrement argi: bin/arkam forth.ark app.f => bin/arkam app.ark
+            opt:argi dec opt:argi!
+            main bye
+        ] 0x04 !
+    ;
 
 SHOW
 
-  : save-image ( fname -- )
-    "wb" file:open! id!
-    # zero clear 0x00-0x03
-    0 here ! here 4 id file:write!
-    # write current image
-    0x04 here id file:write!
-    id file:close!
-  ;
+    : save-image ( fname -- )
+        "wb" file:open! id!
+        # zero clear 0x00-0x03
+        0 here ! here 4 id file:write!
+        # write current image
+        0x04 here id file:write!
+        id file:close!
+    ;
 
-  : turnkey ( fname adr -- )
-    set-boot! save-image
-  ;
+    : turnkey ( fname adr -- )
+        set-boot! save-image
+    ;
 
-  : turnkey: ( adr fname: -- )
-    forth:read [ "Image name required" panic ] ;unless
-    swap turnkey
-  ;
+    : turnkey: ( adr fname: -- )
+        forth:read [ "Image name required" panic ] ;unless
+        swap turnkey
+    ;
 
 END
 
@@ -1747,38 +1747,38 @@ LEXI [repl] [sys] [forth] REFER [repl] EDIT
 
 COVER
 
-  256 as: len
-  255 as: max
-  var: buf
-  var: show-depth
-  var: show-stack
+    256 as: len
+    255 as: max
+    var: buf
+    var: show-depth
+    var: show-stack
 
-  : prompt
-    show-stack [ "| " pr ?stack ] when
-    show-depth [ sys:depth .. ] when
-    "> " pr
-  ;
-  : listen buf len getline IF buf ELSE " " THEN forth:eval ;
+    : prompt
+        show-stack [ "| " pr ?stack ] when
+        show-depth [ sys:depth .. ] when
+        "> " pr
+    ;
+    : listen buf len getline IF buf ELSE " " THEN forth:eval ;
 
-  : notfound ( name -- ) epr " ?" eprn ;
+    : notfound ( name -- ) epr " ?" eprn ;
 
-  : lexicons
-    # create [user] lexicon into [core] then refer and switch to it
-    LEXI REFER [core] EDIT
-    "[user]" lexi:create
-    dup "[user]" forth:create LIT, , RET,
-    dup ALSO EDIT
-  ;
+    : lexicons
+        # create [user] lexicon into [core] then refer and switch to it
+        LEXI REFER [core] EDIT
+        "[user]" lexi:create
+        dup "[user]" forth:create LIT, , RET,
+        dup ALSO EDIT
+    ;
 
 SHOW
 
-  ' notfound -> forth:notfound
-  : repl:init len allot buf! lexicons ;
-  : repl:hide-depth! no  show-depth! ;
-  : repl:show-depth! yes show-depth! ;
-  : repl:hide-stack! no  show-stack! ;
-  : repl:show-stack! yes show-stack! ;
-  : repl [ prompt listen GO ] while ;
+    ' notfound -> forth:notfound
+    : repl:init len allot buf! lexicons ;
+    : repl:hide-depth! no  show-depth! ;
+    : repl:show-depth! yes show-depth! ;
+    : repl:hide-stack! no  show-stack! ;
+    : repl:show-stack! yes show-stack! ;
+    : repl [ prompt listen GO ] while ;
 
 END
 
@@ -1787,14 +1787,14 @@ END
 LEXI [repl] REFER [core] EDIT
 
 : main
-  init:run
-  opt:parse-all
-  opt:repl [
-    repl:init
-    repl:show-depth!
-    repl
-  ] when
-  bye
+    init:run
+    opt:parse-all
+    opt:repl [
+        repl:init
+        repl:show-depth!
+        repl
+    ] when
+    bye
 ;
 
 
