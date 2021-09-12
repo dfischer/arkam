@@ -702,10 +702,10 @@ END
 : rand:init  2 2 io ;
 
 : shuffle ( adr len -- )
-        tuck [ ( len adr i -- )
-                cells >r over rand cells over + over r> + ( len adr src dst )
-                [ dup @ ] bia >r ! r> swap !
-        ] for 2drop
+    tuck [ ( len adr i -- )
+        cells >r over rand cells over + over r> + ( len adr src dst )
+        [ dup @ ] bia >r ! r> swap !
+    ] for 2drop
 ;
 
 
@@ -796,7 +796,7 @@ mhashd-len as: hashd-len
 : lexi:name lexi:name dup [ drop "???" ] unless ;  # for anonymous lexicon
 
 : lexi:create ( name -- adr )
-        s:put lexi:new tuck lexi:name!
+    s:put lexi:new tuck lexi:name!
 ;
 
 
@@ -847,13 +847,13 @@ LEXI [forth] REFER [forth] EDIT
 : forth:code! 3 cells + ! ; # &code &entry --
 
 : hashd-link ( lexi s -- link )
-        s:hash abs hashd-len mod cells ( offset )
-        swap lexi:hashd +
+    s:hash abs hashd-len mod cells ( offset )
+    swap lexi:hashd +
 ;
 
 : forth:register ( lexi word -- )
-        tuck forth:name hashd-link ( word link )
-        2dup @ swap forth:next! !
+    tuck forth:name hashd-link ( word link )
+    2dup @ swap forth:next! !
 ;
 
 
@@ -873,13 +873,13 @@ LEXI [forth] REFER [core] EDIT
 LEXI [forth] REFER [forth] EDIT
 
 : forth:remove ( word lexi -- )
-        over forth:name hashd-link ( target link )
-        dup @ [ ( target link word )
-                0 [ drop forth:name epr space "?" panic ] ;case
-                swap >r 2dup = r> swap ( target word link ? )
-                [ [ forth:next ] dip ! drop STOP ] ;when
-                drop dup forth:next GO
-        ] while
+    over forth:name hashd-link ( target link )
+    dup @ [ ( target link word )
+        0 [ drop forth:name epr space "?" panic ] ;case
+        swap >r 2dup = r> swap ( target word link ? )
+        [ [ forth:next ] dip ! drop STOP ] ;when
+        drop dup forth:next GO
+    ] while
 ;
 
 : forth:find-in ( name lexi -- name no | word yes )
@@ -892,10 +892,10 @@ LEXI [forth] REFER [forth] EDIT
 ;
 
 : forth:(find) ( name -- name no | word yes )
-        lexisp @ cell - swap [ ( sp name )
-                over lexicons @ < [ nip no STOP ] ;when
-                over @ forth:find-in [ nip yes STOP ] [ [ cell - ] dip GO ] if
-        ] while
+    lexisp @ cell - swap [ ( sp name )
+        over lexicons @ < [ nip no STOP ] ;when
+        over @ forth:find-in [ nip yes STOP ] [ [ cell - ] dip GO ] if
+    ] while
 ;
 
 
@@ -1061,25 +1061,25 @@ END
 END
 
 : lexi:each ( q -- ) # q: lexi --
-        lexisp @ cell - [ ( q sp )
-                dup lexicons @ < [ 2drop STOP ] ;when
-                2dup >r >r @ swap call
-                r> r> cell - GO
-        ] while
+    lexisp @ cell - [ ( q sp )
+        dup lexicons @ < [ 2drop STOP ] ;when
+        2dup >r >r @ swap call
+        r> r> cell - GO
+    ] while
 ;
 
 : lexi:clear ( adr -- )
-        lexi:hashd hashd-len [  ( hashd i )
-                cells over + 0 swap !
-        ] for drop
+    lexi:hashd hashd-len [  ( hashd i )
+        cells over + 0 swap !
+    ] for drop
 ;
 
 : forth:each-word ( lexi q -- ) # q: &entry --
     swap lexi:hashd hashd-len [ ( q hashd i )
-            cells over + @ swap >r [ ( q latest )
-                0 [ STOP ] ;case
-                2dup forth:next >r >r swap call r> r> GO
-            ] while r>
+        cells over + @ swap >r [ ( q latest )
+            0 [ STOP ] ;case
+            2dup forth:next >r >r swap call r> r> GO
+        ] while r>
     ] for 2drop
 ;
 
@@ -1090,32 +1090,32 @@ END
 LEXI [forth] REFER [root] EDIT
 
 : CONTEXT ( -- 0 lexi ... )
-        0 [ ( no-op ) ] lexi:each
+    0 [ ( no-op ) ] lexi:each
 ;
 
 : MORE ( 0 lexi ... -- )
-        [ ?dup [ ALSO GO ] [ STOP ] if ] while
+    [ ?dup [ ALSO GO ] [ STOP ] if ] while
 ;
 
 : ORDER ( 0 lexi ... -- )
-        lexicons @ lexisp ! MORE
+    lexicons @ lexisp ! MORE
 ;
 
 : ?words
-        "current: " pr CURRENT lexi:name prn
-        [ dup "===== " pr lexi:name pr " =====" prn
-            [ dup forth:hidden? [ drop ] ;when
-                forth:name pr space
-            ] forth:each-word cr
-        ] lexi:each
+    "current: " pr CURRENT lexi:name prn
+    [ dup "===== " pr lexi:name pr " =====" prn
+        [ dup forth:hidden? [ drop ] ;when
+            forth:name pr space
+        ] forth:each-word cr
+    ] lexi:each
 ;
 
 : ?lexi
-        "LEXI" pr space
-        [ lexi:name pr space ] lexi:each
-        "ORDER" pr space
-        CURRENT lexi:name pr space
-        "EDIT" prn
+    "LEXI" pr space
+    [ lexi:name pr space ] lexi:each
+    "ORDER" pr space
+    CURRENT lexi:name pr space
+    "EDIT" prn
 ;
 
 : LEXI ( -- 0 ) 0 ;
