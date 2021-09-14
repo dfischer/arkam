@@ -515,7 +515,7 @@ SHOW
             cr
         ] for
         len bpl mod 0 [ ( noop ) ] ;case rest!
-        lines inc bpl * adr + base!
+        lines bpl * adr + base!
         where "| " pr
         rest bytes
         bpl rest - [ "   " pr ] times
