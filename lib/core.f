@@ -461,6 +461,9 @@ END
 : .. ? drop ;
 : . .. cr ;
 
+: ..hex ?hex drop ;
+: .hex ..hex cr ;
+
 
 [sys] ALSO
 : ?stack ( -- )
@@ -1204,6 +1207,31 @@ LEXI [forth] REFER [core] EDIT
     ] when nip
     forth:mode [ LIT, , ] when
 ;
+
+
+
+( ===== 0b: binary ===== )
+
+COVER
+    var: acc
+    var: p
+    : next p dup inc p! b@ ;
+    : parse
+        [ next
+          0 [ STOP ] ;case
+          CHAR: 0 [ acc 1 <<      acc! GO ] ;case
+          CHAR: 1 [ acc 1 << 1 or acc! GO ] ;case
+          "Not 0|1" panic
+        ] while
+    ;
+SHOW
+    : 0b <IMMED>
+        0 acc!
+        forth:read [ "binary required" panic ] ;unless p!
+        parse
+        acc forth:mode [ LIT, , ] when
+    ;
+END
 
 
 
