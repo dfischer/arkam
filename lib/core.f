@@ -1544,6 +1544,7 @@ LEXI [forth] REFER [core] EDIT
 ;
 
 
+: 2nd@ ( xt -- v ) cell + @ ;
 : 2nd! ( v xt -- ) cell + ! ;
 
 : -> <IMMED>
