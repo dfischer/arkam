@@ -43,7 +43,7 @@ LEXI REFER [core] EDIT
 ( ===== Boolean ===== )
 
 -1 as: ok
-  0 as: ng
+ 0 as: ng
 
 ok as: yes
 ng as: no
@@ -812,10 +812,11 @@ lexi-root as: [root]
 
 
 
-LEXI [forth] REFER [forth] EDIT
+LEXI [forth] REFER [core] EDIT
 
 : forth:latest  CURRENT lexi:latest  ;
 : forth:latest! CURRENT lexi:latest! ;
+
 
 # Dictionary
 # | next:30 | hidden:1 | immed:1  tagged 32bit pointer
@@ -823,6 +824,9 @@ LEXI [forth] REFER [forth] EDIT
 # | &name
 # | &code
 # | code...
+
+
+LEXI [forth] REFER [forth] EDIT
 
 : forth:next  @ ; # &entry -- &entry
 : forth:next! ! ; # &next &entry --
@@ -840,11 +844,17 @@ LEXI [forth] REFER [forth] EDIT
 : forth:non-immed! flag-immed forth:flag-off! ; # &entry --
 : forth:immed? forth:flags flag-immed and ; # &entry -- ?
 
+
+LEXI [forth] REFER [core] EDIT
+
 : forth:name  2 cells + @    ; # &entry -- &name
 : forth:name! 2 cells + !    ; # &name -- &entry
 
 : forth:code  3 cells + @ ; # &entry -- &code
 : forth:code! 3 cells + ! ; # &code &entry --
+
+
+LEXI [forth] REFER [forth] EDIT
 
 : hashd-link ( lexi s -- link )
     s:hash abs hashd-len mod cells ( offset )
