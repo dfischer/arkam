@@ -461,7 +461,7 @@ END
 : .. ? drop ;
 : . .. cr ;
 
-: ..hex ?hex drop ;
+: ..hex "0x" pr dup 0x10 < [ "0" pr ] when ?hex drop ;
 : .hex ..hex cr ;
 
 
