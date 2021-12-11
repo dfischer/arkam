@@ -605,7 +605,7 @@ END
 
 
 : c:escaped ( qtake -- c ok | ng )
-    dup >r call r> swap
+    dup >r call r> swap ( q c )
     ( no following sequence ) 0 [ drop ng ] ;case
     ( \b bs      ) CHAR: b [ drop 8  ok ] ;case
     ( \t htab    ) CHAR: t [ drop 9  ok ] ;case
