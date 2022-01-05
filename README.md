@@ -25,6 +25,12 @@ Purposes
 - sarkam: with forth
 
 
+## Build and Install
+
+`make all` to build.
+
+then `make install` to install into `/your/home/bin`
+
 
 ## Meta
 
