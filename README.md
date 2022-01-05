@@ -28,6 +28,8 @@ Purposes
 
 ## Meta
 
+First, Run `make all`
+
 Edit `lib/meta.f` and `lib/core.f`.
 
 Then build `out/forth1.ark` with `make meta`.
